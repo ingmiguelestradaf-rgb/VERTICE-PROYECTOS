@@ -2,6 +2,9 @@ name: Prueba de render fotorrealista
 
 # Sólo para ajustar la escena: renderiza en baja calidad y publica las imágenes en la rama pruebas-render.
 on:
+  push:
+    branches: [main]
+    paths: ["motor/foto/**", ".github/workflows/render-prueba.yml"]
   workflow_dispatch:
     inputs:
       clave:
@@ -32,13 +35,13 @@ jobs:
         run: bash motor/foto/instalar_blender.sh
       - name: Escena
         run: |
-          c="${{ github.event.inputs.clave }}"
+          c="${{ github.event.inputs.clave || '2026-11-01-casa-minimalista' }}"
           python generar.py --fecha "${c:0:10}" --spec "docs/proyectos/$c/spec.json"
       - name: Render
         run: |
-          c="${{ github.event.inputs.clave }}"
+          c="${{ github.event.inputs.clave || '2026-11-01-casa-minimalista' }}"
           mkdir -p out
-          /usr/bin/time -v blender/blender -b --factory-startup -P motor/foto/blender_escena.py -- "_privado/$c/escena.json" out ${{ github.event.inputs.modo }} 2>&1 | grep -E "render:|recorrido|Error|Traceback|File \"|Elapsed|Maximum resident|^  " | tail -80
+          /usr/bin/time -v blender/blender -b --factory-startup -P motor/foto/blender_escena.py -- "_privado/$c/escena.json" out ${{ github.event.inputs.modo || '--prueba' }} 2>&1 | grep -E "render:|recorrido|Error|Traceback|File \"|Elapsed|Maximum resident|^  " | tail -80
           ls -la out
       - name: Publicar en rama pruebas-render
         run: |
