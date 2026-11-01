@@ -4,6 +4,7 @@ Uso (Blender 4.2 LTS):
   blender -b -P motor/foto/blender_escena.py -- escena.json carpeta_salida [--prueba] [--sin-video] [--sin-fotos]
 """
 import json
+import time
 import math
 import os
 import sys
@@ -101,14 +102,14 @@ def material_piedra(nombre, color):
 C = E["corriente"]
 M = dict(
     muro=material("Aplanado exterior", hexrgb(C["muro"]), 0.9, ruido=0.25, escala=6, bump=0.08),
-    interior=material("Aplanado interior", hexrgb("#F1EEE8"), 0.85, ruido=0.08, escala=5),
+    interior=material("Aplanado interior", hexrgb("#E4DED3"), 0.85, ruido=0.08, escala=5),
     acento=material("Acento", hexrgb(C["acento"]), 0.55, ruido=0.15, escala=3, bump=0.05),
     techo=material("Cubierta", hexrgb(C["techo"]), 0.75, ruido=0.2, escala=8, bump=0.1),
     losa=material("Concreto", hexrgb("#9C9A95"), 0.85, ruido=0.3, escala=10, bump=0.05),
     vidrio=material("Vidrio", (0.85, 0.92, 0.95, 1), 0.02, trans=1.0),
     marco=material("Cancelería", hexrgb("#2B2C2E"), 0.35, metal=0.7),
     madera=material("Madera", hexrgb("#7A5236"), 0.5, ruido=0.35, escala=2.5),
-    piso=material("Porcelanato", hexrgb("#D8CDBA"), 0.25, ruido=0.08, escala=1.2),
+    piso=material("Piso de madera", hexrgb("#9A7350"), 0.35, ruido=0.08, escala=1.2),
     piso_bano=material("Porcelanato baño", hexrgb("#BDB7AD"), 0.3, ruido=0.08, escala=1.5),
     concreto_piso=material("Concreto escobillado", hexrgb("#A7A49C"), 0.9, ruido=0.25, escala=12, bump=0.1),
     pasto=material("Pasto", hexrgb("#5E7F3E"), 0.95, ruido=0.45, escala=25, bump=0.3),
@@ -191,13 +192,17 @@ for blq in E["bloques"]:
     for nv in blq["niveles"]:
         z, h, losa = nv["z"], nv["h"], nv["losa"]
         zc = z + h - losa
-        for ln in nv["muros"]:
+        lados = [dict(eje="h", c=blq["y"], a=blq["x"] - nv["ty"] / 2, b=blq["x"] + blq["w"] + nv["ty"] / 2),
+                 dict(eje="h", c=blq["y"] + blq["d"], a=blq["x"] - nv["ty"] / 2, b=blq["x"] + blq["w"] + nv["ty"] / 2),
+                 dict(eje="v", c=blq["x"], a=blq["y"], b=blq["y"] + blq["d"]),
+                 dict(eje="v", c=blq["x"] + blq["w"], a=blq["y"], b=blq["y"] + blq["d"])]
+        for ln in [m for m in nv["muros"] if not perimetral(m, blq)] + lados:
             t = nv["tx"] if ln["eje"] == "h" else nv["ty"]
-            ext = perimetral(ln, blq)
+            ext = ln in lados
             t_ = t + (0.05 if ext else 0.03)
             mat = "muro" if ext else "interior"
             vs = [v for v in nv["vanos"] if v["eje"] == ln["eje"] and abs(v["c"] - ln["c"]) < EPS and v["b"] > ln["a"] and v["a"] < ln["b"]]
-            for a, b in segmentos(ln["a"] - (t / 2 if ext else 0), ln["b"] + (t / 2 if ext else 0), [(v["a"], v["b"]) for v in vs]):
+            for a, b in segmentos(ln["a"], ln["b"], [(v["a"], v["b"]) for v in vs]):
                 muro(ln, a, b, z, zc, t_, mat)
             for v in vs:
                 a, b = max(v["a"], ln["a"]), min(v["b"], ln["b"])
@@ -233,10 +238,21 @@ for blq in E["bloques"]:
                         G.caja("madera", b - 0.05, ln["c"] + 0.05, z, b, ln["c"] + 0.05 + hoja, z + v["z2"])
         # losa del nivel (sobre locales, sin hueco de escalera salvo el último nivel)
         ultimo = nv is blq["niveles"][-1]
+        X0, Y0 = blq["x"] - nv["ty"] / 2 - 0.03, blq["y"] - nv["tx"] / 2 - 0.03
+        X1, Y1 = blq["x"] + blq["w"] + nv["ty"] / 2 + 0.03, blq["y"] + blq["d"] + nv["tx"] / 2 + 0.03
+        hueco = None if ultimo else next((c for c in nv["locales"] if c["t"] == "escalera"), None)
+        if hueco:
+            hx0, hy0, hx1, hy1 = hueco["x"], hueco["y"], hueco["x"] + hueco["w"], hueco["y"] + hueco["d"]
+            G.caja("losa", X0, Y0, zc, hx0, Y1, z + h)
+            G.caja("losa", hx1, Y0, zc, X1, Y1, z + h)
+            G.caja("losa", hx0, Y0, zc, hx1, hy0, z + h)
+            G.caja("losa", hx0, hy1, zc, hx1, Y1, z + h)
+        else:
+            G.caja("losa", X0, Y0, zc, X1, Y1, z + h)
+        # plafón interior
         for c in nv["locales"]:
-            if c["t"] == "escalera" and not ultimo:
-                continue
-            G.caja("losa", c["x"] - 0.08, c["y"] - 0.08, zc, c["x"] + c["w"] + 0.08, c["y"] + c["d"] + 0.08, z + h)
+            if c is not hueco:
+                G.caja("interior", c["x"], c["y"], zc - 0.01, c["x"] + c["w"], c["y"] + c["d"], zc)
         # pisos terminados
         for c in nv["locales"]:
             mat = "piso_bano" if c["t"] == "humedo" else ("concreto_piso" if c["t"] in ("ext", "almacen") else "piso")
@@ -458,9 +474,10 @@ for blq in E["bloques"]:
 # ------------------------------------------------------------------ exteriores
 T = E["terreno"]
 F, Fo = T["frente"], T["fondo"]
-G.caja("asfalto", -30, -12, -0.05, F + 30, -2.2, 0.0)
-G.caja("banqueta", -30, -2.2, -0.05, F + 30, 0.0, 0.12)
-G.caja("pasto", -30, 0.0, -0.06, F + 30, Fo + 40, -0.01)
+G.caja("asfalto", -120, -12, -0.05, F + 120, -2.2, 0.0)
+G.caja("banqueta", -120, -2.2, -0.05, F + 120, 0.0, 0.12)
+G.caja("pasto", -120, 0.0, -0.06, F + 120, Fo + 120, -0.01)
+G.caja("pasto", -120, -150, -0.07, F + 120, -12, -0.03)
 for e in E["exteriores"]:
     x, y, w, d = e["x"], e["y"], e["w"], e["d"]
     tp = e["tipo"]
@@ -521,7 +538,7 @@ for blq in E["bloques"]:
             L = bpy.data.lights.new(f"Luz {c['n']}", "AREA")
             L.shape = "RECTANGLE"
             L.size, L.size_y = c["w"] * 0.6, c["d"] * 0.6
-            L.energy = 70 * c["w"] * c["d"]
+            L.energy = 9 * c["w"] * c["d"]
             L.color = (1.0, 0.87, 0.72)
             ob = bpy.data.objects.new(L.name, L)
             ob.location = (c["x"] + c["w"] / 2, c["y"] + c["d"] / 2, nv["z"] + nv["h"] - nv["losa"] - 0.05)
@@ -574,16 +591,17 @@ if social:
                    (social["x"] + social["w"] * 0.2, social["y"] + social["d"] * 0.9, 1.1), 16))
 
 if "--sin-fotos" not in ARGS:
-    SC.render.resolution_x, SC.render.resolution_y = (960, 600) if PRUEBA else (1920, 1200)
-    SC.cycles.samples = 48 if PRUEBA else 192
-    SC.cycles.time_limit = 60 if PRUEBA else 420
+    SC.render.resolution_x, SC.render.resolution_y = (960, 600) if PRUEBA else (1600, 1000)
+    SC.cycles.samples = 48 if PRUEBA else 128
+    SC.cycles.time_limit = 60 if PRUEBA else 300
     SC.render.image_settings.file_format = "JPEG"
     SC.render.image_settings.quality = 90
     for nombre, pos, mira, lente in vistas:
         SC.camera = camara(nombre, pos, mira, lente)
         SC.render.filepath = os.path.join(SALIDA, nombre + ".jpg")
+        t0 = time.time()
         bpy.ops.render.render(write_still=True)
-        print("render:", nombre, flush=True)
+        print(f"render: {nombre} {time.time() - t0:.0f} s", flush=True)
 
 
 # ------------------------------------------------------------------ recorrido virtual
@@ -642,7 +660,7 @@ def ruta_interior():
 
 
 if "--sin-video" not in ARGS:
-    fps = 24
+    fps = 24 if PRUEBA else 15
     vel = 1.1                         # m/s caminando
     pts = ruta_interior()
     cam = camara("Recorrido", (0, 0, 1.6), (0, 1, 1.6), 18)
@@ -700,8 +718,8 @@ if "--sin-video" not in ARGS:
     if PRUEBA:
         SC.frame_step = 6
     SC.render.fps = fps
-    SC.render.resolution_x, SC.render.resolution_y = (640, 360) if PRUEBA else (1280, 720)
-    SC.cycles.samples = 8 if PRUEBA else 20
+    SC.render.resolution_x, SC.render.resolution_y = (640, 360) if PRUEBA else (960, 540)
+    SC.cycles.samples = 8 if PRUEBA else 12
     SC.cycles.time_limit = 0
     SC.render.image_settings.file_format = "FFMPEG"
     SC.render.ffmpeg.format = "MPEG4"
@@ -709,5 +727,6 @@ if "--sin-video" not in ARGS:
     SC.render.ffmpeg.constant_rate_factor = "MEDIUM"
     SC.render.filepath = os.path.join(SALIDA, "recorrido_virtual.mp4")
     print(f"recorrido: {SC.frame_end - SC.frame_start + 1} cuadros", flush=True)
+    t0 = time.time()
     bpy.ops.render.render(animation=True)
-    print("recorrido listo", flush=True)
+    print(f"recorrido listo {time.time() - t0:.0f} s", flush=True)
