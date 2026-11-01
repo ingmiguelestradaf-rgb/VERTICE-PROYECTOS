@@ -1,0 +1,53 @@
+name: Proyecto completo a Drive
+
+# Cuando se publica el diseño de un proyecto (docs/proyectos/<clave>/spec.json), este flujo regenera
+# el anteproyecto y el proyecto ejecutivo y los guarda en Google Drive. El proyecto ejecutivo NO se
+# guarda en GitHub: sólo existe dentro de esta ejecución y en tu Drive.
+on:
+  push:
+    branches: [main]
+    paths: ["docs/proyectos/*/spec.json"]
+  workflow_dispatch:
+    inputs:
+      clave:
+        description: "Clave del proyecto (p. ej. 2026-11-01-casa-minimalista); vacío = el más reciente"
+        required: false
+
+jobs:
+  drive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: LibreOffice (memoria en PDF)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libreoffice-writer > /dev/null || true
+      - name: Motor de cálculo VERTICE-CALCULO
+        env:
+          TOKEN: ${{ secrets.VERTICE_CALCULO_TOKEN }}
+        run: |
+          if [ -n "$TOKEN" ]; then
+            git clone -q --depth 1 https://x-access-token:${TOKEN}@github.com/ingmiguelestradaf-rgb/VERTICE-CALCULO _calculo
+          else
+            git clone -q --depth 1 https://github.com/ingmiguelestradaf-rgb/VERTICE-CALCULO _calculo
+          fi
+      - name: Generar y subir
+        env:
+          VERTICE_DRIVE_URL: ${{ secrets.VERTICE_DRIVE_URL }}
+          VERTICE_DRIVE_TOKEN: ${{ secrets.VERTICE_DRIVE_TOKEN }}
+        run: |
+          if [ -n "${{ github.event.inputs.clave }}" ]; then
+            claves="${{ github.event.inputs.clave }}"
+          else
+            claves=$(git diff --name-only HEAD~1 HEAD -- 'docs/proyectos/*/spec.json' | cut -d/ -f3)
+            [ -z "$claves" ] && claves=$(ls docs/proyectos | sort | tail -1)
+          fi
+          for c in $claves; do
+            fecha=${c:0:10}
+            python generar.py --fecha "$fecha" --spec "docs/proyectos/$c/spec.json"
+            python drive/subir.py "_privado/$c"
+          done

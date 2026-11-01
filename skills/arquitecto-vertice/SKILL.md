@@ -65,6 +65,13 @@ revisa en `motor/revision.py` y que tú confirmas:
 3. Si algo falla, ajusta el spec (rasgos, paleta, `modelo` con un programa propio) y vuelve a
    generar. Si el error es del motor, corrígelo en `motor/` y documéntalo.
 
+## 4b. Proyecto ejecutivo (vivienda)
+El generador produce también el ejecutivo y corre el ciclo de coordinación arquitectura–estructura: puede limitar vanos
+abiertos, reducir ventanas (nunca por debajo del 17.5 % de iluminación) o pedir block de 20 cm. Revisa en A-02 a A-07:
+mobiliario sin chocar con puertas, cotas a ejes iguales a las estructurales, fachadas con materiales y niveles, cortes con
+altura libre ≥ 2.30 m, cancelería y cédula de acabados completas. Si un ajuste degrada el diseño, rediseña el programa
+con `modelo` en lugar de aceptarlo.
+
 ## 5. Entregar
 En `spec_hoy.json` → `extra.dictamen_arquitectura`: lista de 3–5 puntos con las decisiones de
 diseño y la confirmación normativa (por ejemplo, "Recámaras ≥ 2.70 m de lado; todas con

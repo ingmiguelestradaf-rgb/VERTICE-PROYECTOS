@@ -32,7 +32,7 @@ def _linea_huecos(dx, eje, c_dib, a, b, hs, capa):
         cur = max(cur, h1)
 
 
-def planta_arq(dx, blq, cuartos, vanos, ox=0.0, oy=0.0, texto=True, cotas=True):
+def planta_arq(dx, blq, cuartos, vanos, ox=0.0, oy=0.0, texto=True, cotas=True, esp=(0.15, 0.15)):
     """Dibuja una planta. ox, oy: desplazamiento para acomodar varias plantas en la lámina."""
     T = lambda p: (p[0] + ox, p[1] + oy)
     vv = [dict(v, c=v["c"] + (oy if v["eje"] == "h" else ox),
@@ -42,12 +42,13 @@ def planta_arq(dx, blq, cuartos, vanos, ox=0.0, oy=0.0, texto=True, cotas=True):
         if c["contenedor"] and c["t"] != "unidad":
             continue
         x, y, w, d = c["x"] + ox, c["y"] + oy, c["w"], c["d"]
-        ins = TI if not c["contenedor"] else TI * 0.4
+        ih = esp[0] / 2 if not c["contenedor"] else TI * 0.4      # muros en X (bordes horizontales)
+        iv = esp[1] / 2 if not c["contenedor"] else TI * 0.4      # muros en Y (bordes verticales)
         capa = "A-MUROS"
-        _linea_huecos(dx, "h", y + ins, x + ins, x + w - ins, _huecos(vv, "h", y, x, x + w), capa)
-        _linea_huecos(dx, "h", y + d - ins, x + ins, x + w - ins, _huecos(vv, "h", y + d, x, x + w), capa)
-        _linea_huecos(dx, "v", x + ins, y + ins, y + d - ins, _huecos(vv, "v", x, y, y + d), capa)
-        _linea_huecos(dx, "v", x + w - ins, y + ins, y + d - ins, _huecos(vv, "v", x + w, y, y + d), capa)
+        _linea_huecos(dx, "h", y + ih, x + iv, x + w - iv, _huecos(vv, "h", y, x, x + w), capa)
+        _linea_huecos(dx, "h", y + d - ih, x + iv, x + w - iv, _huecos(vv, "h", y + d, x, x + w), capa)
+        _linea_huecos(dx, "v", x + iv, y + ih, y + d - ih, _huecos(vv, "v", x, y, y + d), capa)
+        _linea_huecos(dx, "v", x + w - iv, y + ih, y + d - ih, _huecos(vv, "v", x + w, y, y + d), capa)
         if c["contenedor"]:
             continue
         if texto:
@@ -280,7 +281,7 @@ def cuadro(dx, x0, y0, x1, y1, datos):
     """Marco de lámina, cuadro de datos y norte."""
     m = max(1.0, (x1 - x0) / 60)
     ancho = x1 - x0 + 2 * m
-    W = max(16.0, ancho * 0.42)
+    W = max(2.2, ancho * 0.42)
     h = W / 44
     H = h * 11.5
     X0, X1 = x0 - m, x1 + m
@@ -292,7 +293,7 @@ def cuadro(dx, x0, y0, x1, y1, datos):
     dx.linea((bx, by), (bx, by + H), "LAMINA")
     lineas = [("VÉRTICE  Ingeniería, Arquitectura y Proyectos", 1.3), (datos["proyecto"], 1.05), (datos["plano"], 1.05),
               (f"Clave: {datos['clave']}   Fecha: {datos['fecha']}   Unidades: metros", 0.72),
-              ("Anteproyecto generado automáticamente — sin validez para construcción", 0.72),
+              (datos.get("leyenda", "Anteproyecto generado automáticamente — sin validez para construcción"), 0.72),
               ("Para revisión de: Ing. Miguel Estrada (DRO / Perito en edificación)", 0.72)]
     yy = by + H - h * 1.7
     for t, f in lineas:

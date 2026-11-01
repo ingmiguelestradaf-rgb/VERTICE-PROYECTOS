@@ -30,6 +30,14 @@ def _diam(q_ls, v=1.5):
     return next((x for x in DIAM if x >= d), DIAM[-1])
 
 
+def diam_um(um):
+    """Diámetro nominal (mm) por unidades mueble — criterio práctico de vivienda (CPVC/PPR, v ≤ 2 m/s)."""
+    for lim, d in ((3, 13), (10, 19), (30, 25), (60, 32), (120, 38)):
+        if um <= lim:
+            return d
+    return 51
+
+
 def _hunter(um):
     return 0.19 * um ** 0.6 if um > 0 else 0
 
@@ -128,7 +136,7 @@ def calcular(proy, plan, lays, area_total):
                     ("Gasto medio / máx. diario", f"{Qm:.2f} / {Qmd:.2f} L/s", "Qmd = 1.2 Qm"),
                     ("Toma domiciliaria", f"Ø {max(13, _diam(Qmd, 1.0))} mm", "Contrato CESPT, medidor en límite de predio"),
                     ("Unidades mueble", f"{um} UM ({muebles} muebles)", f"Gasto instantáneo (Hunter) ≈ {Qi:.2f} L/s"),
-                    ("Alimentación general", f"Ø {_diam(Qi)} mm", "Tubería CPVC / PPR, v ≤ 1.5 m/s"),
+                    ("Alimentación general", f"Ø {diam_um(um)} mm", "Tubería CPVC / PPR, diámetro por unidades mueble"),
                     ("Cisterna", f"{cist} m³", "2 días de reserva" + (f" + {ci} m³ contra incendio" if ci else "")),
                     ("Equipo de bombeo", "Hidroneumático / presurizador" if tip == "casa" else
                      "Equipo hidroneumático dúplex de velocidad variable", "Presión mínima 1.0 kg/cm² en mueble más desfavorable"),
@@ -161,6 +169,12 @@ def calcular(proy, plan, lays, area_total):
                                   ("Detección", "Detectores de humo y alarma audiovisual", "NOM-002-STPS-2010")]
     res["resumen"] = dict(D=D, cist=cist, um=um, ud=ud, kw=kw, kva=kva, n_baj=n_baj, col=col, ci=ci)
     return res
+
+
+def punto_humedo(c, ox=0.0, oy=0.0):
+    """Punto de alimentación / descarga del local húmedo: junto al muro oriente del local, a media
+    profundidad. Las bajadas (BAN) corren dentro de ese muro o en un ducto adosado."""
+    return (c["x"] + ox + c["w"] - 0.30, c["y"] + oy + c["d"] / 2)
 
 
 def _luminarias(c, blq):
@@ -217,7 +231,7 @@ def hidraulica(dx, proy, blq, cuartos, ox, oy, nivel_idx, primero_global):
         dx.texto((calp[0] + 0.3, calp[1]), "CALENTADOR", 0.16, "I-TEXTO")
         _L(dx, t, calp, "IH-AGUA-FRIA")
     for c in hum:
-        p = (c["x"] + ox + c["w"] / 2, c["y"] + oy + c["d"] / 2)
+        p = punto_humedo(c, ox, oy)
         _L(dx, t, p, "IH-AGUA-FRIA", "y")
         dx.circulo(p, 0.08, "IH-AGUA-FRIA")
         if (calp or nivel_idx) and ("Cocina" in c["n"] or "Baño" in c["n"] or "Regadera" in c["n"] or "Lavander" in c["n"] or "Vestidor" in c["n"]):
@@ -243,7 +257,7 @@ def sanitaria(dx, proy, blq, cuartos, ox, oy, nivel_idx):
     xc = blq["x"] + ox + (blq["w"] - 0.6 if "E" in col else blq["w"] + 1.2)
     ypts = []
     for c in hum:
-        p = (c["x"] + ox + c["w"] / 2, c["y"] + oy + c["d"] / 2)
+        p = punto_humedo(c, ox, oy)
         dx.circulo(p, 0.12, "IS-SANITARIA")
         dx.texto((p[0] + 0.2, p[1] + 0.2), "BAN Ø100" if nivel_idx else "Ø100", 0.15, "I-TEXTO")
         if nivel_idx == 0:

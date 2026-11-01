@@ -44,11 +44,20 @@ norma**. No rediseñas por gusto: verificas y propones el ajuste mínimo cuando 
 - Gas: tanque ventilado y alejado de fuentes de ignición; llave de paso en cada aparato.
 - Incendio (no habitacional): reserva, bombas, gabinetes a ≤ 30 m, detección y extintores.
 
+## Revisión de coordinación automática
+`generar.py` imprime la revisión de coordinación (≈ 29 verificaciones: muros sobre muros o trabes, método simplificado,
+carga vertical, peralte de losas, zapatas, trabes que no invaden cabezales, castillos fuera de vanos, bajadas sanitarias
+en muro/ducto, bajadas pluviales vs castillos, balance de fases, circuitos dedicados, protección general, cédula de
+acabados, cantidades del presupuesto vs planos, uso de suelo). Con `--estricto` un ERROR impide publicar.
+Revisa además en el Drive/`_privado`: E-01 a E-04, IH-01/02, IS-01, IE-01/02, IG-01, `memoria_tecnica.docx`,
+`presupuesto.xlsx` (hoja "Por cotizar") y `programa_obra.xlsx`.
+
 ## Dictamen
 1. `python generar.py --spec spec_hoy.json --estricto` debe terminar con 0 errores.
 2. Si algo no es construible o no cumple, propón el ajuste mínimo (en el spec o en `motor/`),
    regenera y vuelve a revisar.
-3. Escribe en `spec_hoy.json` → `extra.dictamen_ingenieria` una lista de 3–6 puntos: veredicto
+3. Escribe en `spec_hoy.json` → `extra.dictamen_ingenieria` una lista de 3–6 puntos con los NÚMEROS REALES de
+   `_privado/<clave>/Proyecto ejecutivo/proyecto_ejecutivo.json` (nunca valores de memoria o de otro proyecto): veredicto
    ("Construible conforme a norma" o "Construible con ajustes: …"), sistema estructural y
    elementos clave, cimentación, instalaciones y supuestos por confirmar (suelo, espectro sísmico,
    factibilidades de CESPT y CFE).

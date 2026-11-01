@@ -138,7 +138,7 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
             continue
         if habit and r["t"] in ABIERTO and obj["t"] in ABIERTO:
             eje, c, i0, f0 = mejor
-            ancho = min(f0 - i0 - 0.4, 2.4 if "social" in (r["t"], obj["t"]) else 1.2)
+            ancho = min(f0 - i0 - 0.4, corriente.get("vano_max", 2.4) if "social" in (r["t"], obj["t"]) else 1.2)
             m = (i0 + f0) / 2
             vanos.append(dict(tipo="vano", eje=eje, c=round(c, 3), a=round(m - ancho / 2, 3), b=round(m + ancho / 2, 3),
                               cuarto=r["n"]))
@@ -166,7 +166,7 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
                     seg = vecinos(r, o)
                     if seg and not any(v["eje"] == seg[0] and abs(v["c"] - seg[1]) < EPS and v["b"] > seg[2] and v["a"] < seg[3] for v in vanos):
                         eje, c, i0, f0 = seg
-                        m = (i0 + f0) / 2; an = min(1.8, f0 - i0 - 0.6)
+                        m = (i0 + f0) / 2; an = min(corriente.get("vano_max", 2.4) * 0.75, f0 - i0 - 0.6)
                         vanos.append(dict(tipo="vano", eje=eje, c=round(c, 3), a=round(m - an / 2, 3), b=round(m + an / 2, 3), cuarto=r["n"]))
     # escaleras abiertas hacia la circulación (sin puerta)
     for r in hojas:
@@ -231,11 +231,19 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
             if frente:
                 lado, eje, c, i, f = frente[0]
                 L = f - i
+                vid = "Local" in r["n"] or "Tienda" in r["n"] or "Terraza" in r["n"]
+                if "Cochera doble" in r["n"]:
+                    # dos portones con columna central (apoyo de la trabe de carga)
+                    m = (i + f) / 2
+                    an = min(2.6, (L - 0.8) / 2)
+                    for a, b in ((m - 0.2 - an, m - 0.2), (m + 0.2, m + 0.2 + an)):
+                        vanos.append(dict(tipo="porton", eje=eje, c=c, a=round(a, 3), b=round(b, 3), lado=lado,
+                                          cuarto=r["n"], vidrio=False))
+                    continue
                 ancho = min(L - 0.4, 3.0 if "Cochera" in r["n"] and L < 6 else L * 0.8)
                 a = (i + f - ancho) / 2
                 vanos.append(dict(tipo="porton", eje=eje, c=c, a=round(a, 3), b=round(a + ancho, 3),
-                                  lado=lado, cuarto=r["n"], vidrio=("Local" in r["n"] or "Tienda" in r["n"]
-                                                                    or "Terraza" in r["n"])))
+                                  lado=lado, cuarto=r["n"], vidrio=vid))
             continue
         if r["t"] not in VENTANA_T and r["t"] != "circ":
             continue
@@ -256,6 +264,10 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
                     continue
             else:
                 ancho = max(0.8, min(L - 0.6, L * corriente["ventana"] * (1.25 if r["t"] == "social" else 1)))
+                # iluminación natural mínima: 17.5 % del área del local (ventana de 1.45 m de alto)
+                n_fach = sum(1 for e_ in ext if e_[4] - e_[3] >= 1.0)
+                req = 0.175 * r["w"] * r["d"] / 1.45 / max(1, n_fach) + 0.05
+                ancho = max(ancho, min(L - 0.6, req))
             # ventanas repartidas en claros grandes
             n = max(1, int(L // 9)) if L > 12 else 1
             paso = L / n

@@ -63,10 +63,12 @@ def casa(plan):
     t = plan["terreno"]
     fr, fo, area = t["frente"], t["fondo"], t["area"]
     amplia = area >= 300
-    lat = 0.0 if fr <= 10 else (1.0 if fr <= 12 else 1.5)
+    lat = 0.0 if fr <= 12 else 1.5
     frente_lib = 3.0 if not amplia else 3.5
     # medidas cerradas a paños exteriores de muro (muro exterior 0.25 m al eje del bloque)
     d_ext = math.floor((fo - frente_lib - max(3.0, fo * 0.15)) * 2) / 2
+    if amplia:
+        d_ext = min(d_ext, 14.5)          # bandas de 5.60 / 3.40 / 5.25 m: losas ≤ 5.25 m de claro corto
     post = fo - frente_lib - d_ext
     inset = 0.125
     w, d = fr - 2 * lat - 0.25, d_ext - 0.25
@@ -84,43 +86,47 @@ def casa(plan):
             Z(z3, [C("Sala-comedor", .60, T["social"]),
                    G(.40, [Z(.30, [C("Lavandería", 1, T["serv"])]), Z(.70, [C("Cocina", 1, T["coc"])])])]),
         ])
-        bano = max(1.4, round(w * 0.17, 2))
-        r2 = max((w - bano) / 2, 2.3 + 1.3)
-        rr = w - bano - r2
+        # muros de planta alta alineados con los de planta baja (3.40 / 1.70 m)
         pa = N("Planta alta", 2.7, [
-            Z(z1, [C("Recámara 2", r2 / w, T["priv"]), C("Baño 2", bano / w, T["hum"]), C("Recámara 3", rr / w, T["priv"])]),
+            Z(z1, [C("Recámara 2", 3.4 / w, T["priv"]), C("Recámara 3", (w - 5.1) / w, T["priv"]),
+                   C("Baño 2", 1.7 / w, T["hum"])]),
             Z(z2, [C("Escalera", pe, T["esc"]), C("Pasillo", 1 - pe, T["circ"])]),
-            Z(z3, [C("Recámara principal", .58, T["priv"]),
-                   G(.42, [Z(.42, [C("Vestidor", 1, T["priv"])]), Z(.58, [C("Baño principal", 1, T["hum"])])])]),
+            Z(z3, [C("Recámara principal", .60, T["priv"]),
+                   G(.40, [Z(.30, [C("Vestidor", 1, T["priv"])]), Z(.70, [C("Baño principal", 1, T["hum"])])])]),
         ])
+        trabes = []
     else:
         mb = 1.7 / w
         pb = N("Planta baja", 2.8, [
             Z(z1, [C("Cochera doble", 5.8 / w, T["ext"]), C("Acceso", 1.8 / w, T["circ"]),
-                   C("Estudio", 1 - 7.6 / w, T["social"])]),
+                   G(1 - 7.6 / w, [Z(.62, [C("Despacho", 1, T["social"])]), Z(.38, [C("Bodega", 1, T["alm"])])])]),
             Z(z2, [C("Escalera", pe, T["esc"]), C("Vestíbulo", 1 - pe - mb, T["circ"]), C("Medio baño", mb, T["hum"])]),
             Z(z3, [C("Sala", .38, T["social"]), C("Comedor", .27, T["social"]),
                    G(.35, [Z(.30, [C("Lavandería", 1, T["serv"])]), Z(.70, [C("Cocina", 1, T["coc"])])])]),
         ])
-        bano = 1.8
-        r2 = max((w - bano) / 2, 2.3 + 1.3)
-        rr = w - bano - r2
-        z3c = [C("Recámara principal", .45 if rec4 else .58, T["priv"]),
-               G(.25 if rec4 else .42, [Z(.42, [C("Vestidor", 1, T["priv"])]), Z(.58, [C("Baño principal", 1, T["hum"])])])]
-        if rec4:
-            z3c.append(C("Recámara 4", .30, T["priv"]))
+        # planta alta: muros sobre muros de planta baja; el muro entre recámaras 2 y 3 descansa en una
+        # trabe de carga a la mitad de la cochera doble (con columna entre los dos portones)
+        z1c = [C("Recámara 2", 2.9 / w, T["priv"]), C("Recámara 3", 2.9 / w, T["priv"]), C("Baño 2", 1.8 / w, T["hum"]),
+               C("Cuarto de TV", 1 - 7.6 / w, T["social"])]
         pa = N("Planta alta", 2.8, [
-            Z(z1, [C("Recámara 2", r2 / w, T["priv"]), C("Baño 2", bano / w, T["hum"]), C("Recámara 3", rr / w, T["priv"])]),
+            Z(z1, z1c),
             Z(z2, [C("Escalera", pe, T["esc"]), C("Estancia familiar", 1 - pe, T["circ"])]),
-            Z(z3, z3c),
+            # muros alineados con sala | comedor | cocina de planta baja
+            Z(z3, [C("Recámara principal", .38, T["priv"]),
+                   G(.27, [Z(.45, [C("Vestidor", 1, T["priv"])]), Z(.55, [C("Baño principal", 1, T["hum"])])]),
+                   C("Recámara 4", .35, T["priv"])]),
         ])
+        trabes = [dict(nivel=0, eje="v", rel=2.9, z0=0.0, z1=5.6)]
     bloques = [B("Casa", lat + inset, frente_lib + inset, w, d, [pb, pa], sistema="mamposteria", claro_max=5.0,
                  uso="habitacional", colindancias=col)]
+    x0, y0 = lat + inset, frente_lib + inset
+    bloques[0]["trabes_carga"] = [dict(nivel=t["nivel"], eje=t["eje"], c=round(x0 + t["rel"], 3), a=round(y0 + t["z0"], 3),
+                                       b=round(y0 + t["z1"], 3)) for t in trabes]
     ext = [E("area_verde", 0, fo - post, fr, post, nombre="Patio posterior"),
            E("acceso", 0, 0, fr, frente_lib, nombre="Cajón y jardín frontal")]
     if area >= 400:
         ext.append(E("alberca", lat + 1.5, fo - post + 0.8, min(8, w - 3), max(2.0, post - 1.6), nombre="Alberca"))
-    hab = 4 + (1 if area >= 300 else 0) + (1 if rec4 else 0)
+    hab = 4 + (2 if area >= 300 else 0)
     return dict(terreno=dict(frente=fr, fondo=fo), bloques=bloques, exteriores=ext,
                 usuarios=dict(ocupantes=hab), uso_suelo="Habitacional unifamiliar")
 

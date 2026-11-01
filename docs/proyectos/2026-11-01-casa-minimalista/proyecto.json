@@ -8,7 +8,7 @@
  "subtipo": "",
  "corriente": "minimalista",
  "corriente_nombre": "Minimalista",
- "materiales": "Muros de block de concreto 15x20x40 con aplanado fino blanco; volado de concreto aparente pigmentado gris carbón; paño de piedra laja de la región en fachada principal; jardinera de concreto con vegetación endémica de bajo consumo de agua; cancelería de aluminio negro con vidrio claro de 6 mm; porcelanato 60x120 tono arena; impermeabilizante blanco reflectivo en azotea.",
+ "materiales": "Muros de block de concreto 20x20x40 (dirección X) y 15x20x40 (dirección Y) con aplanado fino blanco; volado de concreto aparente pigmentado gris carbón; paño de piedra laja de la región en fachada principal; jardinera de concreto con vegetación endémica de bajo consumo de agua; cancelería de aluminio negro con vidrio claro de 6 mm; porcelanato 60x120 tono arena; impermeabilizante blanco reflectivo en azotea.",
  "uso_suelo": "Habitacional unifamiliar",
  "terreno": {
   "frente": 9.0,
@@ -21,216 +21,9 @@
  "cus": 1.34,
  "niveles": 2,
  "altura": 5.4,
- "cajones": 0,
+ "cajones": 1,
  "usuarios": {
   "ocupantes": 4
- },
- "bloques": [
-  {
-   "nombre": "Casa",
-   "w": 8.75,
-   "d": 13.75,
-   "niveles": 2,
-   "sistema": "mamposteria"
-  }
- ],
- "estructura": [
-  {
-   "bloque": "Casa",
-   "sistema": "mamposteria",
-   "tabla": [
-    [
-     "Muros",
-     "Block hueco de concreto 15x20x40 cm, f'm ≥ 20 kg/cm², junteado con mortero tipo I",
-     "Mampostería confinada"
-    ],
-    [
-     "Castillos K-1",
-     "15x20 cm, 4 vars #3, est. #2 @ 20 cm (@10 en extremos)",
-     "31 piezas en planta baja"
-    ],
-    [
-     "Dalas D-1",
-     "15x20 cm, 4 vars #3, est. #2 @ 20 cm",
-     "En desplante, cerramiento y pretil"
-    ],
-    [
-     "Losas",
-     "Losa maciza h = 12 cm, f'c = 250 kg/cm², vars #3 @ 20 cm ambos sentidos",
-     "Claro crítico Sala-comedor"
-    ],
-    [
-     "Cimentación",
-     "Zapata corrida de concreto f'c = 250, ancho 0.60 m, h = 20 cm, con contratrabe 20x40 cm",
-     "q_adm supuesta 12.0 t/m²"
-    ],
-    [
-     "Firme",
-     "Concreto f'c = 150 kg/cm², h = 10 cm, malla 6x6-10/10",
-     "Sobre terreno compactado 95 % Proctor"
-    ]
-   ],
-   "calc": {
-    "h_losa_cm": 12,
-    "CM_kgm2": 478,
-    "CV_kgm2": 190,
-    "carga_lineal_tm": 4.29,
-    "ancho_zapata_m": 0.6,
-    "q_adm_tm2": 12.0,
-    "W_t": 137.9,
-    "Q": 2.0,
-    "c": 0.32,
-    "V_basal_t": 22.1
-   },
-   "notas": []
-  }
- ],
- "instalaciones": {
-  "hidraulica": [
-   [
-    "Dotación",
-    "150 L/hab/día × 4",
-    "0.6 m³/día"
-   ],
-   [
-    "Gasto medio / máx. diario",
-    "0.01 / 0.01 L/s",
-    "Qmd = 1.2 Qm"
-   ],
-   [
-    "Toma domiciliaria",
-    "Ø 13 mm",
-    "Contrato CESPT, medidor en límite de predio"
-   ],
-   [
-    "Unidades mueble",
-    "22 UM (11 muebles)",
-    "Gasto instantáneo (Hunter) ≈ 1.21 L/s"
-   ],
-   [
-    "Alimentación general",
-    "Ø 38 mm",
-    "Tubería CPVC / PPR, v ≤ 1.5 m/s"
-   ],
-   [
-    "Cisterna",
-    "2 m³",
-    "2 días de reserva"
-   ],
-   [
-    "Equipo de bombeo",
-    "Hidroneumático / presurizador",
-    "Presión mínima 1.0 kg/cm² en mueble más desfavorable"
-   ],
-   [
-    "Agua caliente",
-    "Calentador de paso a gas",
-    "Retorno de agua caliente en recorridos > 15 m"
-   ]
-  ],
-  "sanitaria": [
-   [
-    "Unidades de descarga",
-    "25 UD",
-    "Tabla de UD por mueble"
-   ],
-   [
-    "Colector principal",
-    "Ø 100 mm PVC sanitario",
-    "Pendiente mínima 2 %"
-   ],
-   [
-    "Registros",
-    "40x60 cm (60x80 en > 1.5 m de prof.)",
-    "A cada 10 m y en cambios de dirección"
-   ],
-   [
-    "Ventilación",
-    "Tubo de ventilación Ø 50 mm por núcleo de muebles",
-    "Rematar 30 cm sobre azotea"
-   ],
-   [
-    "Descarga",
-    "A colector municipal CESPT",
-    "Registro de banqueta"
-   ]
-  ],
-  "pluvial": [
-   [
-    "Área de captación",
-    "120 m²",
-    "Intensidad de diseño 100 mm/h (supuesta)"
-   ],
-   [
-    "Gasto pluvial",
-    "3.3 L/s",
-    "Q = i · A / 3600"
-   ],
-   [
-    "Bajadas",
-    "2 de Ø 100 mm",
-    "Capacidad ≈ 4.5 L/s c/u"
-   ],
-   [
-    "Disposición",
-    "A pozo de absorción / área verde y excedencias a calle",
-    "Separada del drenaje sanitario"
-   ]
-  ],
-  "electrica": [
-   [
-    "Carga instalada",
-    "9.0 kW",
-    "W/m² según uso + equipos"
-   ],
-   [
-    "Demanda",
-    "6.3 kW (7.0 kVA)",
-    "Factor de demanda 0.7"
-   ],
-   [
-    "Acometida",
-    "Bifásica 2F-3H 220/127 V",
-    "Corriente ≈ 32 A"
-   ],
-   [
-    "Alimentador general",
-    "cal. 8 AWG/kcmil THW-LS, Cu",
-    "Ampacidad al 125 %"
-   ],
-   [
-    "Luminarias",
-    "≈ 26 LED",
-    "Niveles NOM-025-STPS / NOM-007-ENER"
-   ],
-   [
-    "Tierra física",
-    "Electrodo de cobre 3 m + registro",
-    "Unión equipotencial, NOM-001-SEDE-2012"
-   ],
-   [
-    "Energía renovable",
-    "Sistema FV interconectado ≈ 2 kWp",
-    "Opcional, recomendado"
-   ]
-  ],
-  "gas": [
-   [
-    "Combustible",
-    "Gas LP",
-    "NOM-004-SEDG-2004"
-   ],
-   [
-    "Almacenamiento",
-    "Tanque estacionario 300 L",
-    "En azotea o patio, ventilado, a > 3 m de flamas"
-   ],
-   [
-    "Red",
-    "Cobre tipo L Ø 3/8\" a 3/4\" con regulador de 2 etapas",
-    "Prueba de hermeticidad a 1.5× presión de trabajo"
-   ]
-  ]
  },
  "areas": [
   {
@@ -310,24 +103,24 @@
    "nivel": "Planta alta",
    "rep": 1,
    "espacio": "Recámara 2",
-   "area": 20.33,
-   "medidas": "3.63 x 5.60"
-  },
-  {
-   "bloque": "Casa",
-   "nivel": "Planta alta",
-   "rep": 1,
-   "espacio": "Baño 2",
-   "area": 8.34,
-   "medidas": "1.49 x 5.60"
+   "area": 19.04,
+   "medidas": "3.40 x 5.60"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta alta",
    "rep": 1,
    "espacio": "Recámara 3",
-   "area": 20.33,
-   "medidas": "3.63 x 5.60"
+   "area": 20.44,
+   "medidas": "3.65 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Baño 2",
+   "area": 9.52,
+   "medidas": "1.70 x 5.60"
   },
   {
    "bloque": "Casa",
@@ -350,102 +143,70 @@
    "nivel": "Planta alta",
    "rep": 1,
    "espacio": "Recámara principal",
-   "area": 24.11,
-   "medidas": "5.08 x 4.75"
+   "area": 24.94,
+   "medidas": "5.25 x 4.75"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta alta",
    "rep": 1,
    "espacio": "Vestidor",
-   "area": 7.33,
-   "medidas": "3.67 x 2.00"
+   "area": 4.99,
+   "medidas": "3.50 x 1.43"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta alta",
    "rep": 1,
    "espacio": "Baño principal",
-   "area": 10.12,
-   "medidas": "3.67 x 2.75"
+   "area": 11.64,
+   "medidas": "3.50 x 3.33"
   }
  ],
  "hojas": [
   {
-   "clave": "A-01",
+   "clave": "AP-01",
    "titulo": "Planta de conjunto",
-   "dxf": "planos/A-01_planta-de-conjunto.dxf",
-   "img": "laminas/A-01.jpg"
+   "disciplina": "Anteproyecto",
+   "dxf": "planos/AP-01_planta-de-conjunto.dxf",
+   "img": "laminas/AP-01.jpg"
   },
   {
-   "clave": "A-02",
+   "clave": "AP-02",
    "titulo": "Plantas arquitectónicas",
-   "dxf": "planos/A-02_plantas-arquitectonicas.dxf",
-   "img": "laminas/A-02.jpg"
+   "disciplina": "Anteproyecto",
+   "dxf": "planos/AP-02_plantas-arquitectonicas.dxf",
+   "img": "laminas/AP-02.jpg"
   },
   {
-   "clave": "A-03",
+   "clave": "AP-03",
    "titulo": "Fachadas y corte",
-   "dxf": "planos/A-03_fachadas-y-corte.dxf",
-   "img": "laminas/A-03.jpg"
-  },
-  {
-   "clave": "E-01",
-   "titulo": "Planta de cimentación",
-   "dxf": "planos/E-01_planta-de-cimentacion.dxf",
-   "img": "laminas/E-01.jpg"
-  },
-  {
-   "clave": "E-02",
-   "titulo": "Planta estructural",
-   "dxf": "planos/E-02_planta-estructural.dxf",
-   "img": "laminas/E-02.jpg"
-  },
-  {
-   "clave": "IH-01",
-   "titulo": "Instalación hidráulica y contra incendio",
-   "dxf": "planos/IH-01_instalacion-hidraulica-y-contra-incendio.dxf",
-   "img": "laminas/IH-01.jpg"
-  },
-  {
-   "clave": "IS-01",
-   "titulo": "Instalación sanitaria y pluvial",
-   "dxf": "planos/IS-01_instalacion-sanitaria-y-pluvial.dxf",
-   "img": "laminas/IS-01.jpg"
-  },
-  {
-   "clave": "IE-01",
-   "titulo": "Instalación eléctrica",
-   "dxf": "planos/IE-01_instalacion-electrica.dxf",
-   "img": "laminas/IE-01.jpg"
-  },
-  {
-   "clave": "IG-01",
-   "titulo": "Instalación de gas LP",
-   "dxf": "planos/IG-01_instalacion-de-gas-lp.dxf",
-   "img": "laminas/IG-01.jpg"
+   "disciplina": "Anteproyecto",
+   "dxf": "planos/AP-03_fachadas-y-corte.dxf",
+   "img": "laminas/AP-03.jpg"
   }
  ],
  "render": [
   "render_aereo.jpg",
   "render_peatonal.jpg"
  ],
- "pdf": "planos.pdf",
- "zip": "2026-11-01-casa-minimalista_dxf.zip",
+ "pdf": "anteproyecto.pdf",
+ "zip": "2026-11-01-casa-minimalista_anteproyecto_dxf.zip",
  "extra": {
   "dictamen_arquitectura": [
-   "Terreno de 9.00 x 20.00 m (180 m²); casa de 9.00 x 14.00 m a paños exteriores, restricción frontal de 3.00 m y patio posterior de 3.00 m. COS 0.67 y CUS 1.34.",
-   "Recorrido continuo: acceso → vestíbulo → sala-comedor con cocina abierta; la escalera abre al vestíbulo y en planta alta al pasillo, del que salen todas las recámaras y el baño 2.",
-   "Recámaras con lado mayor o igual a 2.70 m y ventana al exterior; cochera de 3.40 x 5.60 m; escalera en U de 2.30 m con descanso.",
-   "Volado gris carbón sobre el acceso y las recámaras al sur; paño de piedra laja en el muro ciego más ancho de la fachada; jardinera de vegetación endémica al frente.",
-   "Medio baño interior con extractor mecánico obligatorio."
+   "Terreno de 9.00 x 20.00 m (180 m²); casa de 9.00 x 14.00 m a paños exteriores con restricción frontal de 3.00 m y patio posterior de 3.00 m. COS 0.67, CUS 1.34, 240.6 m² construidos en 2 niveles.",
+   "Recorrido continuo: acceso → vestíbulo → sala-comedor con cocina abierta. La escalera en U (8 peraltes de 16.9 cm y huella de 32.1 cm por tramo) abre al vestíbulo; en planta alta, todas las recámaras y el baño 2 salen al pasillo.",
+   "Muros de planta alta alineados con los de planta baja; baños y cocina apilados para que las bajadas sanitarias corran en el mismo muro.",
+   "Por coordinación con estructura, los vanos abiertos entre locales se limitaron a 1.80 m; todas las recámaras conservan más del 17.5 % de iluminación natural.",
+   "Volado gris carbón sobre acceso y recámaras al sur, paño de piedra laja en el muro ciego más ancho y jardinera endémica al frente. El medio baño interior lleva extractor mecánico."
   ],
   "dictamen_ingenieria": [
-   "Veredicto: construible conforme a norma con los supuestos indicados.",
-   "Estructura de mampostería confinada: block 15x20x40, 31 castillos K-1 15x20 en planta baja (a 3.5 m como máximo y en cada intersección), dalas de desplante, cerramiento y pretil; losas macizas de 12 cm (claro crítico de 5.25 x 4.75 m en la sala-comedor).",
-   "Cimentación con zapata corrida de 0.60 m y contratrabe de 20x40 cm, considerando una capacidad del suelo supuesta de 12 t/m²; se requiere estudio de mecánica de suelos antes de construir.",
-   "Sismo (supuesto c = 0.32, Q = 2): cortante basal de aproximadamente 22 t. Verificar la densidad de muros en ambas direcciones y dejar junta de colindancia con las construcciones vecinas.",
-   "Instalaciones: toma de 13 mm, cisterna de 2 m³ con hidroneumático, colector de 100 mm al 2 %, 2 bajadas pluviales de 100 mm, acometida bifásica de 220/127 V (6.3 kW de demanda) y tanque de gas LP de 300 L en azotea. Factibilidades de CESPT y CFE por tramitar."
+   "Veredicto: construible conforme a norma (0 errores en 22 verificaciones de coordinación), con los supuestos por validar indicados.",
+   "Mampostería confinada: block de 20 cm en X y de 15 cm en Y, castillos K-1 a ≤ 4.00 m y en ambos lados de cada vano. Método simplificado NTC: X 59.5 t ≥ 56.3 t, Y 91.6 t ≥ 56.3 t (V basal 51.2 t con c/Q'R = 0.213 supuesto).",
+   "Losas macizas de 13 cm (perímetro/250 NTC) con #3 entre 10 y 20 cm según el tablero; 8 trabes de cerramiento sobre vanos de 2 m o más, ninguna por debajo del cabezal de puertas, ventanas o portón.",
+   "Zapatas corridas de 50 x 20 cm (excéntricas en ambos linderos), q de 5.5 y 9.1 t/m² contra una q adm supuesta de 12 t/m². Requiere estudio de mecánica de suelos.",
+   "Cuantificación: 5.1 t de acero (21 kg/m²) y 58.9 m³ de concreto.",
+   "Instalaciones: 13 circuitos (12.4 kW instalados, 8.7 kW de demanda), interruptor general 2P-60 A, desbalance de fases 0.7 %; alimentación general Ø25 mm, cisterna de 2 m³ con hidroneumático, colector de 100 mm al 2 % y gas LP con tanque de 300 L en azotea."
   ]
  },
  "revision": {
@@ -458,6 +219,107 @@
   ],
   "errores": 0,
   "avisos": 1
+ },
+ "ejecutivo": {
+  "laminas": [
+   {
+    "clave": "A-01",
+    "titulo": "Planta de conjunto",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-02",
+    "titulo": "Plantas arquitectónicas amuebladas",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-03",
+    "titulo": "Plantas acotadas a ejes",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-04",
+    "titulo": "Planta de azotea",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-05",
+    "titulo": "Fachadas",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-06",
+    "titulo": "Cortes arquitectónicos",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-07",
+    "titulo": "Cancelería y acabados",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "E-01",
+    "titulo": "Planta de cimentación",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "E-02",
+    "titulo": "Losas, trabes y castillos",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "E-03",
+    "titulo": "Detalles estructurales",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "E-04",
+    "titulo": "Cuantificación de acero y concreto",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "IH-01",
+    "titulo": "Instalación hidráulica",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IS-01",
+    "titulo": "Instalación sanitaria y pluvial",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IE-01",
+    "titulo": "Instalación eléctrica",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IG-01",
+    "titulo": "Instalación de gas LP",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IH-02",
+    "titulo": "Isométrico hidráulico",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IE-02",
+    "titulo": "Cuadro de cargas y diagrama unifilar",
+    "disciplina": "Instalaciones"
+   }
+  ],
+  "coordinacion": {
+   "errores": 0,
+   "avisos": 0,
+   "verificaciones": 29
+  },
+  "nivel": "Proyecto ejecutivo completo",
+  "documentos": [
+   "Memoria técnica (Word/PDF)",
+   "Presupuesto (Excel)",
+   "Programa de obra (Excel y Gantt)",
+   "Juego de planos (PDF y DXF)"
+  ]
  },
  "generado_por": "híbrido (Claude + motor)"
 }

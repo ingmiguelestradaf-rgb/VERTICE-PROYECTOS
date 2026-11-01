@@ -1,6 +1,7 @@
 # VÉRTICE · Proyecto del día
 
-Cada día se genera un **anteproyecto arquitectónico, estructural y de instalaciones completo**:
+Cada día se genera un **anteproyecto** (público, en esta galería) y un **proyecto ejecutivo** (privado, sólo en
+Google Drive) con revisión automática de coordinación y normativa:
 
 - Planta de conjunto, plantas arquitectónicas, fachadas y corte (DXF R12, abren en AutoCAD/BricsCAD/ZWCAD/LibreCAD)
 - Cimentación y planta estructural con predimensionamiento (mampostería confinada, marcos de concreto o acero)

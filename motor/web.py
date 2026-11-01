@@ -39,16 +39,14 @@ def memoria_md(r):
         if ex.get(clave_):
             v_ = ex[clave_]
             L += ["", f"## {titulo_}", ""] + [f"- {i}" for i in (v_ if isinstance(v_, list) else [v_])]
-    L += ["", "## Materiales y acabados", "", r["materiales"], "", "## Estructura", ""]
-    for e in r["estructura"]:
-        L += [f"### {e['bloque']} — {SIS[e['sistema']]}", "", "| Elemento | Propuesta | Observación |", "|---|---|---|"]
-        L += [f"| {a} | {b} | {c} |" for a, b, c in e["tabla"]]
-        L += ["", "Datos de cálculo: " + ", ".join(f"{k} = {v}" for k, v in e["calc"].items()), ""]
-        L += [f"> {n}" for n in e["notas"]]
-    L += ["## Instalaciones", ""]
-    for k, filas in r["instalaciones"].items():
-        L += [f"### {DISC.get(k, k)}", "", "| Concepto | Valor | Criterio |", "|---|---|---|"]
-        L += [f"| {a} | {b} | {c} |" for a, b, c in filas] + [""]
+    L += ["", "## Materiales y acabados", "", r["materiales"], ""]
+    ej = r.get("ejecutivo")
+    if ej:
+        L += ["## Proyecto ejecutivo", "", f"{ej['nivel']}: {len(ej['laminas'])} láminas. Se entrega por separado (Drive)."]
+        if ej.get("coordinacion"):
+            c = ej["coordinacion"]
+            L += [f"Revisión de coordinación y normativa: {c['verificaciones']} verificaciones, {c['errores']} errores, {c['avisos']} avisos."]
+        L += [""] + [f"- {l['clave']} {l['titulo']}" for l in ej["laminas"]] + [""]
     rv = r.get("revision")
     if rv:
         L += ["## Revisión de calidad", "", f"{rv['errores']} errores · {rv['avisos']} avisos", ""]
@@ -56,7 +54,7 @@ def memoria_md(r):
     L += ["## Cuadro de áreas", "", "| Bloque | Nivel | Espacio | Medidas (m) | Área (m²) |", "|---|---|---|---|---|"]
     L += [f"| {a['bloque']} | {a['nivel']}{' x' + str(a['rep']) if a['rep'] > 1 else ''} | {a['espacio']} | {a['medidas']} | {a['area']:.2f} |"
           for a in r["areas"]]
-    L += ["", "## Planos", ""] + [f"- **{h['clave']}** {h['titulo']} — `{h['dxf']}`" for h in r["hojas"]]
+    L += ["", "## Láminas del anteproyecto", ""] + [f"- **{h['clave']}** {h['titulo']} — `{h['dxf']}`" for h in r["hojas"]]
     L += ["", "---", "*Anteproyecto conceptual generado automáticamente por el motor Vértice. El predimensionamiento "
           "y los cálculos de instalaciones son preliminares: no sustituyen la memoria de cálculo definitiva, el estudio "
           "de mecánica de suelos ni la revisión y firma del DRO y corresponsables.*", ""]
@@ -154,23 +152,31 @@ def pagina_proyecto(r):
     s += [f'<h2>Materiales</h2><p>{e(r["materiales"])}</p>',
           '<h2>Vistas</h2><div class="dos"><img src="render_peatonal.jpg" style="width:100%;border:1px solid var(--linea)" alt="Render peatonal">'
           '<img src="render_aereo.jpg" style="width:100%;border:1px solid var(--linea)" alt="Render aéreo"></div>',
-          '<h2>Descargas</h2><div class="desc">'
-          f'<a class="btn pri" href="{e(r["zip"])}" download>Planos DXF (.zip)</a><a class="btn" href="planos.pdf">Juego de planos PDF</a>'
-          '<a class="btn" href="memoria.md">Memoria (.md)</a><a class="btn" href="proyecto.json">Datos (.json)</a></div>',
-          '<h2>Planos</h2><div class="laminas">']
+          '<h2>Anteproyecto — descargas</h2><div class="desc">'
+          f'<a class="btn pri" href="{e(r["pdf"])}">Anteproyecto PDF</a><a class="btn" href="{e(r["zip"])}" download>Planos DXF (.zip)</a>'
+          '<a class="btn" href="memoria_descriptiva.md">Memoria descriptiva</a></div>',
+          '<h2>Láminas del anteproyecto</h2><div class="laminas">']
     for h in r["hojas"]:
         s.append(f'<a href="{e(h["img"])}"><img loading="lazy" src="{e(h["img"])}" alt="{e(h["titulo"])}">'
-                 f'<div><b>{e(h["clave"])}</b> {e(h["titulo"])} · <span class="mono" style="font-size:11px">'
-                 f'<object><a href="{e(h["dxf"])}" download style="color:#B4532A">DXF</a></object></span></div></a>')
-    s.append("</div><h2>Estructura</h2>")
-    for est in r["estructura"]:
-        s.append(f"<h3>{e(est['bloque'])} — {SIS[est['sistema']]}</h3>" + _tabla(est["tabla"], ["Elemento", "Propuesta", "Observación"]))
-        s.append('<p class="sub mono" style="font-size:12px">' + " · ".join(f"{e(k)}={e(str(v))}" for k, v in est["calc"].items()) + "</p>")
-        for n in est["notas"]:
-            s.append(f'<p class="sub">{e(n)}</p>')
-    s.append("<h2>Instalaciones</h2><div class='dos'>")
-    for k, filas in r["instalaciones"].items():
-        s.append(f"<div><h3>{DISC.get(k, k)}</h3>{_tabla(filas, ['Concepto', 'Valor', 'Criterio'])}</div>")
+                 f'<div><b>{e(h["clave"])}</b> {e(h["titulo"])}</div></a>')
+    s.append("</div>")
+    ej = r.get("ejecutivo")
+    if ej:
+        s.append(f"<h2>Proyecto ejecutivo</h2><p><b>{e(ej['nivel'])}</b> — {len(ej['laminas'])} láminas. "
+                 "Se entrega por separado; no se publica en esta galería.</p>")
+        if ej.get("coordinacion"):
+            c = ej["coordinacion"]
+            est = "Sin errores" if not c["errores"] else f"{c['errores']} errores"
+            s.append(f"<p>Revisión de coordinación arquitectura–estructura–instalaciones–acabados y normativa: "
+                     f"<b>{est}</b> · {c['avisos']} avisos en {c['verificaciones']} verificaciones.</p>")
+        por = {}
+        for l in ej["laminas"]:
+            por.setdefault(l["disciplina"] or "Planos", []).append(f"{l['clave']} {l['titulo']}")
+        s.append('<div class="dos">' + "".join(f"<div><h3>{e(d)}</h3><ul>" + "".join(f"<li>{e(x)}</li>" for x in xs) + "</ul></div>"
+                                               for d, xs in por.items()) + "</div>")
+        if ej.get("documentos"):
+            s.append("<p class='sub'>Incluye: " + " · ".join(e(d) for d in ej["documentos"]) + "</p>")
+    s.append("<div>")
     rv = r.get("revision")
     if rv:
         estado = "Sin errores" if not rv["errores"] else f"{rv['errores']} errores"

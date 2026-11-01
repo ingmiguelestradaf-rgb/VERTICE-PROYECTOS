@@ -1,3 +1,5 @@
 __pycache__/
 *.pyc
 spec_hoy.json
+_privado/
+_calculo/
