@@ -41,7 +41,7 @@ jobs:
         run: |
           c="${{ github.event.inputs.clave || '2026-11-01-casa-minimalista' }}"
           mkdir -p out
-          /usr/bin/time -v blender/blender -b --factory-startup -P motor/foto/blender_escena.py -- "_privado/$c/escena.json" out ${{ github.event.inputs.modo || '' }} 2>&1 | grep -E "render:|recorrido|Error|Traceback|File \"|Elapsed|Maximum resident|^  " | tail -80
+          /usr/bin/time -v blender/blender -b --factory-startup -P motor/foto/blender_escena.py -- "_privado/$c/escena.json" out ${{ github.event.inputs.modo || '--prueba' }} 2>&1 | grep -E "render:|recorrido|Error|Traceback|File \"|Elapsed|Maximum resident|^  " | tail -80
           ls -la out
       - name: Publicar en rama pruebas-render
         run: |
