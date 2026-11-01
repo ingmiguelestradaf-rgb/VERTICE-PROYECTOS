@@ -109,7 +109,7 @@ M = dict(
     vidrio=material("Vidrio", (0.85, 0.92, 0.95, 1), 0.02, trans=1.0),
     marco=material("Cancelería", hexrgb("#2B2C2E"), 0.35, metal=0.7),
     madera=material("Madera", hexrgb("#7A5236"), 0.5, ruido=0.35, escala=2.5),
-    piso=material("Piso de madera", hexrgb("#9A7350"), 0.35, ruido=0.08, escala=1.2),
+    piso=material("Piso de madera", hexrgb("#8C7660"), 0.35, ruido=0.08, escala=1.2),
     piso_bano=material("Porcelanato baño", hexrgb("#BDB7AD"), 0.3, ruido=0.08, escala=1.5),
     concreto_piso=material("Concreto escobillado", hexrgb("#A7A49C"), 0.9, ruido=0.25, escala=12, bump=0.1),
     pasto=material("Pasto", hexrgb("#5E7F3E"), 0.95, ruido=0.45, escala=25, bump=0.3),
@@ -252,7 +252,7 @@ for blq in E["bloques"]:
         # plafón interior
         for c in nv["locales"]:
             if c is not hueco:
-                G.caja("interior", c["x"], c["y"], zc - 0.01, c["x"] + c["w"], c["y"] + c["d"], zc)
+                G.caja("blanco", c["x"], c["y"], zc - 0.01, c["x"] + c["w"], c["y"] + c["d"], zc)
         # pisos terminados
         for c in nv["locales"]:
             mat = "piso_bano" if c["t"] == "humedo" else ("concreto_piso" if c["t"] in ("ext", "almacen") else "piso")
@@ -660,7 +660,7 @@ def ruta_interior():
 
 
 if "--sin-video" not in ARGS:
-    fps = 24 if PRUEBA else 15
+    fps = 24 if PRUEBA else 12
     vel = 1.1                         # m/s caminando
     pts = ruta_interior()
     cam = camara("Recorrido", (0, 0, 1.6), (0, 1, 1.6), 18)
@@ -718,9 +718,9 @@ if "--sin-video" not in ARGS:
     if PRUEBA:
         SC.frame_step = 6
     SC.render.fps = fps
-    SC.render.resolution_x, SC.render.resolution_y = (640, 360) if PRUEBA else (960, 540)
-    SC.cycles.samples = 8 if PRUEBA else 12
-    SC.cycles.time_limit = 0
+    SC.render.resolution_x, SC.render.resolution_y = (640, 360) if PRUEBA else (854, 480)
+    SC.cycles.samples = 8 if PRUEBA else 10
+    SC.cycles.time_limit = 0 if PRUEBA else 4
     SC.render.image_settings.file_format = "FFMPEG"
     SC.render.ffmpeg.format = "MPEG4"
     SC.render.ffmpeg.codec = "H264"
