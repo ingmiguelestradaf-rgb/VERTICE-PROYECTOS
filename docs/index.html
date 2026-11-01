@@ -1,0 +1,43 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vértice · Proyecto del día</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--papel:#F3F0E8;--tinta:#1C1D1F;--suave:#5E6064;--linea:#D9D4C7;--acento:#B4532A;--tarjeta:#FBFAF6}
+@media (prefers-color-scheme:dark){:root{--papel:#17181A;--tinta:#ECE8DF;--suave:#A3A19C;--linea:#33342F;--acento:#E07A4F;--tarjeta:#1F2022}}
+*{box-sizing:border-box}body{margin:0;background:var(--papel);color:var(--tinta);font-family:'Archivo',system-ui,sans-serif;line-height:1.5}
+a{color:inherit}.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.wrap{max-width:1240px;margin:0 auto;padding:0 16px}
+header.top{border-bottom:1px solid var(--linea);padding:18px 0}
+header.top .wrap{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap}
+.marca{font-weight:800;letter-spacing:.18em;font-size:14px;text-decoration:none}.marca span{color:var(--acento)}
+.sub{color:var(--suave);font-size:13px}
+h1{font-size:clamp(30px,5vw,58px);line-height:1.02;margin:36px 0 10px;font-weight:800;letter-spacing:-.02em}
+h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--suave);margin:44px 0 14px;font-weight:600}
+h3{font-size:18px;margin:22px 0 8px}
+.ciclo{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:22px 0 8px}
+.ciclo div{border:1px solid var(--linea);padding:10px;font-size:12px;border-radius:2px}
+.ciclo div.on{background:var(--tinta);color:var(--papel);border-color:var(--tinta)}
+.ciclo b{display:block;font-size:13px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:26px 0 18px}
+.chips button{font:inherit;font-size:13px;border:1px solid var(--linea);background:transparent;color:var(--tinta);padding:6px 12px;border-radius:99px;cursor:pointer}
+.chips button.on{background:var(--acento);border-color:var(--acento);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px;margin-bottom:60px}
+.card{background:var(--tarjeta);border:1px solid var(--linea);text-decoration:none;display:block;transition:transform .15s}
+.card:hover{transform:translateY(-2px)}
+.card img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;border-bottom:1px solid var(--linea)}
+.card .t{padding:12px 14px 14px}.card .f{font-size:12px;color:var(--suave)}.card .n{font-weight:700;font-size:16px;margin:2px 0 6px}
+.tag{display:inline-block;font-size:11px;border:1px solid var(--linea);padding:2px 7px;margin-right:4px;border-radius:2px}
+.hero img{width:100%;display:block;border:1px solid var(--linea)}
+.datos{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-top:1px solid var(--linea);border-left:1px solid var(--linea);margin-top:22px}
+.datos div{border-right:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:12px 14px}
+.datos b{display:block;font-size:21px}.datos span{font-size:12px;color:var(--suave)}
+.concepto{font-size:19px;max-width:780px}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media(max-width:760px){.dos{grid-template-columns:1fr}.ciclo{grid-template-columns:repeat(4,1fr)}}
+.laminas{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.laminas a{display:block;background:#fff;border:1px solid var(--linea);text-decoration:none}
+.laminas img{width:100%;aspect-ratio:4/3;object-fit:contain;display:block}
+.laminas div{padding:8px 10px;font-size:13px;color:#222;border-top:1px solid #e5e5e5}
+.desc a.btn{display:inline-block;border:1px solid var(--tinta);padding:9px 14px;margin:0 8px 8px 0;text-decoration:none;font-size:14px}
+.desc a.btn.pri{background:var(--acento);border-color:var(--acento);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:6px 0 10px}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--linea);vertical-align:top}th{font-size:12px;color:var(--suave);font-weight:600}
+.tabla{overflow-x:auto}details summary{cursor:pointer;font-weight:600;padding:8px 0}
+.aviso{font-size:13px;color:var(--suave);border-left:3px solid var(--acento);padding:8px 14px;margin:40px 0 60px}
+</style></head><body><header class="top"><div class="wrap"><a class="marca" href="index.html">VÉRTICE<span>·</span>PROYECTO DEL DÍA</a><span class="sub">Ingeniería, Arquitectura y Proyectos · Tijuana, B.C.</span></div></header><main class="wrap"><h1>Un proyecto completo,<br>cada día.</h1><p class="sub" style="max-width:720px">Anteproyecto arquitectónico, estructural y de instalaciones con planos DXF, renders y memoria. Cada mes una tipología; cada día una corriente arquitectónica distinta.</p><div class="ciclo"><div class="on"><b>Casa habitación</b>Mes 1 del ciclo</div><div class=""><b>Edificio de departamentos</b>Mes 2 del ciclo</div><div class=""><b>Nave industrial</b>Mes 3 del ciclo</div><div class=""><b>Plaza comercial</b>Mes 4 del ciclo</div><div class=""><b>Hotel</b>Mes 5 del ciclo</div><div class=""><b>Parque de diversiones</b>Mes 6 del ciclo</div><div class=""><b>Museo</b>Mes 7 del ciclo</div></div><div class="chips" id="chips"><button class="on" data-t="">Todos</button><button data-t="casa">Casa habitación</button></div><div class="grid" id="grid"><a class="card" data-t="casa" href="proyectos/2026-11-01-casa-minimalista/index.html"><img loading="lazy" src="proyectos/2026-11-01-casa-minimalista/render_aereo.jpg" alt=""><div class="t"><div class="f mono">1 de noviembre de 2026</div><div class="n">Casa Umbral</div><span class="tag">Casa habitación</span><span class="tag">226 m²</span><div class="f" style="margin-top:6px">Minimalista</div></div></a></div></main><script>document.getElementById("chips").addEventListener("click",function(ev){var b=ev.target.closest("button");if(!b)return;document.querySelectorAll("#chips button").forEach(function(x){x.classList.toggle("on",x===b)});var t=b.dataset.t;document.querySelectorAll("#grid .card").forEach(function(c){c.style.display=!t||c.dataset.t===t?"":"none"})});</script></body></html>

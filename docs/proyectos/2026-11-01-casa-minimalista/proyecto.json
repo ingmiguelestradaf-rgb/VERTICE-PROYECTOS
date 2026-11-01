@@ -1,0 +1,423 @@
+{
+ "clave": "2026-11-01-casa-minimalista",
+ "fecha": "2026-11-01",
+ "nombre": "Casa Umbral",
+ "concepto": "Vivienda compacta para un lote de 8 x 22.5 m en Tijuana, resuelta como un prisma blanco de dos niveles que se protege del poniente con muros ciegos a las colindancias y se abre al norte hacia el patio posterior. Un volado de concreto oscuro marca el acceso y sombrea las recámaras de la fachada sur. La escalera funciona como núcleo central que separa la zona pública de la privada, y el patio trasero capta la brisa marina del poniente para ventilar la casa de forma cruzada.",
+ "tipologia": "casa",
+ "tipologia_nombre": "Casa habitación",
+ "subtipo": "",
+ "corriente": "minimalista",
+ "corriente_nombre": "Minimalista",
+ "materiales": "Block de concreto con aplanado fino blanco, volado de concreto aparente pigmentado en gris carbón, cancelería de aluminio negro con vidrio claro de 6 mm, piso de porcelanato 60x120 en tono arena, impermeabilizante blanco reflectivo en azotea.",
+ "uso_suelo": "Habitacional unifamiliar",
+ "terreno": {
+  "frente": 8.0,
+  "fondo": 22.5,
+  "area": 180.0
+ },
+ "area_construida": 225.6,
+ "desplante": 112.8,
+ "cos": 0.63,
+ "cus": 1.25,
+ "niveles": 2,
+ "altura": 5.4,
+ "cajones": 0,
+ "usuarios": {
+  "ocupantes": 4
+ },
+ "bloques": [
+  {
+   "nombre": "Casa",
+   "w": 8.0,
+   "d": 14.1,
+   "niveles": 2,
+   "sistema": "mamposteria"
+  }
+ ],
+ "estructura": [
+  {
+   "bloque": "Casa",
+   "sistema": "mamposteria",
+   "tabla": [
+    [
+     "Muros",
+     "Block hueco de concreto 15x20x40 cm, f'm ≥ 20 kg/cm², junteado con mortero tipo I",
+     "Mampostería confinada"
+    ],
+    [
+     "Castillos K-1",
+     "15x20 cm, 4 vars #3, est. #2 @ 20 cm (@10 en extremos)",
+     "32 piezas en planta baja"
+    ],
+    [
+     "Dalas D-1",
+     "15x20 cm, 4 vars #3, est. #2 @ 20 cm",
+     "En desplante, cerramiento y pretil"
+    ],
+    [
+     "Losas",
+     "Losa maciza h = 11 cm, f'c = 250 kg/cm², vars #3 @ 20 cm ambos sentidos",
+     "Claro crítico Cocina"
+    ],
+    [
+     "Cimentación",
+     "Zapata corrida de concreto f'c = 250, ancho 0.60 m, h = 20 cm, con contratrabe 20x40 cm",
+     "q_adm supuesta 12.0 t/m²"
+    ],
+    [
+     "Firme",
+     "Concreto f'c = 150 kg/cm², h = 10 cm, malla 6x6-10/10",
+     "Sobre terreno compactado 95 % Proctor"
+    ]
+   ],
+   "calc": {
+    "h_losa_cm": 11,
+    "CM_kgm2": 454,
+    "CV_kgm2": 190,
+    "carga_lineal_tm": 4.2,
+    "ancho_zapata_m": 0.6,
+    "q_adm_tm2": 12.0,
+    "W_t": 123.9,
+    "Q": 2.0,
+    "c": 0.32,
+    "V_basal_t": 19.8
+   },
+   "notas": []
+  }
+ ],
+ "instalaciones": {
+  "hidraulica": [
+   [
+    "Dotación",
+    "150 L/hab/día × 4",
+    "0.6 m³/día"
+   ],
+   [
+    "Gasto medio / máx. diario",
+    "0.01 / 0.01 L/s",
+    "Qmd = 1.2 Qm"
+   ],
+   [
+    "Toma domiciliaria",
+    "Ø 13 mm",
+    "Contrato CESPT, medidor en límite de predio"
+   ],
+   [
+    "Unidades mueble",
+    "18 UM (9 muebles)",
+    "Gasto instantáneo (Hunter) ≈ 1.08 L/s"
+   ],
+   [
+    "Alimentación general",
+    "Ø 32 mm",
+    "Tubería CPVC / PPR, v ≤ 1.5 m/s"
+   ],
+   [
+    "Cisterna",
+    "2 m³",
+    "2 días de reserva"
+   ],
+   [
+    "Equipo de bombeo",
+    "Hidroneumático / presurizador",
+    "Presión mínima 1.0 kg/cm² en mueble más desfavorable"
+   ],
+   [
+    "Agua caliente",
+    "Calentador de paso a gas",
+    "Retorno de agua caliente en recorridos > 15 m"
+   ]
+  ],
+  "sanitaria": [
+   [
+    "Unidades de descarga",
+    "21 UD",
+    "Tabla de UD por mueble"
+   ],
+   [
+    "Colector principal",
+    "Ø 100 mm PVC sanitario",
+    "Pendiente mínima 2 %"
+   ],
+   [
+    "Registros",
+    "40x60 cm (60x80 en > 1.5 m de prof.)",
+    "A cada 10 m y en cambios de dirección"
+   ],
+   [
+    "Ventilación",
+    "Tubo de ventilación Ø 50 mm por núcleo de muebles",
+    "Rematar 30 cm sobre azotea"
+   ],
+   [
+    "Descarga",
+    "A colector municipal CESPT",
+    "Registro de banqueta"
+   ]
+  ],
+  "pluvial": [
+   [
+    "Área de captación",
+    "113 m²",
+    "Intensidad de diseño 100 mm/h (supuesta)"
+   ],
+   [
+    "Gasto pluvial",
+    "3.1 L/s",
+    "Q = i · A / 3600"
+   ],
+   [
+    "Bajadas",
+    "2 de Ø 100 mm",
+    "Capacidad ≈ 4.5 L/s c/u"
+   ],
+   [
+    "Disposición",
+    "A pozo de absorción / área verde y excedencias a calle",
+    "Separada del drenaje sanitario"
+   ]
+  ],
+  "electrica": [
+   [
+    "Carga instalada",
+    "8.6 kW",
+    "W/m² según uso + equipos"
+   ],
+   [
+    "Demanda",
+    "6.0 kW (6.7 kVA)",
+    "Factor de demanda 0.7"
+   ],
+   [
+    "Acometida",
+    "Bifásica 2F-3H 220/127 V",
+    "Corriente ≈ 31 A"
+   ],
+   [
+    "Alimentador general",
+    "cal. 8 AWG/kcmil THW-LS, Cu",
+    "Ampacidad al 125 %"
+   ],
+   [
+    "Luminarias",
+    "≈ 20 LED",
+    "Niveles NOM-025-STPS / NOM-007-ENER"
+   ],
+   [
+    "Tierra física",
+    "Electrodo de cobre 3 m + registro",
+    "Unión equipotencial, NOM-001-SEDE-2012"
+   ],
+   [
+    "Energía renovable",
+    "Sistema FV interconectado ≈ 2 kWp",
+    "Opcional, recomendado"
+   ]
+  ],
+  "gas": [
+   [
+    "Combustible",
+    "Gas LP",
+    "NOM-004-SEDG-2004"
+   ],
+   [
+    "Almacenamiento",
+    "Tanque estacionario 300 L",
+    "En azotea o patio, ventilado, a > 3 m de flamas"
+   ],
+   [
+    "Red",
+    "Cobre tipo L Ø 3/8\" a 3/4\" con regulador de 2 etapas",
+    "Prueba de hermeticidad a 1.5× presión de trabajo"
+   ]
+  ]
+ },
+ "areas": [
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Cochera",
+   "area": 21.59,
+   "medidas": "4.64 x 4.65"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Acceso",
+   "area": 8.6,
+   "medidas": "3.36 x 2.56"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Medio baño",
+   "area": 7.04,
+   "medidas": "3.36 x 2.09"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Sala",
+   "area": 20.3,
+   "medidas": "4.80 x 4.23"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Escalera",
+   "area": 13.54,
+   "medidas": "3.20 x 4.23"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Comedor",
+   "area": 18.78,
+   "medidas": "3.60 x 5.22"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Cocina",
+   "area": 22.95,
+   "medidas": "4.40 x 5.22"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara 2",
+   "area": 18.61,
+   "medidas": "4.00 x 4.65"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara 3",
+   "area": 18.61,
+   "medidas": "4.00 x 4.65"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Baño 2",
+   "area": 9.14,
+   "medidas": "2.16 x 4.23"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Pasillo",
+   "area": 11.17,
+   "medidas": "2.64 x 4.23"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Escalera",
+   "area": 13.54,
+   "medidas": "3.20 x 4.23"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara principal",
+   "area": 25.88,
+   "medidas": "4.96 x 5.22"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Vestidor",
+   "area": 7.14,
+   "medidas": "3.04 x 2.35"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Baño principal",
+   "area": 8.72,
+   "medidas": "3.04 x 2.87"
+  }
+ ],
+ "hojas": [
+  {
+   "clave": "A-01",
+   "titulo": "Planta de conjunto",
+   "dxf": "planos/A-01_planta-de-conjunto.dxf",
+   "img": "laminas/A-01.jpg"
+  },
+  {
+   "clave": "A-02",
+   "titulo": "Plantas arquitectónicas",
+   "dxf": "planos/A-02_plantas-arquitectonicas.dxf",
+   "img": "laminas/A-02.jpg"
+  },
+  {
+   "clave": "A-03",
+   "titulo": "Fachadas y corte",
+   "dxf": "planos/A-03_fachadas-y-corte.dxf",
+   "img": "laminas/A-03.jpg"
+  },
+  {
+   "clave": "E-01",
+   "titulo": "Planta de cimentación",
+   "dxf": "planos/E-01_planta-de-cimentacion.dxf",
+   "img": "laminas/E-01.jpg"
+  },
+  {
+   "clave": "E-02",
+   "titulo": "Planta estructural",
+   "dxf": "planos/E-02_planta-estructural.dxf",
+   "img": "laminas/E-02.jpg"
+  },
+  {
+   "clave": "IH-01",
+   "titulo": "Instalación hidráulica y contra incendio",
+   "dxf": "planos/IH-01_instalacion-hidraulica-y-contra-incendio.dxf",
+   "img": "laminas/IH-01.jpg"
+  },
+  {
+   "clave": "IS-01",
+   "titulo": "Instalación sanitaria y pluvial",
+   "dxf": "planos/IS-01_instalacion-sanitaria-y-pluvial.dxf",
+   "img": "laminas/IS-01.jpg"
+  },
+  {
+   "clave": "IE-01",
+   "titulo": "Instalación eléctrica",
+   "dxf": "planos/IE-01_instalacion-electrica.dxf",
+   "img": "laminas/IE-01.jpg"
+  },
+  {
+   "clave": "IG-01",
+   "titulo": "Instalación de gas LP",
+   "dxf": "planos/IG-01_instalacion-de-gas-lp.dxf",
+   "img": "laminas/IG-01.jpg"
+  }
+ ],
+ "render": [
+  "render_aereo.jpg",
+  "render_peatonal.jpg"
+ ],
+ "pdf": "planos.pdf",
+ "zip": "2026-11-01-casa-minimalista_dxf.zip",
+ "extra": {
+  "orientacion": "Fachada principal al sur; patio y ventanas de recámara principal al norte"
+ },
+ "generado_por": "híbrido (Claude + motor)"
+}

@@ -1,0 +1,298 @@
+#!/usr/bin/env python3
+"""Genera el proyecto arquitectónico y estructural del día.
+
+Uso:
+  python generar.py                       # proyecto de hoy (zona horaria America/Tijuana)
+  python generar.py --fecha 2026-11-01    # de una fecha específica
+  python generar.py --plan                # sólo muestra tipología/corriente/terreno del día
+  python generar.py --spec spec.json      # usa el diseño propuesto por Claude (modo híbrido)
+  python generar.py --si-no-existe        # no hace nada si ya existe el proyecto del día
+"""
+import argparse
+import copy
+import datetime as dt
+import json
+import os
+import re
+import shutil
+import sys
+import unicodedata
+import zipfile
+
+from matplotlib.backends.backend_pdf import PdfPages
+
+from motor import calendario, programa, layout, estructura, instalaciones as inst, planos, plano_estructural as pe
+from motor import render as rd, lamina, web
+from motor.dxf import DXF
+
+RAIZ = os.path.dirname(os.path.abspath(__file__))
+SALIDA = os.path.join(RAIZ, "docs", "proyectos")
+
+
+def slug(s):
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+
+
+def hoy_tijuana():
+    try:
+        from zoneinfo import ZoneInfo
+        return dt.datetime.now(ZoneInfo("America/Tijuana")).date()
+    except Exception:
+        return (dt.datetime.utcnow() - dt.timedelta(hours=8)).date()
+
+
+def fusionar(base, extra):
+    for k, v in extra.items():
+        if isinstance(v, dict) and isinstance(base.get(k), dict):
+            fusionar(base[k], v)
+        else:
+            base[k] = v
+    return base
+
+
+class Hoja:
+    """Acomoda varios dibujos en una lámina, de izquierda a derecha."""
+
+    def __init__(self, dx, sep):
+        self.dx, self.x, self.sep, self.ymax = dx, 0.0, sep, 0.0
+
+    def poner(self, ancho, alto, dibujar, titulo):
+        ox = self.x
+        dibujar(ox)
+        h = max(0.35, max(ancho, alto) / 45)
+        self.dx.texto((ox + ancho / 2, -h * 6.5), titulo, h, "A-TEXTO", centrado=True)
+        self.x += ancho + self.sep
+        self.ymax = max(self.ymax, alto)
+
+
+def niveles_unicos(blq):
+    return [(k, n) for k, n in enumerate(blq["niveles"])]
+
+
+def construir(fecha, spec=None, salida=SALIDA):
+    plan = calendario.plan_del_dia(fecha)
+    spec = spec or {}
+    for k in ("corriente", "variante", "terreno"):
+        if k in spec:
+            plan[k] = spec[k] if k != "terreno" else fusionar(plan.get("terreno", {}), spec[k])
+    plan["corriente_nombre"] = calendario.CORRIENTES[plan["corriente"]]["nombre"]
+    corr = copy.deepcopy(calendario.CORRIENTES[plan["corriente"]])
+    if spec.get("paleta"):
+        corr.update(spec["paleta"])
+    if spec.get("rasgos"):
+        corr["rasgos"] = spec["rasgos"]
+    proy = programa.generar(plan)
+    if spec.get("modelo"):
+        fusionar(proy, spec["modelo"])
+    nombre = spec.get("nombre") or f"{plan['tipologia_nombre']} {plan['corriente_nombre']}"
+    concepto = spec.get("concepto") or ""
+    clave = f"{fecha.isoformat()}-{plan['tipologia']}-{slug(plan['corriente'])}"
+    carpeta = os.path.join(salida, clave)
+    if os.path.exists(carpeta):
+        shutil.rmtree(carpeta)
+    os.makedirs(os.path.join(carpeta, "planos"))
+    os.makedirs(os.path.join(carpeta, "laminas"))
+
+    # ---- distribución por nivel
+    lays = []
+    for blq in proy["bloques"]:
+        bl = []
+        for k, n in enumerate(blq["niveles"]):
+            bl.append(layout.distribuir(blq, n, corr, k))
+        lays.append(bl)
+    area_total = sum(b["w"] * b["d"] * sum(n["rep"] for n in b["niveles"]) for b in proy["bloques"])
+    desplante = sum(b["w"] * b["d"] for b in proy["bloques"] if b.get("z0", 0) == 0)
+    t = proy["terreno"]
+    a_terreno = t["frente"] * t["fondo"]
+    ests = [estructura.predimensionar(b, lays[i], proy["bloques"]) for i, b in enumerate(proy["bloques"])]
+    proy["_ci"] = plan["tipologia"] != "casa"
+    ins = inst.calcular(proy, plan, lays, area_total)
+
+    datos = dict(proyecto=nombre.upper(), clave=clave, fecha=fecha.isoformat())
+    notas = ["Cotas en metros. Verificar en sitio.", "Predimensionamiento preliminar; requiere memoria de cálculo",
+             "definitiva, estudio de mecánica de suelos y firma de DRO.",
+             "Normativa de referencia: Reglamento de Edificaciones de Tijuana, NTC-2017, NOM-001-SEDE-2012."]
+    hojas = []
+    pdfp = os.path.join(carpeta, "planos.pdf")
+    pdf = PdfPages(pdfp)
+    big = max(max(b["w"], b["d"]) for b in proy["bloques"])
+    sep = max(6.0, big * 0.35)
+
+    def nueva(clave_h, titulo, gris=False, dib=None):
+        dx = DXF()
+        planos.capas_arq(dx); inst.capas(dx); pe.capas(dx)
+        return dict(dx=dx, clave=clave_h, titulo=titulo, gris=gris)
+
+    def cerrar(h):
+        dx = h["dx"]
+        xs = [0.0]; ys = [0.0]
+        for e in dx.ents:
+            if e[0] == "POLYLINE":
+                xs += [p[0] for p in e[2]]; ys += [p[1] for p in e[2]]
+            else:
+                d = dict(e[2]); xs.append(d.get(10, 0)); ys.append(d.get(20, 0))
+                if 11 in d:
+                    xs.append(d[11]); ys.append(d[21])
+        planos.cuadro(dx, min(xs), min(ys), max(xs), max(ys), dict(datos, plano=f"{h['clave']}  {h['titulo']}", notas=notas))
+        ruta = os.path.join(carpeta, "planos", f"{h['clave']}_{slug(h['titulo'])}.dxf")
+        dx.guardar(ruta)
+        img = os.path.join(carpeta, "laminas", f"{h['clave']}.jpg")
+        lamina.dibujar(dx, img, pdf, gris_arq=h["gris"])
+        hojas.append(dict(clave=h["clave"], titulo=h["titulo"], dxf=os.path.relpath(ruta, carpeta),
+                          img=os.path.relpath(img, carpeta)))
+
+    # A-01 conjunto
+    h = nueva("A-01", "Planta de conjunto")
+    planos.exteriores(h["dx"], proy)
+    for i, blq in enumerate(proy["bloques"]):
+        if blq.get("z0", 0) == 0 or True:
+            planos.planta_arq(h["dx"], blq, lays[i][0][0], lays[i][0][1], texto=len(proy["bloques"]) > 1 or blq["w"] < 30)
+        h["dx"].texto((blq["x"] + blq["w"] / 2, blq["y"] + blq["d"] + max(0.4, blq["w"] / 40)), blq["nombre"].upper(),
+                      max(0.3, max(blq["w"], blq["d"]) / 35), "A-TEXTO", centrado=True)
+    cerrar(h)
+
+    # A-02 plantas arquitectónicas
+    h = nueva("A-02", "Plantas arquitectónicas")
+    H = Hoja(h["dx"], sep)
+    for i, blq in enumerate(proy["bloques"]):
+        if i > 0 and blq["nombre"].startswith("Villa") and i > 1:
+            continue
+        for k, n in niveles_unicos(blq):
+            cu, va = lays[i][k]
+            rep = f" (x{n['rep']})" if n["rep"] > 1 else ""
+            H.poner(blq["w"], blq["d"], lambda ox, blq=blq, cu=cu, va=va: planos.planta_arq(h["dx"], blq, cu, va, ox - blq["x"], -blq["y"]),
+                    f"{n['nombre'].upper()}{rep} — {blq['nombre'].upper()}")
+    cerrar(h)
+
+    # A-03 fachadas y corte
+    h = nueva("A-03", "Fachadas y corte")
+    planos.fachada(h["dx"], proy, lays, corr, 0, 0, "S")
+    planos.fachada(h["dx"], proy, lays, corr, t["frente"] + sep, 0, "E")
+    zmax = max(planos.alturas(b)[1] + planos.altura_cubierta(b, corr) for b in proy["bloques"])
+    planos.corte(h["dx"], proy, lays, corr, 0, -(zmax + max(8.0, t["fondo"] * 0.12)) - max(3.0, zmax * 0.3))
+    cerrar(h)
+
+    # E-01 cimentación, E-02 estructura
+    for clave_h, tit, fn in (("E-01", "Planta de cimentación", "cim"), ("E-02", "Planta estructural", "est")):
+        h = nueva(clave_h, tit, gris=True)
+        H = Hoja(h["dx"], sep * 1.3)
+        for i, blq in enumerate(proy["bloques"]):
+            if blq["nombre"].startswith("Villa") and i > 1:
+                continue
+            est = ests[i]
+            if fn == "cim":
+                H.poner(blq["w"], blq["d"], lambda ox, blq=blq, est=est: pe.cimentacion(h["dx"], blq, est, ox - blq["x"], -blq["y"]),
+                        f"CIMENTACIÓN — {blq['nombre'].upper()}")
+            else:
+                H.poner(blq["w"], blq["d"], lambda ox, blq=blq, est=est, i=i: pe.planta_est(h["dx"], blq, est, lays[i][0][0], ox - blq["x"], -blq["y"]),
+                        f"ESTRUCTURA TIPO — {blq['nombre'].upper()}")
+        cerrar(h)
+
+    # Instalaciones
+    disc = [("IH-01", "Instalación hidráulica y contra incendio", "ih"), ("IS-01", "Instalación sanitaria y pluvial", "is"),
+            ("IE-01", "Instalación eléctrica", "ie"), ("IG-01", "Instalación de gas LP", "ig")]
+    for clave_h, tit, d in disc:
+        h = nueva(clave_h, tit, gris=True)
+        H = Hoja(h["dx"], sep)
+        primero = True
+        for i, blq in enumerate(proy["bloques"]):
+            if blq["nombre"].startswith("Villa") and i > 1:
+                continue
+            for k, n in niveles_unicos(blq):
+                cu, va = lays[i][k]
+
+                def dib(ox, blq=blq, cu=cu, va=va, k=k, pg=primero):
+                    oxx, oyy = ox - blq["x"], -blq["y"]
+                    planos.planta_arq(h["dx"], blq, cu, va, oxx, oyy, texto=d == "ie")
+                    if d == "ih":
+                        inst.hidraulica(h["dx"], proy, blq, cu, oxx, oyy, k, pg)
+                    elif d == "is":
+                        inst.sanitaria(h["dx"], proy, blq, cu, oxx, oyy, k)
+                    elif d == "ie":
+                        inst.electrica(h["dx"], proy, blq, cu, oxx, oyy, k, pg)
+                    else:
+                        inst.gas(h["dx"], proy, blq, cu, oxx, oyy, k, pg)
+                H.poner(blq["w"], blq["d"], dib, f"{n['nombre'].upper()} — {blq['nombre'].upper()}")
+                primero = False
+            if d == "is":
+                H.poner(blq["w"], blq["d"], lambda ox, blq=blq: inst.pluvial(h["dx"], proy, blq, ox - blq["x"], -blq["y"],
+                                                                         ins["resumen"]["n_baj"]),
+                        f"AZOTEA (PLUVIAL) — {blq['nombre'].upper()}")
+        cerrar(h)
+    pdf.close()
+
+    # ---- renders
+    titulo = f"{nombre}"
+    ra = os.path.join(carpeta, "render_aereo.jpg")
+    rp = os.path.join(carpeta, "render_peatonal.jpg")
+    rd.render(proy, lays, corr, ra, rp, titulo, seed=int(fecha.strftime("%Y%m%d")))
+
+    # ---- DXF en zip
+    zp = os.path.join(carpeta, f"{clave}_dxf.zip")
+    with zipfile.ZipFile(zp, "w", zipfile.ZIP_DEFLATED) as z:
+        for hj in hojas:
+            z.write(os.path.join(carpeta, hj["dxf"]), os.path.basename(hj["dxf"]))
+
+    # ---- cuadro de áreas
+    areas = []
+    for i, blq in enumerate(proy["bloques"]):
+        for k, n in enumerate(blq["niveles"]):
+            for c in lays[i][k][0]:
+                if not c["contenedor"]:
+                    areas.append(dict(bloque=blq["nombre"], nivel=n["nombre"], rep=n["rep"], espacio=c["n"],
+                                      area=round(c["w"] * c["d"], 2), medidas=f"{c['w']:.2f} x {c['d']:.2f}"))
+    cajones = sum(planos.contar_cajones(e["w"], e["d"]) for e in proy["exteriores"] if e["tipo"] == "estacionamiento")
+    altura_max = max(planos.alturas(b)[1] + planos.altura_cubierta(b, corr) for b in proy["bloques"])
+    resumen = dict(clave=clave, fecha=fecha.isoformat(), nombre=nombre, concepto=concepto,
+                   tipologia=plan["tipologia"], tipologia_nombre=plan["tipologia_nombre"],
+                   subtipo=proy.get("subtipo", ""), corriente=plan["corriente"], corriente_nombre=corr["nombre"],
+                   materiales=spec.get("materiales") or corr["materiales"], uso_suelo=proy.get("uso_suelo", ""),
+                   terreno=dict(frente=t["frente"], fondo=t["fondo"], area=round(a_terreno, 1)),
+                   area_construida=round(area_total, 1), desplante=round(desplante, 1),
+                   cos=round(desplante / a_terreno, 2), cus=round(area_total / a_terreno, 2),
+                   niveles=max(sum(n["rep"] for n in b["niveles"]) for b in proy["bloques"]),
+                   altura=round(altura_max, 1), cajones=cajones, usuarios=proy.get("usuarios", {}),
+                   bloques=[dict(nombre=b["nombre"], w=b["w"], d=b["d"], niveles=sum(n["rep"] for n in b["niveles"]),
+                                 sistema=b["sistema"]) for b in proy["bloques"]],
+                   estructura=[dict(bloque=proy["bloques"][i]["nombre"], sistema=e["sistema"], tabla=e["tabla"],
+                                    calc=e["calc"], notas=e["notas"]) for i, e in enumerate(ests)],
+                   instalaciones={k: v for k, v in ins.items() if k != "resumen"},
+                   areas=areas, hojas=hojas, render=["render_aereo.jpg", "render_peatonal.jpg"],
+                   pdf="planos.pdf", zip=os.path.basename(zp), extra=spec.get("extra", {}),
+                   generado_por="híbrido (Claude + motor)" if spec else "motor automático")
+    with open(os.path.join(carpeta, "proyecto.json"), "w", encoding="utf-8") as f:
+        json.dump(resumen, f, ensure_ascii=False, indent=1)
+    with open(os.path.join(carpeta, "memoria.md"), "w", encoding="utf-8") as f:
+        f.write(web.memoria_md(resumen))
+    with open(os.path.join(carpeta, "index.html"), "w", encoding="utf-8") as f:
+        f.write(web.pagina_proyecto(resumen))
+    web.galeria(salida, os.path.join(os.path.dirname(salida), "index.html"))
+    return carpeta, resumen
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--fecha")
+    ap.add_argument("--spec")
+    ap.add_argument("--plan", action="store_true")
+    ap.add_argument("--si-no-existe", action="store_true")
+    ap.add_argument("--galeria", action="store_true", help="sólo regenera la galería")
+    a = ap.parse_args()
+    fecha = dt.date.fromisoformat(a.fecha) if a.fecha else hoy_tijuana()
+    if a.galeria:
+        web.galeria(SALIDA, os.path.join(os.path.dirname(SALIDA), "index.html"))
+        return
+    if a.plan:
+        print(json.dumps(calendario.plan_del_dia(fecha), ensure_ascii=False, indent=2))
+        return
+    if a.si_no_existe and os.path.isdir(SALIDA) and any(n.startswith(fecha.isoformat()) for n in os.listdir(SALIDA)):
+        print(f"Ya existe el proyecto del {fecha}; nada que hacer.")
+        return
+    spec = json.load(open(a.spec, encoding="utf-8")) if a.spec else None
+    carpeta, r = construir(fecha, spec)
+    print(f"OK {r['clave']}: {r['nombre']} — {r['area_construida']} m², {len(r['hojas'])} planos → {os.path.relpath(carpeta, RAIZ)}")
+
+
+if __name__ == "__main__":
+    main()
