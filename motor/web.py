@@ -34,6 +34,11 @@ def memoria_md(r):
         L.append(f"| Cajones de estacionamiento | {r['cajones']} |")
     for k, v in r["usuarios"].items():
         L.append(f"| {k.replace('_', ' ').capitalize()} | {v:,} |")
+    ex = r.get("extra") or {}
+    for clave_, titulo_ in (("dictamen_arquitectura", "Dictamen del arquitecto"), ("dictamen_ingenieria", "Dictamen de ingeniería")):
+        if ex.get(clave_):
+            v_ = ex[clave_]
+            L += ["", f"## {titulo_}", ""] + [f"- {i}" for i in (v_ if isinstance(v_, list) else [v_])]
     L += ["", "## Materiales y acabados", "", r["materiales"], "", "## Estructura", ""]
     for e in r["estructura"]:
         L += [f"### {e['bloque']} — {SIS[e['sistema']]}", "", "| Elemento | Propuesta | Observación |", "|---|---|---|"]
@@ -44,6 +49,10 @@ def memoria_md(r):
     for k, filas in r["instalaciones"].items():
         L += [f"### {DISC.get(k, k)}", "", "| Concepto | Valor | Criterio |", "|---|---|---|"]
         L += [f"| {a} | {b} | {c} |" for a, b, c in filas] + [""]
+    rv = r.get("revision")
+    if rv:
+        L += ["## Revisión de calidad", "", f"{rv['errores']} errores · {rv['avisos']} avisos", ""]
+        L += [f"- **{o['tipo'].upper()}** · {o['nivel']}: {o['mensaje']}" for o in rv["observaciones"]] + [""]
     L += ["## Cuadro de áreas", "", "| Bloque | Nivel | Espacio | Medidas (m) | Área (m²) |", "|---|---|---|---|---|"]
     L += [f"| {a['bloque']} | {a['nivel']}{' x' + str(a['rep']) if a['rep'] > 1 else ''} | {a['espacio']} | {a['medidas']} | {a['area']:.2f} |"
           for a in r["areas"]]
@@ -136,6 +145,12 @@ def pagina_proyecto(r):
          '<div class="datos">' + "".join(f"<div><b>{a}</b><span>{b}</span></div>" for a, b in datos) + "</div>"]
     if r["concepto"]:
         s.append(f'<h2>Concepto</h2><p class="concepto">{e(r["concepto"])}</p>')
+    ex = r.get("extra") or {}
+    for clave_, titulo_ in (("dictamen_arquitectura", "Dictamen del arquitecto"), ("dictamen_ingenieria", "Dictamen de ingeniería")):
+        if ex.get(clave_):
+            v_ = ex[clave_]
+            items = v_ if isinstance(v_, list) else [v_]
+            s.append(f"<h2>{titulo_}</h2><ul>" + "".join(f"<li>{e(str(i))}</li>" for i in items) + "</ul>")
     s += [f'<h2>Materiales</h2><p>{e(r["materiales"])}</p>',
           '<h2>Vistas</h2><div class="dos"><img src="render_peatonal.jpg" style="width:100%;border:1px solid var(--linea)" alt="Render peatonal">'
           '<img src="render_aereo.jpg" style="width:100%;border:1px solid var(--linea)" alt="Render aéreo"></div>',
@@ -156,6 +171,13 @@ def pagina_proyecto(r):
     s.append("<h2>Instalaciones</h2><div class='dos'>")
     for k, filas in r["instalaciones"].items():
         s.append(f"<div><h3>{DISC.get(k, k)}</h3>{_tabla(filas, ['Concepto', 'Valor', 'Criterio'])}</div>")
+    rv = r.get("revision")
+    if rv:
+        estado = "Sin errores" if not rv["errores"] else f"{rv['errores']} errores"
+        s.append(f"</div><h2>Revisión de calidad</h2><p><b>{estado}</b> · {rv['avisos']} avisos</p>")
+        if rv["observaciones"]:
+            s.append(_tabla([(o["tipo"].capitalize(), o["nivel"], o["mensaje"]) for o in rv["observaciones"]], ["Tipo", "Nivel", "Observación"]))
+        s.append("<div>")
     s.append("</div><h2>Cuadro de áreas</h2><details><summary>Ver los "
              f"{len(r['areas'])} espacios</summary>")
     s.append(_tabla([(a["bloque"], a["nivel"] + (f" ×{a['rep']}" if a["rep"] > 1 else ""), a["espacio"], a["medidas"], f"{a['area']:.2f}")

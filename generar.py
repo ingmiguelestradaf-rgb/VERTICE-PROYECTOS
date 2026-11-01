@@ -22,7 +22,7 @@ import zipfile
 from matplotlib.backends.backend_pdf import PdfPages
 
 from motor import calendario, programa, layout, estructura, instalaciones as inst, planos, plano_estructural as pe
-from motor import render as rd, lamina, web
+from motor import render as rd, lamina, web, revision
 from motor.dxf import DXF
 
 RAIZ = os.path.dirname(os.path.abspath(__file__))
@@ -106,6 +106,7 @@ def construir(fecha, spec=None, salida=SALIDA):
     t = proy["terreno"]
     a_terreno = t["frente"] * t["fondo"]
     ests = [estructura.predimensionar(b, lays[i], proy["bloques"]) for i, b in enumerate(proy["bloques"])]
+    rev = revision.revisar(proy, lays)
     proy["_ci"] = plan["tipologia"] != "casa"
     ins = inst.calcular(proy, plan, lays, area_total)
 
@@ -145,11 +146,23 @@ def construir(fecha, spec=None, salida=SALIDA):
     # A-01 conjunto
     h = nueva("A-01", "Planta de conjunto")
     planos.exteriores(h["dx"], proy)
+    varios = len(proy["bloques"]) > 1
     for i, blq in enumerate(proy["bloques"]):
-        if blq.get("z0", 0) == 0 or True:
-            planos.planta_arq(h["dx"], blq, lays[i][0][0], lays[i][0][1], texto=len(proy["bloques"]) > 1 or blq["w"] < 30)
-        h["dx"].texto((blq["x"] + blq["w"] / 2, blq["y"] + blq["d"] + max(0.4, blq["w"] / 40)), blq["nombre"].upper(),
-                      max(0.3, max(blq["w"], blq["d"]) / 35), "A-TEXTO", centrado=True)
+        planos.planta_arq(h["dx"], blq, lays[i][0][0], lays[i][0][1], texto=varios or blq["w"] < 30, cotas=False)
+        if varios:
+            h["dx"].texto((blq["x"] + blq["w"] / 2, blq["y"] + blq["d"] + max(0.4, blq["w"] / 40)), blq["nombre"].upper(),
+                          max(0.3, max(blq["w"], blq["d"]) / 35), "A-TEXTO", centrado=True)
+    verde = sum(e["w"] * e["d"] for e in proy["exteriores"] if e["tipo"] == "area_verde")
+    caj = sum(planos.contar_cajones(e["w"], e["d"]) for e in proy["exteriores"] if e["tipo"] == "estacionamiento")
+    if plan["tipologia"] == "casa":
+        caj = 2 if a_terreno >= 300 else 1
+    filas = [("Terreno", f"{a_terreno:,.2f} m2"), ("Desplante", f"{desplante:,.2f} m2"), ("C.O.S.", f"{desplante / a_terreno:.2f}"),
+             ("Construcción total", f"{area_total:,.2f} m2"), ("C.U.S.", f"{area_total / a_terreno:.2f}"),
+             ("Área libre", f"{a_terreno - desplante:,.2f} m2"), ("Área verde (aprox.)", f"{verde:,.2f} m2"),
+             ("Niveles", str(max(sum(n['rep'] for n in b['niveles']) for b in proy['bloques']))),
+             ("Cajones de estacionamiento", str(caj))]
+    hc = max(0.3, max(t["frente"], t["fondo"]) / 70)
+    planos.cuadro_areas(h["dx"], t["frente"] + max(6.0, t["frente"] * 0.15), t["fondo"], filas, hc)
     cerrar(h)
 
     # A-02 plantas arquitectónicas
@@ -260,6 +273,7 @@ def construir(fecha, spec=None, salida=SALIDA):
                    instalaciones={k: v for k, v in ins.items() if k != "resumen"},
                    areas=areas, hojas=hojas, render=["render_aereo.jpg", "render_peatonal.jpg"],
                    pdf="planos.pdf", zip=os.path.basename(zp), extra=spec.get("extra", {}),
+                   revision=rev,
                    generado_por="híbrido (Claude + motor)" if spec else "motor automático")
     with open(os.path.join(carpeta, "proyecto.json"), "w", encoding="utf-8") as f:
         json.dump(resumen, f, ensure_ascii=False, indent=1)
@@ -278,6 +292,7 @@ def main():
     ap.add_argument("--plan", action="store_true")
     ap.add_argument("--si-no-existe", action="store_true")
     ap.add_argument("--galeria", action="store_true", help="sólo regenera la galería")
+    ap.add_argument("--estricto", action="store_true", help="termina con error si la revisión encuentra errores")
     a = ap.parse_args()
     fecha = dt.date.fromisoformat(a.fecha) if a.fecha else hoy_tijuana()
     if a.galeria:
@@ -291,7 +306,13 @@ def main():
         return
     spec = json.load(open(a.spec, encoding="utf-8")) if a.spec else None
     carpeta, r = construir(fecha, spec)
+    rv = r["revision"]
     print(f"OK {r['clave']}: {r['nombre']} — {r['area_construida']} m², {len(r['hojas'])} planos → {os.path.relpath(carpeta, RAIZ)}")
+    print(f"Revisión: {rv['errores']} errores, {rv['avisos']} avisos")
+    for o in rv["observaciones"]:
+        print(f"  [{o['tipo'].upper()}] {o['nivel']}: {o['mensaje']}")
+    if a.estricto and rv["errores"]:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

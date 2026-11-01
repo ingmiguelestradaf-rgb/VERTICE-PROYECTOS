@@ -134,6 +134,42 @@ def _cubierta(E, blq, corr, ztop):
     return zr
 
 
+def _pt(blq, lado, t, z, off):
+    """Punto sobre la fachada `lado` a la distancia t (coordenada global) y altura z, desplazado `off` hacia afuera."""
+    x, y, w, d = blq["x"], blq["y"], blq["w"], blq["d"]
+    return {"S": (t, y - off, z), "N": (t, y + d + off, z), "O": (x - off, t, z), "E": (x + w + off, t, z)}[lado]
+
+
+def _quad(E, blq, lado, a, b, z0, z1, off, col, brillo=None):
+    E.q([_pt(blq, lado, a, z0, off), _pt(blq, lado, b, z0, off), _pt(blq, lado, b, z1, off), _pt(blq, lado, a, z1, off)], col, brillo)
+
+
+def _vano3d(E, blq, lado, a, b, za, zb, col, tipo, corr):
+    """Ventana o puerta con vidrio, marco, parteluces, reflejo y repisón."""
+    marco = "#2C2D2F" if corr["cubierta"] != "dos_aguas" else "#F2EFE8"
+    if corr["nombre"].startswith(("Mediterr", "Colonial", "Californ")):
+        marco = "#5A3A22"
+    br = {"S": 0.9, "N": 0.7, "O": 0.75, "E": 0.82}[lado]
+    _quad(E, blq, lado, a, b, za, zb, 0.03, col, br)                         # vidrio / hoja
+    if col != "#55524E":
+        zr = za + (zb - za) * 0.62                                           # reflejo de cielo en la parte alta
+        _quad(E, blq, lado, a + 0.04, b - 0.04, zr, zb - 0.04, 0.035, "#9FB8C8", br * 0.95)
+    t = 0.06
+    for (p0, p1, q0, q1) in ((a, b, zb - t, zb), (a, b, za, za + t), (a, a + t, za, zb), (b - t, b, za, zb)):
+        _quad(E, blq, lado, p0, p1, q0, q1, 0.05, marco)
+    if tipo == "ventana" or (tipo == "porton" and col != "#55524E"):
+        n = max(1, int((b - a) / 1.1))
+        for k in range(1, n):
+            m = a + (b - a) * k / n
+            _quad(E, blq, lado, m - 0.025, m + 0.025, za, zb, 0.05, marco)
+    if tipo == "ventana":
+        _quad(E, blq, lado, a - 0.05, b + 0.05, za - 0.06, za, 0.09, "#D9D5CC")   # repisón
+    if tipo == "porton" and col == "#55524E":
+        for k in range(1, 6):                                                # duelas del portón
+            zz = za + (zb - za) * k / 6
+            _quad(E, blq, lado, a, b, zz - 0.02, zz + 0.02, 0.045, "#3F3D3A")
+
+
 def _bloque(E, blq, lay, corr, rnd):
     x, y, w, d = blq["x"], blq["y"], blq["w"], blq["d"]
     zs, ztop = alturas(blq)
@@ -142,6 +178,8 @@ def _bloque(E, blq, lay, corr, rnd):
     if blq["sistema"] == "acero" and blq["uso"] == "industrial":
         muro = "#D5D8DA"
     E.caja(x, y, z0, w, d, ztop - z0, muro, techo=corr["techo"])
+    if z0 == 0:
+        E.caja(x - 0.015, y - 0.015, 0, w + 0.03, d + 0.03, 0.25, "#6E6A63")      # zoclo
     vid = corr["vidrio"]
     off = 0.04
     banda = any(k in corr["rasgos"] for k in ("volado", "ventana_corrida", "muro_cortina")) or blq["sistema"] == "marcos"
@@ -166,16 +204,7 @@ def _bloque(E, blq, lay, corr, rnd):
             else:
                 z1, z2 = 0.0, min(h - 0.3, 2.4 if h < 3.2 else h - 0.9)
                 col = vid if (v.get("vidrio") or v["tipo"] == "puerta_ext") else "#55524E"
-            a, b = v["a"], v["b"]
-            za, zb2 = zb + z1, zb + z2
-            if lado == "S":
-                E.q([(a, y - off, za), (b, y - off, za), (b, y - off, zb2), (a, y - off, zb2)], col, 0.85)
-            elif lado == "N":
-                E.q([(b, y + d + off, za), (a, y + d + off, za), (a, y + d + off, zb2), (b, y + d + off, zb2)], col, 0.7)
-            elif lado == "O":
-                E.q([(x - off, b, za), (x - off, a, za), (x - off, a, zb2), (x - off, b, zb2)], col, 0.75)
-            elif lado == "E":
-                E.q([(x + w + off, a, za), (x + w + off, b, za), (x + w + off, b, zb2), (x + w + off, a, zb2)], col, 0.8)
+            _vano3d(E, blq, lado, v["a"], v["b"], zb + z1, zb + z2, col, v["tipo"], corr)
     ztech = _cubierta(E, blq, corr, ztop)
     # rasgos de estilo
     ac = corr["acento"]
@@ -189,6 +218,42 @@ def _bloque(E, blq, lay, corr, rnd):
         for k in range(n):
             xx = x1 + k * 0.35
             E.caja(xx, y - 0.35, base, 0.08 if "celosia" in corr["rasgos"] else 0.15, 0.25, top - base, ac)
+    if "marco" in corr["rasgos"] and len(zs) > 1:
+        # marco volumétrico que enmarca la planta alta de la fachada principal
+        zb1 = zs[1][0]
+        fx0, fx1 = x + w * 0.38, x + w + 0.05
+        e_ = 0.3
+        E.caja(fx0, y - 0.9, zb1 - 0.3, fx1 - fx0, 0.9, e_, ac)
+        E.caja(fx0, y - 0.9, ztop - e_, fx1 - fx0, 0.9, e_, ac)
+        for xx in (fx0, fx1 - e_):
+            E.caja(xx, y - 0.9, zb1 - 0.3, e_, 0.9, ztop - zb1 + 0.3, ac)
+    def hueco_mayor(vs):
+        ocup = sorted((v["a"] - 0.3, v["b"] + 0.3) for v in vs if v.get("lado") == "S")
+        hs, cur = [], x
+        for a_, b_ in ocup:
+            if a_ > cur:
+                hs.append((cur, a_))
+            cur = max(cur, b_)
+        hs.append((cur, x + w))
+        return max(hs, key=lambda h_: h_[1] - h_[0])
+    if "muro_acento" in corr["rasgos"]:
+        # piedra laja en el paño ciego más ancho de cada nivel de la fachada principal
+        piedra = corr.get("piedra", "#8E8579")
+        for zb, h, n in zs:
+            mx0, mx1 = hueco_mayor(nivel_vanos[id(n)])
+            if mx1 - mx0 < 0.9:
+                continue
+            for k in range(int(h / 0.3)):
+                tono = piedra if k % 3 else "#7F776C"
+                za_ = zb + k * 0.3
+                E.q([(mx0, y - 0.06, za_), (mx1, y - 0.06, za_), (mx1, y - 0.06, za_ + 0.28), (mx0, y - 0.06, za_ + 0.28)], tono)
+    if "jardinera" in corr["rasgos"] and zs:
+        jx0, jx1 = hueco_mayor(nivel_vanos[id(zs[0][2])])
+        if jx1 - jx0 >= 1.0:
+            E.caja(jx0 + 0.1, y - 0.75, z0, jx1 - jx0 - 0.2, 0.6, 0.5, "#8A8780")
+            for k in range(int((jx1 - jx0 - 0.4) / 0.45)):
+                px = jx0 + 0.35 + k * 0.45
+                E.caja(px - 0.18, y - 0.63, z0 + 0.5, 0.36, 0.36, 0.35 + 0.12 * (k % 3), "#5E8C4A")
     if "pergola" in corr["rasgos"] or "porche" in corr["rasgos"]:
         zp = z0 + 2.7
         for k in range(int(w / 0.6)):
@@ -222,6 +287,37 @@ def _arbol(E, x, y, rnd, esc=1.0):
             a, b2 = P[j][i], P[j][(i + 1) % nl]
             c, d = P[j + 1][(i + 1) % nl], P[j + 1][i]
             E.q([a, b2, c, d], verde)
+
+
+def _auto(E, cx, y0, rnd, color=None):
+    """Auto sencillo orientado hacia la calle (eje y)."""
+    color = color or rnd.choice(["#2F3A45", "#B8BCC0", "#8C2F2B", "#E6E6E6", "#3C5A78"])
+    E.caja(cx - 0.9, y0, 0.25, 1.8, 4.4, 0.75, color)
+    E.caja(cx - 0.8, y0 + 1.1, 1.0, 1.6, 2.2, 0.55, "#33424D")
+    for dx_ in (-0.92, 0.72):
+        for dy in (0.7, 3.3):
+            E.caja(cx + dx_, y0 + dy, 0, 0.2, 0.62, 0.62, "#1E1E1E")
+
+
+def _bardas(E, proy, lays):
+    t = proy["terreno"]
+    F, Fo = t["frente"], t["fondo"]
+    b = proy["bloques"][0]
+    col = "#D8D2C4"
+    hb = 2.4
+    y1, y2 = b["y"] - 0.125, b["y"] + b["d"] + 0.125
+    for xx in (0.0, F - 0.15):
+        for ya, yb in ((y2, Fo), ):
+            if yb - ya > 0.1:
+                E.caja(xx, ya, 0, 0.15, yb - ya, hb, col)
+        E.caja(xx, 0, 0, 0.15, max(0.1, y1), 1.0, col)             # murete frontal lateral
+    E.caja(0, Fo - 0.15, 0, F, 0.15, hb, col)
+    # cochera: piso de concreto y auto frente al portón
+    for v in lays[0][0][1]:
+        if v["tipo"] == "porton" and v.get("lado") == "S" and not v.get("vidrio"):
+            E.q([(v["a"], 0, 0.04), (v["b"], 0, 0.04), (v["b"], y1, 0.04), (v["a"], y1, 0.04)], "#B9B4A8", 0.95)
+            return (v["a"] + v["b"]) / 2
+    return None
 
 
 def _exteriores(E, proy, rnd):
@@ -330,7 +426,7 @@ def _exteriores(E, proy, rnd):
                 E.caja(x + 2 + rnd.random() * (w - 6), y + 2 + rnd.random() * (d - 6), 0, 3, 3, 2 + rnd.random() * 3,
                        rnd.choice(["#E4572E", "#F3A712", "#3FA7C9", "#76B041"]))
     # árboles de banqueta
-    xs_arb = [1.2, F - 1.2] if F < 24 else [2 + k * 9 for k in range(int((F - 2) / 9) + 1)]
+    xs_arb = [F - 0.6] if F < 24 else [2 + k * 9 for k in range(int((F - 2) / 9) + 1)]
     for xa in xs_arb:
         _arbol(E, xa, -1.5, rnd, 0.85)
 
@@ -340,6 +436,17 @@ def render(proy, lays, corr, ruta_aereo, ruta_peatonal, titulo, seed=1, ss=2, W=
     rnd = random.Random(seed)
     E = Escena()
     _exteriores(E, proy, rnd)
+    if "unifamiliar" in proy.get("uso_suelo", ""):
+        cx = _bardas(E, proy, lays)
+        if cx is not None:
+            _auto(E, cx, 0.2, rnd)
+        b0 = proy["bloques"][0]
+        for v in lays[0][0][1]:          # jardín frontal junto al acceso
+            if v["tipo"] == "puerta_ext":
+                xa, xb = v["b"] + 0.3, b0["x"] + b0["w"] - 0.2
+                if xb - xa > 0.8:
+                    E.q([(xa, 0.3, 0.05), (xb, 0.3, 0.05), (xb, b0["y"] - 0.4, 0.05), (xa, b0["y"] - 0.4, 0.05)], "#8FB06A", 0.95)
+                    pass
     zmax = 0
     for bi, blq in enumerate(proy["bloques"]):
         zmax = max(zmax, _bloque(E, blq, lays[bi], corr, rnd))

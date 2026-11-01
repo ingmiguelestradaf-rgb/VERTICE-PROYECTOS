@@ -65,50 +65,61 @@ def casa(plan):
     amplia = area >= 300
     lat = 0.0 if fr <= 10 else (1.0 if fr <= 12 else 1.5)
     frente_lib = 3.0 if not amplia else 3.5
-    post = max(3.5, round(fo * 0.24, 2))
-    w, d = fr - 2 * lat, fo - frente_lib - post
+    # medidas cerradas a paños exteriores de muro (muro exterior 0.25 m al eje del bloque)
+    d_ext = math.floor((fo - frente_lib - max(3.0, fo * 0.15)) * 2) / 2
+    post = fo - frente_lib - d_ext
+    inset = 0.125
+    w, d = fr - 2 * lat - 0.25, d_ext - 0.25
     col = ["O", "E"] if lat == 0 else []
     rec4 = area >= 400
+    # bandas con medidas reales: cochera 5.6 m de fondo, banda de escalera+pasillo 3.4 m
+    z1, z2 = 5.6 / d, 3.4 / d
+    z3 = 1 - z1 - z2
+    pe = 2.3 / w                        # ancho de escalera en "U" (2 tramos de 1.10 m)
     if not amplia:
         pb = N("Planta baja", 2.7, [
-            Z(.33, [C("Cochera", .58, T["ext"]),
-                    G(.42, [Z(.55, [C("Acceso", 1, T["circ"])]), Z(.45, [C("Medio baño", 1, T["hum"])])])]),
-            Z(.30, [C("Sala", .60, T["social"]), C("Escalera", .40, T["esc"])]),
-            Z(.37, [C("Comedor", .45, T["social"]), C("Cocina", .55, T["coc"])]),
+            Z(z1, [C("Cochera", 3.4 / w, T["ext"]), C("Acceso", (w - 3.4 - 1.7) / w, T["circ"]),
+                   G(1.7 / w, [Z(.55, [C("Bodega", 1, T["alm"])]), Z(.45, [C("Medio baño", 1, T["hum"])])])]),
+            Z(z2, [C("Escalera", pe, T["esc"]), C("Vestíbulo", 1 - pe, T["circ"])]),
+            Z(z3, [C("Sala-comedor", .60, T["social"]),
+                   G(.40, [Z(.30, [C("Lavandería", 1, T["serv"])]), Z(.70, [C("Cocina", 1, T["coc"])])])]),
         ])
+        bano = max(1.4, round(w * 0.17, 2))
+        r2 = max((w - bano) / 2, 2.3 + 1.3)
+        rr = w - bano - r2
         pa = N("Planta alta", 2.7, [
-            Z(.33, [C("Recámara 2", .5, T["priv"]), C("Recámara 3", .5, T["priv"])]),
-            Z(.30, [G(.60, [Z(.45, [C("Baño 2", 1, T["hum"])]), Z(.55, [C("Pasillo", 1, T["circ"])])]),
-                    C("Escalera", .40, T["esc"])]),
-            Z(.37, [C("Recámara principal", .62, T["priv"]),
-                    G(.38, [Z(.45, [C("Vestidor", 1, T["priv"])]), Z(.55, [C("Baño principal", 1, T["hum"])])])]),
+            Z(z1, [C("Recámara 2", r2 / w, T["priv"]), C("Baño 2", bano / w, T["hum"]), C("Recámara 3", rr / w, T["priv"])]),
+            Z(z2, [C("Escalera", pe, T["esc"]), C("Pasillo", 1 - pe, T["circ"])]),
+            Z(z3, [C("Recámara principal", .58, T["priv"]),
+                   G(.42, [Z(.42, [C("Vestidor", 1, T["priv"])]), Z(.58, [C("Baño principal", 1, T["hum"])])])]),
         ])
     else:
+        mb = 1.7 / w
         pb = N("Planta baja", 2.8, [
-            Z(.30, [C("Cochera doble", .50, T["ext"]),
-                    G(.50, [Z(.45, [C("Vestíbulo", 1, T["circ"])]), Z(.55, [C("Estudio", 1, T["social"])])])]),
-            Z(.32, [C("Sala", .45, T["social"]), C("Comedor", .30, T["social"]), C("Escalera", .25, T["esc"])]),
-            Z(.38, [C("Cocina", .40, T["coc"]),
-                    G(.25, [Z(.40, [C("Medio baño", 1, T["hum"])]), Z(.20, [C("Despensa", 1, T["alm"])]),
-                            Z(.40, [C("Lavandería", 1, T["serv"])])]),
-                    C("Family room", .35, T["social"])]),
+            Z(z1, [C("Cochera doble", 5.8 / w, T["ext"]), C("Acceso", 1.8 / w, T["circ"]),
+                   C("Estudio", 1 - 7.6 / w, T["social"])]),
+            Z(z2, [C("Escalera", pe, T["esc"]), C("Vestíbulo", 1 - pe - mb, T["circ"]), C("Medio baño", mb, T["hum"])]),
+            Z(z3, [C("Sala", .38, T["social"]), C("Comedor", .27, T["social"]),
+                   G(.35, [Z(.30, [C("Lavandería", 1, T["serv"])]), Z(.70, [C("Cocina", 1, T["coc"])])])]),
         ])
+        bano = 1.8
+        r2 = max((w - bano) / 2, 2.3 + 1.3)
+        rr = w - bano - r2
+        z3c = [C("Recámara principal", .45 if rec4 else .58, T["priv"]),
+               G(.25 if rec4 else .42, [Z(.42, [C("Vestidor", 1, T["priv"])]), Z(.58, [C("Baño principal", 1, T["hum"])])])]
+        if rec4:
+            z3c.append(C("Recámara 4", .30, T["priv"]))
         pa = N("Planta alta", 2.8, [
-            Z(.30, [C("Recámara 2", .5, T["priv"]), C("Recámara 3", .5, T["priv"])]),
-            Z(.32, [G(.45, [Z(.45, [C("Baño 2", 1, T["hum"])]),
-                            Z(.55, [C("Recámara 4" if rec4 else "Cuarto de TV", 1, T["priv"] if rec4 else T["social"])])]),
-                    C("Estancia familiar", .30, T["circ"]), C("Escalera", .25, T["esc"])]),
-            Z(.38, [C("Recámara principal", .55, T["priv"]),
-                    G(.45, [Z(.40, [C("Vestidor", 1, T["priv"])]), Z(.60, [C("Baño principal", 1, T["hum"])])])]),
+            Z(z1, [C("Recámara 2", r2 / w, T["priv"]), C("Baño 2", bano / w, T["hum"]), C("Recámara 3", rr / w, T["priv"])]),
+            Z(z2, [C("Escalera", pe, T["esc"]), C("Estancia familiar", 1 - pe, T["circ"])]),
+            Z(z3, z3c),
         ])
-    bloques = [B("Casa", lat, frente_lib, w, d, [pb, pa], sistema="mamposteria", claro_max=5.0,
+    bloques = [B("Casa", lat + inset, frente_lib + inset, w, d, [pb, pa], sistema="mamposteria", claro_max=5.0,
                  uso="habitacional", colindancias=col)]
-    ext = [E("area_verde", lat, fo - post + 0.3, w, post - 0.3, nombre="Jardín / patio posterior"),
-           E("acceso", lat, 0, w, frente_lib, nombre="Banqueta y acceso")]
-    if not amplia:
-        ext.append(E("servicio", lat + w * .6, fo - post + 0.3, w * .4 - 0.1, 1.6, nombre="Lavadero / tendedero"))
+    ext = [E("area_verde", 0, fo - post, fr, post, nombre="Patio posterior"),
+           E("acceso", 0, 0, fr, frente_lib, nombre="Cajón y jardín frontal")]
     if area >= 400:
-        ext.append(E("alberca", lat + 1.5, fo - post + 1.0, min(8, w - 3), max(2.5, post - 2), nombre="Alberca"))
+        ext.append(E("alberca", lat + 1.5, fo - post + 0.8, min(8, w - 3), max(2.0, post - 1.6), nombre="Alberca"))
     hab = 4 + (1 if area >= 300 else 0) + (1 if rec4 else 0)
     return dict(terreno=dict(frente=fr, fondo=fo), bloques=bloques, exteriores=ext,
                 usuarios=dict(ocupantes=hab), uso_suelo="Habitacional unifamiliar")

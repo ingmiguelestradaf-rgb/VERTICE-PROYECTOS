@@ -32,7 +32,7 @@ def _linea_huecos(dx, eje, c_dib, a, b, hs, capa):
         cur = max(cur, h1)
 
 
-def planta_arq(dx, blq, cuartos, vanos, ox=0.0, oy=0.0, texto=True):
+def planta_arq(dx, blq, cuartos, vanos, ox=0.0, oy=0.0, texto=True, cotas=True):
     """Dibuja una planta. ox, oy: desplazamiento para acomodar varias plantas en la lámina."""
     T = lambda p: (p[0] + ox, p[1] + oy)
     vv = [dict(v, c=v["c"] + (oy if v["eje"] == "h" else ox),
@@ -64,8 +64,9 @@ def planta_arq(dx, blq, cuartos, vanos, ox=0.0, oy=0.0, texto=True):
     _linea_huecos(dx, "v", bx + bw + TE, by - TE, by + bd + TE, _huecos(vv, "v", bx + bw, by, by + bd), "A-MUROS")
     for v in vv:
         _vano(dx, v)
-    dx.cota((bx, by - TE), (bx + bw, by - TE), -1.2 - escala_txt)
-    dx.cota((bx - TE, by), (bx - TE, by + bd), 1.2 + escala_txt)
+    if cotas:
+        dx.cota((bx - TE, by - TE), (bx + bw + TE, by - TE), -1.2 - escala_txt)
+        dx.cota((bx - TE, by - TE), (bx - TE, by + bd + TE), 1.2 + escala_txt)
 
 
 def _jambas(dx, v, t=0.13):
@@ -77,7 +78,8 @@ def _jambas(dx, v, t=0.13):
 
 
 def _vano(dx, v):
-    _jambas(dx, v)
+    if v["tipo"] != "vano":
+        _jambas(dx, v)
     a, b, c = v["a"], v["b"], v["c"]
     if v["tipo"] == "ventana":
         for off in (-0.03, 0.03):
@@ -85,6 +87,8 @@ def _vano(dx, v):
                 dx.linea((a, c + off), (b, c + off), "A-VANOS")
             else:
                 dx.linea((c + off, a), (c + off, b), "A-VANOS")
+    elif v["tipo"] == "vano":
+        pass
     elif v["tipo"] == "porton":
         if v["eje"] == "h":
             dx.linea((a, c), (b, c), "A-VANOS")
@@ -126,54 +130,94 @@ def _escalera(dx, c, ox, oy):
             dx.rect(cx0, cy0, cx1 - cx0, cy1 - cy0, "A-ESCALERA")
             dx.linea((cx0, cy0), (cx1, cy1), "A-ESCALERA"); dx.linea((cx0, cy1), (cx1, cy0), "A-ESCALERA")
         return
-    # escalera en "U": dos rampas a lo largo del lado mayor
+    # escalera en "U": dos tramos a lo largo del lado mayor, descanso al fondo
     larg = w >= d
     L, A = (w, d) if larg else (d, w)
     huella = 0.28
-    tramo = min(L - 1.4, 3.6)
-    n = int(tramo / huella)
-    for lado in (0, 1):
-        for k in range(n + 1):
-            p = 0.25 + k * huella
-            q0, q1 = (0.15, A / 2 - 0.05) if lado == 0 else (A / 2 + 0.05, A - 0.15)
-            if larg:
-                dx.linea((x + p, y + q0), (x + p, y + q1), "A-ESCALERA")
-            else:
-                dx.linea((x + q0, y + p), (x + q1, y + p), "A-ESCALERA")
+    desc = max(1.0, A / 2)
+    run = L - desc - 0.1
+    n = int(run / huella)
+    ini = 0.05
+
+    def P(a, b):
+        """a: avance a lo largo del tramo, b: posición transversal."""
+        return (x + a, y + b) if larg else (x + b, y + a)
+    dx.linea(P(ini, A / 2), P(ini + run, A / 2), "A-ESCALERA")              # muro intermedio
+    dx.linea(P(ini + run, 0.05), P(ini + run, A - 0.05), "A-ESCALERA")      # borde del descanso
+    for k in range(1, n + 1):
+        p = ini + k * huella
+        if p >= ini + run:
+            break
+        dx.linea(P(p, 0.05), P(p, A / 2 - 0.05), "A-ESCALERA")
+        dx.linea(P(p, A / 2 + 0.05), P(p, A - 0.05), "A-ESCALERA")
+    # flecha de recorrido
+    q1, q2 = A * 0.25, A * 0.75
+    ruta = [P(ini + 0.3, q1), P(ini + run + desc / 2, q1), P(ini + run + desc / 2, q2), P(ini + 0.5, q2)]
+    dx.polilinea(ruta, "A-ESCALERA")
+    fin = ruta[-1]
+    t = 0.18
     if larg:
-        dx.linea((x + 0.25, y + A / 2), (x + 0.25 + tramo, y + A / 2), "A-ESCALERA")
-        dx.texto((x + 0.4, y + A * 0.25), "SUBE", 0.15, "A-ESCALERA")
+        dx.polilinea([(fin[0] + t, fin[1] + t * 0.6), fin, (fin[0] + t, fin[1] - t * 0.6)], "A-ESCALERA")
     else:
-        dx.linea((x + A / 2, y + 0.25), (x + A / 2, y + 0.25 + tramo), "A-ESCALERA")
-        dx.texto((x + A * 0.1, y + 0.15), "SUBE", 0.15, "A-ESCALERA")
+        dx.polilinea([(fin[0] - t * 0.6, fin[1] + t), fin, (fin[0] + t * 0.6, fin[1] + t)], "A-ESCALERA")
+    dx.circulo(ruta[0], 0.07, "A-ESCALERA")
+    sube = c.get("piso", 0) == 0
+    ultimo = c.get("ultimo", False)
+    etq = "SUBE" if sube else ("BAJA" if ultimo else "SUBE / BAJA")
+    pt = P(ini + 0.15, q1 + 0.15)
+    dx.texto(pt, etq, 0.14, "A-ESCALERA")
+    if not sube:   # línea de corte de la planta superior
+        dx.linea(P(ini + run * 0.45, 0.05), P(ini + run * 0.6, A / 2 - 0.05), "A-ESCALERA")
 
 
 def exteriores(dx, proy, ox=0.0, oy=0.0):
     t = proy["terreno"]
-    dx.rect(ox, oy, t["frente"], t["fondo"], "A-LIMITE")
-    dx.linea((ox - 3, oy - 1.5), (ox + t["frente"] + 3, oy - 1.5), "A-EXTERIOR")
-    dx.texto((ox + t["frente"] / 2, oy - 3.2), "C A L L E", max(0.3, t["frente"] / 60), "A-TEXTO", centrado=True)
-    dx.cota((ox, oy), (ox + t["frente"], oy), -5.5)
-    dx.cota((ox + t["frente"], oy), (ox + t["frente"], oy + t["fondo"]), -3.0)
-    th = max(0.25, t["frente"] / 80)
+    F, Fo = t["frente"], t["fondo"]
+    th = max(0.22, F / 75)
+    dx.rect(ox, oy, F, Fo, "A-LIMITE")
+    # banqueta 2.0 m y arroyo de calle
+    dx.linea((ox - 3, oy - 2.0), (ox + F + 3, oy - 2.0), "A-EXTERIOR")
+    dx.linea((ox - 3, oy - 2.15), (ox + F + 3, oy - 2.15), "A-EXTERIOR")
+    dx.texto((ox + F * 0.02, oy - 1.2), "BANQUETA", th * 0.8, "A-TEXTO")
+    dx.texto((ox + F / 2, oy - 4.5), "C A L L E", th * 1.3, "A-TEXTO", centrado=True)
+    dx.cota((ox, oy - 6.5), (ox + F, oy - 6.5), -0.1)
+    dx.cota((ox + F, oy), (ox + F, oy + Fo), -(3.0 + th * 4))
+    # colindancias
+    if F < 40:
+        for xx, rot in ((ox - th * 1.6, 90), (ox + F + th * 2.4, 90)):
+            dx.texto((xx, oy + Fo * 0.62), "COLINDANCIA", th * 0.8, "A-TEXTO", rot=rot)
+    dx.texto((ox + F / 2, oy + Fo + th * 1.6), "COLINDANCIA", th * 0.8, "A-TEXTO", centrado=True)
+    # restricciones del bloque principal
+    bl = max(proy["bloques"], key=lambda b: b["w"] * b["d"])
+    if bl["y"] > 0.3:
+        dx.cota((ox + bl["x"] + bl["w"] * 0.85, oy), (ox + bl["x"] + bl["w"] * 0.85, oy + bl["y"]), 0.6)
+    post = Fo - (bl["y"] + bl["d"])
+    if post > 0.3:
+        dx.cota((ox + bl["x"] + bl["w"] * 0.85, oy + bl["y"] + bl["d"]), (ox + bl["x"] + bl["w"] * 0.85, oy + Fo), 0.6)
+    if bl["x"] > 0.5:
+        dx.cota((ox, oy + bl["y"] + bl["d"] * 0.5), (ox + bl["x"], oy + bl["y"] + bl["d"] * 0.5), 0.6)
     for e in proy["exteriores"]:
         x, y, w, d, r = e["x"] + ox, e["y"] + oy, e["w"], e["d"], e.get("r", 0)
         tp = e["tipo"]
+        lx, ly, cen = x + 0.4, y + 0.4, False
         if tp in ("alberca", "espejo_agua"):
             dx.rect(x, y, w, d, "A-EXTERIOR"); dx.rect(x + 0.3, y + 0.3, w - 0.6, d - 0.6, "A-EXTERIOR")
+            lx, ly, cen = x + w / 2, y + d / 2, True
         elif tp == "estacionamiento":
             dx.rect(x, y, w, d, "A-EXTERIOR")
             _cajones(dx, x, y, w, d)
+            lx, ly = x + 0.6, y + d - th * 1.6
         elif tp == "rio":
             dx.circulo((x, y), r, "A-EXTERIOR"); dx.circulo((x, y), r - 6, "A-EXTERIOR")
+            lx, ly, cen = x, y, True
         elif tp in ("rueda", "carrusel"):
             dx.circulo((x, y), r, "A-EXTERIOR"); dx.circulo((x, y), 1.0, "A-EXTERIOR")
-            y = y - r - th * 2
-            x = x - r * 0.5
+            lx, ly, cen = x, y - r - th * 2, True
         elif tp == "montaña_rusa":
             pts = [(x + w / 2 + w / 2 * math.cos(a) * (1 + 0.25 * math.sin(3 * a)),
                     y + d / 2 + d / 2 * math.sin(a)) for a in [i * 2 * math.pi / 60 for i in range(60)]]
             dx.polilinea(pts, "A-EXTERIOR", True)
+            lx, ly, cen = x + w / 2, y + d / 2, True
         elif tp == "palapas":
             for i in range(3):
                 for j in range(3):
@@ -181,10 +225,31 @@ def exteriores(dx, proy, ox=0.0, oy=0.0):
         elif tp == "cancha":
             dx.rect(x, y, w, d, "A-EXTERIOR"); dx.linea((x + w / 2, y), (x + w / 2, y + d), "A-EXTERIOR")
             dx.circulo((x + w / 2, y + d / 2), min(w, d) / 6, "A-EXTERIOR")
+        elif tp == "acceso":
+            dx.rect(x, y, w, d, "A-EXTERIOR")
+            lx, ly = x + 0.4, y + d * 0.35
+        elif tp == "area_verde" and any(o["tipo"] != "area_verde" and o["x"] >= e["x"] and o["y"] >= e["y"] for o in proy["exteriores"]):
+            dx.rect(x, y, w, d, "A-EXTERIOR")
+            lx, ly = x + 0.4, y + d - th * 1.6
         else:
             dx.rect(x, y, w, d, "A-EXTERIOR")
-        dx.texto((x + max(w, 0) / 2 if tp not in ("rio",) else x, y + max(d, 0) / 2 if tp not in ("rio",) else y + r - 3),
-                 e.get("nombre", tp).upper(), th, "A-TEXTO", centrado=True)
+            lx, ly = x + 0.4, y + d - th * 1.6
+        dx.texto((lx, ly), e.get("nombre", tp).upper(), th, "A-TEXTO", centrado=cen)
+
+
+def cuadro_areas(dx, x, y, filas, h):
+    """Tabla de áreas dibujada con texto y líneas."""
+    ancho = h * 26
+    dx.texto((x, y + h * 0.6), "CUADRO DE ÁREAS", h * 1.1, "A-TEXTO")
+    yy = y - h * 0.4
+    for i, (a, b) in enumerate(filas):
+        dx.linea((x, yy), (x + ancho, yy), "COTAS")
+        dx.texto((x + h * 0.3, yy - h * 1.25), a, h * 0.85, "A-TEXTO")
+        dx.texto((x + ancho * 0.72, yy - h * 1.25), b, h * 0.85, "A-TEXTO")
+        yy -= h * 1.9
+    dx.linea((x, yy), (x + ancho, yy), "COTAS")
+    dx.linea((x, y - h * 0.4), (x, yy), "COTAS"); dx.linea((x + ancho, y - h * 0.4), (x + ancho, yy), "COTAS")
+    dx.linea((x + ancho * 0.7, y - h * 0.4), (x + ancho * 0.7, yy), "COTAS")
 
 
 def _cajones(dx, x, y, w, d):
@@ -219,8 +284,8 @@ def cuadro(dx, x0, y0, x1, y1, datos):
     h = W / 44
     H = h * 11.5
     X0, X1 = x0 - m, x1 + m
-    if W > ancho:
-        X1 = X0 + W
+    if ancho < W * 1.95:
+        X1 = X0 + W * 1.95
     bx, by = X1 - W, y0 - m - H
     dx.rect(X0, y0 - m, X1 - X0, y1 - y0 + 2 * m, "LAMINA")
     dx.rect(X0, by, X1 - X0, H, "LAMINA")
@@ -240,7 +305,7 @@ def cuadro(dx, x0, y0, x1, y1, datos):
     dx.polilinea([(nx, ny + r), (nx - r * 0.35, ny - r * 0.55), (nx, ny - r * 0.2), (nx + r * 0.35, ny - r * 0.55)], "LAMINA", True)
     dx.texto((nx, ny + r * 1.3), "N", r * 0.5, "LAMINA", centrado=True)
     disp = bx - (nx + r * 2)
-    hn = min(h * 0.6, disp / 52) if disp > 0 else 0
+    hn = min(h * 0.62, disp / 50) if disp > 0 else 0
     if hn > 0.02:
         yy = by + H - h * 1.7
         for t in datos.get("notas", [])[:6]:

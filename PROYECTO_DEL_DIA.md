@@ -23,16 +23,17 @@ Cada día cambia la corriente arquitectónica (18 corrientes en `motor/calendari
 2. `python generar.py --plan` → muestra tipología, corriente, terreno y variante de hoy
    (zona horaria America/Tijuana).
 3. Si ya existe una carpeta `docs/proyectos/<fecha de hoy>-*`, termina sin hacer nada.
-4. Diseña el proyecto como arquitecto: escribe `spec_hoy.json` (ver formato) con un nombre
-   evocador, un concepto de 3–5 frases fiel a la corriente y al sitio (Tijuana, clima
-   mediterráneo semiárido, vista, asoleamiento), materiales concretos y, si mejora el
-   diseño, una paleta/rasgos ajustados o un programa propio (`modelo`).
-5. `python generar.py --spec spec_hoy.json`
-6. Revisa `render_aereo.jpg`, `render_peatonal.jpg` y las láminas `A-02.jpg` y `E-01.jpg`.
-   Si algo se ve mal (espacios absurdos, render vacío), ajusta el spec y vuelve a generar.
+4. **Arquitecto** — lee y sigue `skills/arquitecto-vertice/SKILL.md`: diseña el concepto, los
+   detalles creativos y los materiales en `spec_hoy.json`, genera con
+   `python generar.py --spec spec_hoy.json --estricto` y revisa plantas, fachadas y renders.
+   Escribe `extra.dictamen_arquitectura`.
+5. **Ingenieros** — lee y sigue `skills/ingenieros-vertice/SKILL.md`: verifica que el proyecto sea
+   construible conforme a norma (estructura e instalaciones), ajusta lo necesario y escribe
+   `extra.dictamen_ingenieria`.
+6. Regenera con `--estricto`. No se publica nada con errores de revisión.
 7. `git add docs && git commit -m "Proyecto del día AAAA-MM-DD: <nombre>" && git push`.
-8. Resume en 3 líneas qué se generó y deja el enlace a la página del proyecto en
-   GitHub Pages: `https://ingmiguelestradaf-rgb.github.io/vertice-proyectos/proyectos/<clave>/`.
+8. Resume en 3 líneas qué se generó y deja el enlace a la página del proyecto:
+   `https://ingmiguelestradaf-rgb.github.io/VERTICE-PROYECTOS/proyectos/<clave>/`.
 
 ## Formato de `spec_hoy.json`
 
@@ -43,7 +44,7 @@ Cada día cambia la corriente arquitectónica (18 corrientes en `motor/calendari
   "materiales": "Aplanado blanco, concreto aparente, …",
   "paleta": {"muro": "#EEECE7", "acento": "#3A3A3A", "techo": "#D9D6CF", "vidrio": "#4C6A7A", "ventana": 0.55},
   "rasgos": ["volado", "celosia"],
-  "extra": {"orientacion": "Fachada principal al sur", "notas": "…"}
+  "extra": {"dictamen_arquitectura": ["…"], "dictamen_ingenieria": ["…"]}
 }
 ```
 
@@ -51,8 +52,10 @@ Claves opcionales:
 - `corriente`, `variante`, `terreno`: sólo si hay una razón para salir del calendario.
 - `modelo`: reemplaza partes del modelo generado (`bloques`, `exteriores`, `usuarios`).
   Los bloques usan el formato de `motor/programa.py` (zonas con fracciones `p`).
-- Rasgos disponibles: volado, celosia, parteluces, pergola, porche, estructura_aparente,
-  pilotis, muro_cortina, ventana_corrida, alero_amplio.
+- Rasgos disponibles: volado, celosia, parteluces, pergola, porche, marco, muro_acento,
+  jardinera, estructura_aparente, pilotis, muro_cortina, ventana_corrida, alero_amplio.
+- `extra.dictamen_arquitectura` y `extra.dictamen_ingenieria`: listas de puntos; se publican
+  en la memoria y en la página del proyecto.
 
 ## Alcance
 

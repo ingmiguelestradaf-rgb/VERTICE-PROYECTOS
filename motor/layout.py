@@ -79,7 +79,7 @@ def bordes_ext(r, blq):
 
 
 PRIORIDAD = {
-    "humedo": ["privado", "circ", "social", "servicio", "cocina"],
+    "humedo": ["circ", "privado", "social", "servicio", "cocina"],
     "privado": ["circ", "escalera", "social", "privado"],
     "almacen": ["cocina", "circ", "servicio", "privado", "grande", "social"],
     "default": ["circ", "social", "grande", "cocina", "servicio", "privado"],
@@ -107,24 +107,79 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
     vanos = []
     big = max(blq["w"], blq["d"]) > 40
     # puertas interiores
+    habit = blq.get("uso") == "habitacional"
+    ABIERTO = ("social", "cocina", "circ")
     for i, r in enumerate(hojas):
-        if r["t"] in ("circ", "ext"):
+        if r["t"] in ("circ", "escalera") and "Elevador" not in r["n"]:
+            continue
+        if r["t"] == "ext" and "Cochera" not in r["n"]:
             continue
         pri = PRIORIDAD.get(r["t"], PRIORIDAD["default"])
-        mejor, rank = None, 99
+        if r["t"] == "ext":
+            pri = ["circ", "social", "servicio", "cocina"]
+        if "Elevador" in r["n"]:
+            pri = ["circ"]
+        dependiente = "Vestidor" in r["n"] or ("principal" in r["n"] and r["t"] == "humedo")
+        mejor, rank, obj = None, 99, None
         for j, o in enumerate(hojas):
-            if i == j or o["unidad"] != r["unidad"]:
+            if i == j or o["unidad"] != r["unidad"] or o["t"] == "escalera":
+                continue
+            if o["t"] == "ext" and r["t"] != "grande":
                 continue
             seg = vecinos(r, o)
             if not seg:
                 continue
-            k = pri.index(o["t"]) if o["t"] in pri else (len(pri) + (0 if o["t"] == "escalera" else 3))
-            if r["t"] == "escalera" and o["t"] == "escalera":
-                k = 0
+            k = pri.index(o["t"]) if o["t"] in pri else len(pri) + 3
+            if dependiente and "principal" in o["n"] and o["t"] == "privado":
+                k = -1
             if k < rank:
-                mejor, rank = seg, k
-        if mejor and not (r["t"] == "escalera" and rank > 2 and piso_idx > 0):
+                mejor, rank, obj = seg, k, o
+        if not mejor:
+            continue
+        if habit and r["t"] in ABIERTO and obj["t"] in ABIERTO:
+            eje, c, i0, f0 = mejor
+            ancho = min(f0 - i0 - 0.4, 2.4 if "social" in (r["t"], obj["t"]) else 1.2)
+            m = (i0 + f0) / 2
+            vanos.append(dict(tipo="vano", eje=eje, c=round(c, 3), a=round(m - ancho / 2, 3), b=round(m + ancho / 2, 3),
+                              cuarto=r["n"]))
+        else:
             vanos.append(_puerta(mejor, ANCHO_PUERTA.get(r["t"], 0.9) * (2 if big and r["t"] == "humedo" else 1), r))
+    # circulaciones contiguas se comunican (vestíbulo-pasillo, acceso-vestíbulo)
+    for i, r in enumerate(hojas):
+        if r["t"] != "circ":
+            continue
+        for j, o in enumerate(hojas):
+            if j > i and o["t"] == "circ" and o["unidad"] == r["unidad"]:
+                seg = vecinos(r, o)
+                if seg:
+                    eje, c, i0, f0 = seg
+                    m = (i0 + f0) / 2; an = min(1.5, f0 - i0 - 0.3)
+                    vanos.append(dict(tipo="vano" if habit else "puerta", eje=eje, c=round(c, 3), a=round(m - an / 2, 3),
+                                      b=round(m + an / 2, 3), cuarto=r["n"], cx=r["x"] + r["w"] / 2, cy=r["y"] + r["d"] / 2))
+    # cocina abierta al comedor en vivienda
+    if habit:
+        for r in hojas:
+            if r["t"] != "cocina":
+                continue
+            for o in hojas:
+                if o["t"] == "social" and o["unidad"] == r["unidad"]:
+                    seg = vecinos(r, o)
+                    if seg and not any(v["eje"] == seg[0] and abs(v["c"] - seg[1]) < EPS and v["b"] > seg[2] and v["a"] < seg[3] for v in vanos):
+                        eje, c, i0, f0 = seg
+                        m = (i0 + f0) / 2; an = min(1.8, f0 - i0 - 0.6)
+                        vanos.append(dict(tipo="vano", eje=eje, c=round(c, 3), a=round(m - an / 2, 3), b=round(m + an / 2, 3), cuarto=r["n"]))
+    # escaleras abiertas hacia la circulación (sin puerta)
+    for r in hojas:
+        if r["t"] != "escalera" or "Elevador" in r["n"]:
+            continue
+        for o in hojas:
+            if o is r or o["unidad"] != r["unidad"] or o["t"] not in ("circ", "social", "grande"):
+                continue
+            seg = vecinos(r, o)
+            if seg:
+                eje, c, i0, f0 = seg
+                vanos.append(dict(tipo="vano", eje=eje, c=round(c, 3), a=round(i0 + 0.15, 3), b=round(f0 - 0.15, 3),
+                                  cuarto=r["n"]))
     # acceso a cada unidad (depto, habitación) desde la circulación común
     unidades = {c["unidad"] for c in hojas if c["unidad"] is not None}
     for u in unidades:
@@ -141,10 +196,36 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
         if mejores:
             mejores.sort(key=lambda m: m[0])
             vanos.append(_puerta(mejores[0][1], 1.0, mejores[0][2]))
+        else:   # unidad que abre directo al exterior (villas, cabañas)
+            col_ = set(blq.get("colindancias", []))
+            cand = []
+            for r in hojas:
+                if r["unidad"] != u:
+                    continue
+                for lado, eje, c, i0, f0 in bordes_ext(r, blq):
+                    if lado not in col_ and f0 - i0 > 1.4:
+                        pr = {"S": 0, "N": 1}.get(lado, 2) + {"privado": 0, "circ": 0, "social": 0}.get(r["t"], 3)
+                        cand.append((pr, lado, eje, c, i0, f0, r))
+            if cand:
+                cand.sort(key=lambda t: t[0])
+                _, lado, eje, c, i0, f0, r = cand[0]
+                m = (i0 + f0) / 2
+                vanos.append(dict(tipo="puerta_ext", eje=eje, c=c, a=round(m - 0.5, 3), b=round(m + 0.5, 3), lado=lado,
+                                  cuarto=r["n"], cx=r["x"] + r["w"] / 2, cy=r["y"] + r["d"] / 2))
     # vanos al exterior
     col = set(blq.get("colindancias", []))
     for r in hojas:
         ext = [e for e in bordes_ext(r, blq) if e[0] not in col]
+        if r["t"] == "ext" and not any(e[0] == "S" for e in ext) and "Cochera" not in r["n"]:
+            ops = [(vecinos(r, o), o) for o in hojas if o["t"] == "circ" and o["unidad"] == r["unidad"]]
+            ops = [(sg, o) for sg, o in ops if sg]
+            if ops:
+                (eje, c, i0, f0), o = max(ops, key=lambda t: t[0][3] - t[0][2])
+                an = (f0 - i0) * 0.8
+                m = (i0 + f0) / 2
+                vanos.append(dict(tipo="porton", eje=eje, c=c, a=round(m - an / 2, 3), b=round(m + an / 2, 3),
+                                  lado=None, cuarto=r["n"], vidrio=True))
+                continue
         if r["t"] == "ext":
             frente = [e for e in ext if e[0] == "S"] or ext
             if frente:
@@ -185,8 +266,10 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
                                   b=round(cen + aw / 2, 3), lado=lado, cuarto=r["n"],
                                   alta=r["t"] == "humedo"))
     # acceso principal al bloque si nada da al frente
-    if not any(v["tipo"] in ("porton", "puerta_ext") and v.get("lado") == "S" for v in vanos):
+    if piso_idx == 0 and blq.get("z0", 0) == 0 and not any(v["tipo"] in ("porton", "puerta_ext") and v.get("lado") == "S" for v in vanos):
         frente = [r for r in hojas if abs(r["y"] - blq["y"]) < EPS and r["t"] in ("circ", "social", "grande")]
+        if not frente:
+            frente = [r for r in hojas if abs(r["y"] - blq["y"]) < EPS and r["t"] not in ("tecnico", "almacen")]
         if frente:
             r = max(frente, key=lambda q: q["w"])
             cx = r["x"] + r["w"] / 2
@@ -194,6 +277,77 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
                                                and v["a"] < cx + 1 and v["b"] > cx - 1)]
             vanos.append(dict(tipo="puerta_ext", eje="h", c=blq["y"], a=round(cx - 1.0, 3), b=round(cx + 1.0, 3),
                               lado="S", cuarto=r["n"], cx=cx, cy=r["y"] + r["d"] / 2))
+    vanos += conectar(hojas, vanos, blq, piso_idx)
     for c in cuartos:
         c["area"] = round(c["w"] * c["d"], 2)
+        c["piso"] = piso_idx
+        c["ultimo"] = piso_idx == len(blq["niveles"]) - 1
     return cuartos, vanos
+
+
+def _lados(r, v):
+    """¿El vano v está sobre un borde del cuarto r?"""
+    if v["eje"] == "h":
+        on = abs(r["y"] - v["c"]) < EPS or abs(r["y"] + r["d"] - v["c"]) < EPS
+        return on and v["a"] < r["x"] + r["w"] - 0.05 and v["b"] > r["x"] + 0.05
+    on = abs(r["x"] - v["c"]) < EPS or abs(r["x"] + r["w"] - v["c"]) < EPS
+    return on and v["a"] < r["y"] + r["d"] - 0.05 and v["b"] > r["y"] + 0.05
+
+
+def grafo(hojas, vanos):
+    n = len(hojas)
+    ady = {i: set() for i in range(n)}
+    entradas = set()
+    for v in vanos:
+        lados = [i for i, r in enumerate(hojas) if _lados(r, v)]
+        if v["tipo"] in ("puerta_ext", "porton") or (v["tipo"] == "ventana" and False):
+            entradas.update(lados)
+        for i in lados:
+            for j in lados:
+                if i != j:
+                    ady[i].add(j)
+    return ady, entradas
+
+
+def alcanzables(hojas, vanos, piso_idx):
+    ady, entradas = grafo(hojas, vanos)
+    inicio = set(entradas)
+    if piso_idx > 0 or not inicio:
+        inicio |= {i for i, r in enumerate(hojas) if r["t"] == "escalera"}
+    vistos, pila = set(inicio), list(inicio)
+    while pila:
+        i = pila.pop()
+        for j in ady[i]:
+            if j not in vistos:
+                vistos.add(j); pila.append(j)
+    return vistos
+
+
+def conectar(hojas, vanos, blq, piso_idx):
+    """Garantiza que todo espacio tenga acceso desde la entrada / escalera.
+    Elige siempre la mejor conexión disponible (circulación antes que escalera o habitación)."""
+    nuevos = []
+    for _ in range(len(hojas)):
+        vis = alcanzables(hojas, vanos + nuevos, piso_idx)
+        aislados = [i for i in range(len(hojas)) if i not in vis]
+        if not aislados:
+            break
+        opciones = []
+        for i in aislados:
+            r = hojas[i]
+            for j in vis:
+                o = hojas[j]
+                if r["unidad"] is not None and o["unidad"] != r["unidad"] and o["t"] != "circ":
+                    continue
+                seg = vecinos(r, o)
+                if seg:
+                    pr = {"circ": 0, "social": 2, "privado": 3, "escalera": 6, "ext": 5}.get(o["t"], 4)
+                    pr += 3 if r["t"] == "escalera" else 0
+                    opciones.append((pr, seg, r))
+        if not opciones:
+            break
+        opciones.sort(key=lambda t: t[0])
+        pv = _puerta(opciones[0][1], 0.9, opciones[0][2])
+        pv["auto"] = True
+        nuevos.append(pv)
+    return nuevos

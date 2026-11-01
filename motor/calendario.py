@@ -101,7 +101,7 @@ CORRIENTES = {
 ORDEN_CORRIENTES = list(CORRIENTES)
 
 # Terrenos de casas que se rotan día con día (m², frente x fondo en m)
-TERRENOS_CASA = [(180, 8.0, 22.5), (200, 10.0, 20.0), (300, 12.0, 25.0), (400, 16.0, 25.0)]
+TERRENOS_CASA = [(180, 9.0, 20.0), (200, 10.0, 20.0), (300, 12.0, 25.0), (400, 16.0, 25.0)]
 
 
 def indice_ciclo(fecha):

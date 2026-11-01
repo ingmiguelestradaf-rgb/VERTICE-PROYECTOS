@@ -2,23 +2,23 @@
  "clave": "2026-11-01-casa-minimalista",
  "fecha": "2026-11-01",
  "nombre": "Casa Umbral",
- "concepto": "Vivienda compacta para un lote de 8 x 22.5 m en Tijuana, resuelta como un prisma blanco de dos niveles que se protege del poniente con muros ciegos a las colindancias y se abre al norte hacia el patio posterior. Un volado de concreto oscuro marca el acceso y sombrea las recámaras de la fachada sur. La escalera funciona como núcleo central que separa la zona pública de la privada, y el patio trasero capta la brisa marina del poniente para ventilar la casa de forma cruzada.",
+ "concepto": "Vivienda de dos niveles en un lote de 9 x 20 m en Tijuana, resuelta como un prisma blanco que se cierra a las colindancias y se abre al patio norte. Un volado de concreto gris carbón marca el umbral de acceso y sombrea las recámaras de la fachada sur, mientras un paño de piedra laja ancla el volumen al suelo y equilibra la fachada. La escalera abierta al vestíbulo funciona como núcleo que separa la zona pública de la privada, y la sala-comedor con cocina abierta mira al patio posterior para captar la brisa del poniente con ventilación cruzada.",
  "tipologia": "casa",
  "tipologia_nombre": "Casa habitación",
  "subtipo": "",
  "corriente": "minimalista",
  "corriente_nombre": "Minimalista",
- "materiales": "Block de concreto con aplanado fino blanco, volado de concreto aparente pigmentado en gris carbón, cancelería de aluminio negro con vidrio claro de 6 mm, piso de porcelanato 60x120 en tono arena, impermeabilizante blanco reflectivo en azotea.",
+ "materiales": "Muros de block de concreto 15x20x40 con aplanado fino blanco; volado de concreto aparente pigmentado gris carbón; paño de piedra laja de la región en fachada principal; jardinera de concreto con vegetación endémica de bajo consumo de agua; cancelería de aluminio negro con vidrio claro de 6 mm; porcelanato 60x120 tono arena; impermeabilizante blanco reflectivo en azotea.",
  "uso_suelo": "Habitacional unifamiliar",
  "terreno": {
-  "frente": 8.0,
-  "fondo": 22.5,
+  "frente": 9.0,
+  "fondo": 20.0,
   "area": 180.0
  },
- "area_construida": 225.6,
- "desplante": 112.8,
- "cos": 0.63,
- "cus": 1.25,
+ "area_construida": 240.6,
+ "desplante": 120.3,
+ "cos": 0.67,
+ "cus": 1.34,
  "niveles": 2,
  "altura": 5.4,
  "cajones": 0,
@@ -28,8 +28,8 @@
  "bloques": [
   {
    "nombre": "Casa",
-   "w": 8.0,
-   "d": 14.1,
+   "w": 8.75,
+   "d": 13.75,
    "niveles": 2,
    "sistema": "mamposteria"
   }
@@ -47,7 +47,7 @@
     [
      "Castillos K-1",
      "15x20 cm, 4 vars #3, est. #2 @ 20 cm (@10 en extremos)",
-     "32 piezas en planta baja"
+     "31 piezas en planta baja"
     ],
     [
      "Dalas D-1",
@@ -56,8 +56,8 @@
     ],
     [
      "Losas",
-     "Losa maciza h = 11 cm, f'c = 250 kg/cm², vars #3 @ 20 cm ambos sentidos",
-     "Claro crítico Cocina"
+     "Losa maciza h = 12 cm, f'c = 250 kg/cm², vars #3 @ 20 cm ambos sentidos",
+     "Claro crítico Sala-comedor"
     ],
     [
      "Cimentación",
@@ -71,16 +71,16 @@
     ]
    ],
    "calc": {
-    "h_losa_cm": 11,
-    "CM_kgm2": 454,
+    "h_losa_cm": 12,
+    "CM_kgm2": 478,
     "CV_kgm2": 190,
-    "carga_lineal_tm": 4.2,
+    "carga_lineal_tm": 4.29,
     "ancho_zapata_m": 0.6,
     "q_adm_tm2": 12.0,
-    "W_t": 123.9,
+    "W_t": 137.9,
     "Q": 2.0,
     "c": 0.32,
-    "V_basal_t": 19.8
+    "V_basal_t": 22.1
    },
    "notas": []
   }
@@ -104,12 +104,12 @@
    ],
    [
     "Unidades mueble",
-    "18 UM (9 muebles)",
-    "Gasto instantáneo (Hunter) ≈ 1.08 L/s"
+    "22 UM (11 muebles)",
+    "Gasto instantáneo (Hunter) ≈ 1.21 L/s"
    ],
    [
     "Alimentación general",
-    "Ø 32 mm",
+    "Ø 38 mm",
     "Tubería CPVC / PPR, v ≤ 1.5 m/s"
    ],
    [
@@ -131,7 +131,7 @@
   "sanitaria": [
    [
     "Unidades de descarga",
-    "21 UD",
+    "25 UD",
     "Tabla de UD por mueble"
    ],
    [
@@ -158,12 +158,12 @@
   "pluvial": [
    [
     "Área de captación",
-    "113 m²",
+    "120 m²",
     "Intensidad de diseño 100 mm/h (supuesta)"
    ],
    [
     "Gasto pluvial",
-    "3.1 L/s",
+    "3.3 L/s",
     "Q = i · A / 3600"
    ],
    [
@@ -180,18 +180,18 @@
   "electrica": [
    [
     "Carga instalada",
-    "8.6 kW",
+    "9.0 kW",
     "W/m² según uso + equipos"
    ],
    [
     "Demanda",
-    "6.0 kW (6.7 kVA)",
+    "6.3 kW (7.0 kVA)",
     "Factor de demanda 0.7"
    ],
    [
     "Acometida",
     "Bifásica 2F-3H 220/127 V",
-    "Corriente ≈ 31 A"
+    "Corriente ≈ 32 A"
    ],
    [
     "Alimentador general",
@@ -200,7 +200,7 @@
    ],
    [
     "Luminarias",
-    "≈ 20 LED",
+    "≈ 26 LED",
     "Niveles NOM-025-STPS / NOM-007-ENER"
    ],
    [
@@ -238,120 +238,136 @@
    "nivel": "Planta baja",
    "rep": 1,
    "espacio": "Cochera",
-   "area": 21.59,
-   "medidas": "4.64 x 4.65"
+   "area": 19.04,
+   "medidas": "3.40 x 5.60"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta baja",
    "rep": 1,
    "espacio": "Acceso",
-   "area": 8.6,
-   "medidas": "3.36 x 2.56"
+   "area": 20.44,
+   "medidas": "3.65 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Bodega",
+   "area": 5.24,
+   "medidas": "1.70 x 3.08"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta baja",
    "rep": 1,
    "espacio": "Medio baño",
-   "area": 7.04,
-   "medidas": "3.36 x 2.09"
-  },
-  {
-   "bloque": "Casa",
-   "nivel": "Planta baja",
-   "rep": 1,
-   "espacio": "Sala",
-   "area": 20.3,
-   "medidas": "4.80 x 4.23"
+   "area": 4.28,
+   "medidas": "1.70 x 2.52"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta baja",
    "rep": 1,
    "espacio": "Escalera",
-   "area": 13.54,
-   "medidas": "3.20 x 4.23"
+   "area": 7.82,
+   "medidas": "2.30 x 3.40"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta baja",
    "rep": 1,
-   "espacio": "Comedor",
-   "area": 18.78,
-   "medidas": "3.60 x 5.22"
+   "espacio": "Vestíbulo",
+   "area": 21.93,
+   "medidas": "6.45 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Sala-comedor",
+   "area": 24.94,
+   "medidas": "5.25 x 4.75"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Lavandería",
+   "area": 4.99,
+   "medidas": "3.50 x 1.43"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta baja",
    "rep": 1,
    "espacio": "Cocina",
-   "area": 22.95,
-   "medidas": "4.40 x 5.22"
+   "area": 11.64,
+   "medidas": "3.50 x 3.33"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta alta",
    "rep": 1,
    "espacio": "Recámara 2",
-   "area": 18.61,
-   "medidas": "4.00 x 4.65"
-  },
-  {
-   "bloque": "Casa",
-   "nivel": "Planta alta",
-   "rep": 1,
-   "espacio": "Recámara 3",
-   "area": 18.61,
-   "medidas": "4.00 x 4.65"
+   "area": 20.33,
+   "medidas": "3.63 x 5.60"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta alta",
    "rep": 1,
    "espacio": "Baño 2",
-   "area": 9.14,
-   "medidas": "2.16 x 4.23"
+   "area": 8.34,
+   "medidas": "1.49 x 5.60"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta alta",
    "rep": 1,
-   "espacio": "Pasillo",
-   "area": 11.17,
-   "medidas": "2.64 x 4.23"
+   "espacio": "Recámara 3",
+   "area": 20.33,
+   "medidas": "3.63 x 5.60"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta alta",
    "rep": 1,
    "espacio": "Escalera",
-   "area": 13.54,
-   "medidas": "3.20 x 4.23"
+   "area": 7.82,
+   "medidas": "2.30 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Pasillo",
+   "area": 21.93,
+   "medidas": "6.45 x 3.40"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta alta",
    "rep": 1,
    "espacio": "Recámara principal",
-   "area": 25.88,
-   "medidas": "4.96 x 5.22"
+   "area": 24.11,
+   "medidas": "5.08 x 4.75"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta alta",
    "rep": 1,
    "espacio": "Vestidor",
-   "area": 7.14,
-   "medidas": "3.04 x 2.35"
+   "area": 7.33,
+   "medidas": "3.67 x 2.00"
   },
   {
    "bloque": "Casa",
    "nivel": "Planta alta",
    "rep": 1,
    "espacio": "Baño principal",
-   "area": 8.72,
-   "medidas": "3.04 x 2.87"
+   "area": 10.12,
+   "medidas": "3.67 x 2.75"
   }
  ],
  "hojas": [
@@ -417,7 +433,31 @@
  "pdf": "planos.pdf",
  "zip": "2026-11-01-casa-minimalista_dxf.zip",
  "extra": {
-  "orientacion": "Fachada principal al sur; patio y ventanas de recámara principal al norte"
+  "dictamen_arquitectura": [
+   "Terreno de 9.00 x 20.00 m (180 m²); casa de 9.00 x 14.00 m a paños exteriores, restricción frontal de 3.00 m y patio posterior de 3.00 m. COS 0.67 y CUS 1.34.",
+   "Recorrido continuo: acceso → vestíbulo → sala-comedor con cocina abierta; la escalera abre al vestíbulo y en planta alta al pasillo, del que salen todas las recámaras y el baño 2.",
+   "Recámaras con lado mayor o igual a 2.70 m y ventana al exterior; cochera de 3.40 x 5.60 m; escalera en U de 2.30 m con descanso.",
+   "Volado gris carbón sobre el acceso y las recámaras al sur; paño de piedra laja en el muro ciego más ancho de la fachada; jardinera de vegetación endémica al frente.",
+   "Medio baño interior con extractor mecánico obligatorio."
+  ],
+  "dictamen_ingenieria": [
+   "Veredicto: construible conforme a norma con los supuestos indicados.",
+   "Estructura de mampostería confinada: block 15x20x40, 31 castillos K-1 15x20 en planta baja (a 3.5 m como máximo y en cada intersección), dalas de desplante, cerramiento y pretil; losas macizas de 12 cm (claro crítico de 5.25 x 4.75 m en la sala-comedor).",
+   "Cimentación con zapata corrida de 0.60 m y contratrabe de 20x40 cm, considerando una capacidad del suelo supuesta de 12 t/m²; se requiere estudio de mecánica de suelos antes de construir.",
+   "Sismo (supuesto c = 0.32, Q = 2): cortante basal de aproximadamente 22 t. Verificar la densidad de muros en ambas direcciones y dejar junta de colindancia con las construcciones vecinas.",
+   "Instalaciones: toma de 13 mm, cisterna de 2 m³ con hidroneumático, colector de 100 mm al 2 %, 2 bajadas pluviales de 100 mm, acometida bifásica de 220/127 V (6.3 kW de demanda) y tanque de gas LP de 300 L en azotea. Factibilidades de CESPT y CFE por tramitar."
+  ]
+ },
+ "revision": {
+  "observaciones": [
+   {
+    "nivel": "Casa · Planta baja",
+    "tipo": "aviso",
+    "mensaje": "Medio baño: ventilación mecánica (extractor) obligatoria."
+   }
+  ],
+  "errores": 0,
+  "avisos": 1
  },
  "generado_por": "híbrido (Claude + motor)"
 }
