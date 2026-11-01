@@ -101,9 +101,15 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com"><link href=
          'family=Archivo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">')
 
 
-def _head(titulo):
-    return (f'<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-            f'<title>{html.escape(titulo)}</title>{FONTS}<style>{CSS}</style></head><body>')
+def _head(titulo, raiz=""):
+    """raiz: ruta relativa a docs/ ('' en la galería, '../../' en cada proyecto)."""
+    pwa = (f'<link rel="manifest" href="{raiz}manifest.json"><meta name="theme-color" content="#1C1D1F">'
+           f'<link rel="icon" href="{raiz}icon-192.png"><link rel="apple-touch-icon" href="{raiz}apple-touch-icon.png">'
+           '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">'
+           '<meta name="apple-mobile-web-app-title" content="Vértice">'
+           f'<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("{raiz}sw.js",{{scope:"{raiz or "./"}"}}).catch(function(){{}});</script>')
+    return (f'<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cut">'
+            f'<title>{html.escape(titulo)}</title>{pwa}{FONTS}<style>{CSS}</style></head><body>')
 
 
 def _tabla(filas, cab):
@@ -121,7 +127,7 @@ def pagina_proyecto(r):
         datos.append((str(r["cajones"]), "Cajones"))
     for k, v in list(r["usuarios"].items())[:2]:
         datos.append((f"{v:,}", k.replace("_", " ").capitalize()))
-    s = [_head(r["nombre"]), '<header class="top"><div class="wrap"><a class="marca" href="../../index.html">VÉRTICE<span>·</span>PROYECTO DEL DÍA</a>',
+    s = [_head(r["nombre"], "../../"), '<header class="top"><div class="wrap"><a class="marca" href="../../index.html">VÉRTICE<span>·</span>PROYECTO DEL DÍA</a>',
          f'<span class="sub mono">{e(r["clave"])}</span></div></header><main class="wrap">',
          f'<p class="sub mono" style="margin-top:28px">{fecha_larga(r["fecha"])} · {e(r["tipologia_nombre"])}'
          f'{(" · " + e(r["subtipo"])) if r["subtipo"] else ""}</p>',
