@@ -185,7 +185,9 @@ def galeria(dir_proy, ruta_index):
          '<span class="sub">Ingeniería, Arquitectura y Proyectos · Tijuana, B.C.</span></div></header><main class="wrap">',
          '<h1>Un proyecto completo,<br>cada día.</h1>',
          '<p class="sub" style="max-width:720px">Anteproyecto arquitectónico, estructural y de instalaciones con planos DXF, '
-         'renders y memoria. Cada mes una tipología; cada día una corriente arquitectónica distinta.</p><div class="ciclo">']
+         'renders y memoria. Cada mes una tipología; cada día una corriente arquitectónica distinta.</p>'
+         '<p class="desc" style="margin:14px 0 0"><a class="btn pri" href="vertice.apk" download>Descargar app Android (.apk)</a></p>'
+         '<div class="ciclo">']
     for i, t in enumerate(CICLO):
         s.append(f'<div class="{"on" if i == ic else ""}"><b>{e(NOMBRES[t].split(" /")[0])}</b>Mes {i + 1} del ciclo</div>')
     s.append('</div><div class="chips" id="chips"><button class="on" data-t="">Todos</button>')
