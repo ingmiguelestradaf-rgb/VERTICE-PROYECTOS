@@ -49,6 +49,8 @@ def main():
     carpeta = None
     for raiz, _, archivos in os.walk(base):
         for a in sorted(archivos):
+            if a == "escena.json":
+                continue
             local = os.path.join(raiz, a)
             rel = os.path.relpath(raiz, os.path.dirname(base)).split(os.sep)   # [clave, Anteproyecto, planos...]
             res = subir(url, token, local, rel)

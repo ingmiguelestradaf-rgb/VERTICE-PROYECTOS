@@ -1,0 +1,49 @@
+name: Prueba de render fotorrealista
+
+# Sólo para ajustar la escena: renderiza en baja calidad y publica las imágenes en la rama pruebas-render.
+on:
+  workflow_dispatch:
+    inputs:
+      clave:
+        description: "Clave del proyecto"
+        required: false
+        default: "2026-11-01-casa-minimalista"
+      modo:
+        description: "--prueba (rápido) o vacío (calidad final)"
+        required: false
+        default: "--prueba"
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Motor de cálculo
+        run: git clone -q --depth 1 https://github.com/ingmiguelestradaf-rgb/VERTICE-CALCULO _calculo
+      - name: Blender 4.2 LTS
+        run: bash motor/foto/instalar_blender.sh
+      - name: Escena
+        run: |
+          c="${{ github.event.inputs.clave }}"
+          python generar.py --fecha "${c:0:10}" --spec "docs/proyectos/$c/spec.json"
+      - name: Render
+        run: |
+          c="${{ github.event.inputs.clave }}"
+          mkdir -p out
+          /usr/bin/time -v blender/blender -b --factory-startup -P motor/foto/blender_escena.py -- "_privado/$c/escena.json" out ${{ github.event.inputs.modo }} 2>&1 | grep -E "render:|recorrido|Error|Traceback|File \"|Elapsed|Maximum resident|^  " | tail -80
+          ls -la out
+      - name: Publicar en rama pruebas-render
+        run: |
+          cd out
+          git init -q -b pruebas-render
+          git config user.name "vertice-bot"; git config user.email "bot@vertice.local"
+          git add -A && git commit -qm "Prueba de render $(date -u +%FT%T)"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" pruebas-render

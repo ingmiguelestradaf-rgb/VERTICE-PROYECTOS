@@ -222,6 +222,9 @@ def construir(fecha, spec=None, salida=SALIDA, privado=PRIVADO, ejecutivo=True):
         if os.path.exists(dest):
             shutil.rmtree(dest)
         shutil.copytree(carpeta, dest, ignore=shutil.ignore_patterns("index.html", "laminas", "spec.json", "proyecto.json"))
+    if ejecutivo:
+        from motor.foto import escena as ESC
+        ESC.exportar(os.path.join(privado, clave, "escena.json"), proy, lays, corr, plan, nombre, r_est, spec)
     resumen["_ejecutivo"] = ej
     resumen["_carpeta_privada"] = os.path.join(privado, clave) if ejecutivo else None
     return carpeta, resumen
