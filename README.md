@@ -6,7 +6,8 @@ Google Drive) con revisión automática de coordinación y normativa:
 - Planta de conjunto, plantas arquitectónicas, fachadas y corte (DXF R12, abren en AutoCAD/BricsCAD/ZWCAD/LibreCAD)
 - Cimentación y planta estructural con predimensionamiento (mampostería confinada, marcos de concreto o acero)
 - Instalación hidráulica + contra incendio, sanitaria + pluvial, eléctrica y gas LP, con cálculo preliminar
-- Dos renders (aéreo y peatonal) con sombras, juego de planos en PDF y memoria descriptiva
+- Renders volumétricos en la galería; en Drive, renders fotorrealistas (Blender Cycles) y recorrido virtual en video
+- Juego de planos en PDF y memoria descriptiva
 
 **Galería:** https://ingmiguelestradaf-rgb.github.io/vertice-proyectos/
 
@@ -46,6 +47,7 @@ motor/estructura.py   estructuración y predimensionamiento
 motor/instalaciones.py cálculo y trazo de instalaciones
 motor/planos.py, plano_estructural.py  dibujo DXF
 motor/rast.py, render.py  renders por software (z-buffer + sombras)
+motor/foto/           escena 3D, renders fotorrealistas y recorrido virtual (Blender)
 motor/web.py          memoria y galería (GitHub Pages desde /docs)
 ```
 

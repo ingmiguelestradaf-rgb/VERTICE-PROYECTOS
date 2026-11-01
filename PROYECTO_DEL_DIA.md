@@ -7,6 +7,7 @@ Instrucciones que sigue Claude cada mañana desde la tarea programada (también 
 | Entregable | Dónde vive |
 |---|---|
 | **Anteproyecto**: renders, AP-01 conjunto, AP-02 plantas, AP-03 fachadas y corte, memoria descriptiva, `spec.json` | GitHub (`docs/proyectos/<clave>/`) → galería y app, **y** Drive |
+| **Renders fotorrealistas** (aéreo, peatonal, posterior, interior; Blender Cycles) y **recorrido virtual** MP4 (calle → acceso → interior → vuelo exterior) | **Sólo Drive** (`<clave>/Anteproyecto/Renders fotorrealistas` y `/Recorrido virtual`), generados en Actions con `motor/foto/render.sh` |
 | **Proyecto ejecutivo**: 17 láminas (A-01…A-07, E-01…E-04, IH, IS, IE, IG), memoria técnica Word/PDF, presupuesto Excel, programa de obra, revisión de coordinación | **Sólo Drive** (`Vértice - Proyectos del día/<clave>/Proyecto ejecutivo`). Nunca se sube a GitHub. |
 
 El proyecto ejecutivo se genera en `_privado/` (ignorado por git). En GitHub sólo se guarda el diseño (`spec.json`);

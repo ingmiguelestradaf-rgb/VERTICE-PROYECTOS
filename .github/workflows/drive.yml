@@ -16,6 +16,7 @@ on:
 jobs:
   drive:
     runs-on: ubuntu-latest
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,5 +50,6 @@ jobs:
           for c in $claves; do
             fecha=${c:0:10}
             python generar.py --fecha "$fecha" --spec "docs/proyectos/$c/spec.json"
+            timeout 100m bash motor/foto/render.sh "_privado/$c" || echo "::warning::Render fotorrealista incompleto para $c"
             python drive/subir.py "_privado/$c"
           done
