@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-02-casa-industrial",
+  "fecha": "2026-11-02",
+  "nombre": "Casa Taller",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Industrial",
+  "area": 268.1,
+  "terreno": 200.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-01-casa-minimalista",
   "fecha": "2026-11-01",
   "nombre": "Casa Umbral",
