@@ -41,8 +41,10 @@ def subir(url, token, ruta_local, ruta_drive):
 def main():
     url, token = os.environ.get("VERTICE_DRIVE_URL"), os.environ.get("VERTICE_DRIVE_TOKEN")
     if not url or not token:
-        print("Sin VERTICE_DRIVE_URL / VERTICE_DRIVE_TOKEN: no se sube a Drive.")
-        return
+        falta = [n for n, v in (("VERTICE_DRIVE_URL", url), ("VERTICE_DRIVE_TOKEN", token)) if not v]
+        print(f"::error::Faltan los secretos de GitHub {', '.join(falta)} (Settings → Secrets and variables → Actions → "
+              "pestaña Secrets → Repository secrets): no se subió nada a Drive.")
+        sys.exit(1)
     base = sys.argv[1].rstrip("/")
     solo = sys.argv[sys.argv.index("--solo") + 1:] if "--solo" in sys.argv else None
     clave = os.path.basename(base)
