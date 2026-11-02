@@ -44,6 +44,7 @@ def main():
         print("Sin VERTICE_DRIVE_URL / VERTICE_DRIVE_TOKEN: no se sube a Drive.")
         return
     base = sys.argv[1].rstrip("/")
+    solo = sys.argv[sys.argv.index("--solo") + 1:] if "--solo" in sys.argv else None
     clave = os.path.basename(base)
     n = 0
     carpeta = None
@@ -52,6 +53,8 @@ def main():
             if a == "escena.json":
                 continue
             local = os.path.join(raiz, a)
+            if solo and not any(os.path.relpath(local, base).startswith(p) for p in solo):
+                continue
             rel = os.path.relpath(raiz, os.path.dirname(base)).split(os.sep)   # [clave, Anteproyecto, planos...]
             res = subir(url, token, local, rel)
             carpeta = carpeta or res.get("carpeta")

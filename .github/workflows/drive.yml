@@ -1,8 +1,8 @@
 name: Proyecto completo a Drive
 
 # Cuando se publica el diseño de un proyecto (docs/proyectos/<clave>/spec.json), este flujo regenera
-# el anteproyecto y el proyecto ejecutivo y los guarda en Google Drive. El proyecto ejecutivo NO se
-# guarda en GitHub: sólo existe dentro de esta ejecución y en tu Drive.
+# el anteproyecto y el proyecto ejecutivo, genera los renders fotorrealistas y el recorrido virtual,
+# y lo guarda todo en Google Drive. El proyecto ejecutivo NO se guarda en GitHub.
 on:
   push:
     branches: [main]
@@ -14,13 +14,34 @@ on:
         required: false
 
 jobs:
-  drive:
+  claves:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    outputs:
+      lista: ${{ steps.c.outputs.lista }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
+      - id: c
+        run: |
+          if [ -n "${{ github.event.inputs.clave }}" ]; then
+            claves="${{ github.event.inputs.clave }}"
+          else
+            claves=$(git diff --name-only HEAD~1 HEAD -- 'docs/proyectos/*/spec.json' | cut -d/ -f3)
+            [ -z "$claves" ] && claves=$(ls docs/proyectos | sort | tail -1)
+          fi
+          echo "lista=$(printf '%s\n' $claves | python3 -c 'import json,sys;print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')" >> "$GITHUB_OUTPUT"
+
+  drive:
+    needs: claves
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        clave: ${{ fromJson(needs.claves.outputs.lista) }}
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -36,20 +57,22 @@ jobs:
           else
             git clone -q --depth 1 https://github.com/ingmiguelestradaf-rgb/VERTICE-CALCULO _calculo
           fi
-      - name: Generar y subir
+      - name: Generar anteproyecto y proyecto ejecutivo
+        run: |
+          c="${{ matrix.clave }}"
+          python generar.py --fecha "${c:0:10}" --spec "docs/proyectos/$c/spec.json"
+      - name: Subir planos y documentos a Drive
         env:
           VERTICE_DRIVE_URL: ${{ secrets.VERTICE_DRIVE_URL }}
           VERTICE_DRIVE_TOKEN: ${{ secrets.VERTICE_DRIVE_TOKEN }}
-        run: |
-          if [ -n "${{ github.event.inputs.clave }}" ]; then
-            claves="${{ github.event.inputs.clave }}"
-          else
-            claves=$(git diff --name-only HEAD~1 HEAD -- 'docs/proyectos/*/spec.json' | cut -d/ -f3)
-            [ -z "$claves" ] && claves=$(ls docs/proyectos | sort | tail -1)
-          fi
-          for c in $claves; do
-            fecha=${c:0:10}
-            python generar.py --fecha "$fecha" --spec "docs/proyectos/$c/spec.json"
-            timeout 100m bash motor/foto/render.sh "_privado/$c" || echo "::warning::Render fotorrealista incompleto para $c"
-            python drive/subir.py "_privado/$c"
-          done
+        run: python drive/subir.py "_privado/${{ matrix.clave }}"
+      - name: Renders fotorrealistas y recorrido virtual
+        timeout-minutes: 110
+        continue-on-error: true
+        run: bash motor/foto/render.sh "_privado/${{ matrix.clave }}"
+      - name: Subir renders y recorrido a Drive
+        if: always()
+        env:
+          VERTICE_DRIVE_URL: ${{ secrets.VERTICE_DRIVE_URL }}
+          VERTICE_DRIVE_TOKEN: ${{ secrets.VERTICE_DRIVE_TOKEN }}
+        run: python drive/subir.py "_privado/${{ matrix.clave }}" --solo "Anteproyecto/Renders fotorrealistas" "Anteproyecto/Recorrido virtual"
