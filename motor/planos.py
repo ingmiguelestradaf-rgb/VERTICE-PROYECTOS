@@ -363,7 +363,16 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
             if cub == "curva":
                 pts = [(x0 - al + (L + 2 * al) * i / 20, oy + ztop + r * 4 * (i / 20) * (1 - i / 20)) for i in range(21)]
                 dx.polilinea(pts, "A-FACHADA")
-            elif cub.startswith("una") or cub == "inclinada_irregular":
+            elif cub.startswith("una"):
+                # Cubierta a una agua: baja al frente (sur, y0) y sube hacia el fondo (norte), como en los renders.
+                if lado == "S":
+                    dx.polilinea([(x0 - al, oy + ztop), (x0 + L + al, oy + ztop), (x0 + L + al, oy + ztop + r),
+                                  (x0 - al, oy + ztop + r)], "A-FACHADA", True)
+                    dx.linea((x0 - al, oy + ztop + 0.1), (x0 + L + al, oy + ztop + 0.1), "A-FACHADA")
+                else:
+                    dx.polilinea([(x0 - al, oy + ztop), (x0 + L + al, oy + ztop), (x0 + L + al, oy + ztop + r),
+                                  (x0 - al, oy + ztop + 0.1)], "A-FACHADA", True)
+            elif cub == "inclinada_irregular":
                 dx.polilinea([(x0 - al, oy + ztop), (x0 + L + al, oy + ztop), (x0 + L + al, oy + ztop + r), (x0 - al, oy + ztop + r * 0.15)], "A-FACHADA", True)
             elif frontal_gable:
                 dx.polilinea([(x0 - al, oy + ztop), (x0 + L / 2, oy + ztop + r), (x0 + L + al, oy + ztop)], "A-FACHADA", True)
@@ -393,6 +402,16 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
                     for k in range(1, 6):
                         zz = zb + z1 + (z2 - z1) * k / 6
                         dx.linea((a, oy + zz), (b, oy + zz), "A-FACHADA")
+        if lado == "S" and len(zs) > 1:
+            # parteluces y marco con la geometría del render
+            zb1 = zs[1][0] - z0
+            if "celosia" in corr["rasgos"] or "parteluces" in corr["rasgos"]:
+                for k in range(int(L * 0.4 / 0.35)):
+                    dx.rect(x0 + L * 0.55 + k * 0.35, oy + z0 + zb1, 0.15, ztop - z0 - zb1, "A-FACHADA")
+            if "marco" in corr["rasgos"]:
+                fa, fb = L * 0.38, L + 0.05
+                dx.rect(x0 + fa, oy + z0 + zb1 - 0.3, fb - fa, ztop - z0 - zb1 + 0.3, "A-FACHADA")
+                dx.rect(x0 + fa + 0.3, oy + z0 + zb1, fb - fa - 0.6, ztop - z0 - zb1 - 0.3, "A-FACHADA")
         dx.texto((x0 + 0.3, oy + ztop + 0.3), f"NPT +{ztop:.2f}", max(0.2, L / 80), "COTAS")
     dx.texto((ox + Lt / 2, oy - max(1.5, Lt / 25)), f"FACHADA {'PRINCIPAL (SUR)' if lado == 'S' else 'LATERAL (ORIENTE)'}",
              max(0.35, Lt / 50), "A-TEXTO", centrado=True)
@@ -422,10 +441,21 @@ def corte(dx, proy, lays, corr, ox, oy):
                 dx.rect(ox + yy - 0.075, oy + zb, 0.15, h - losa, "A-CORTE")
             for c in cuartos:
                 if c["x"] <= xm <= c["x"] + c["w"] and not c["contenedor"] and h > 2.2:
-                    dx.texto((ox + c["y"] + c["d"] / 2, oy + zb + h * 0.45), c["n"].upper(),
-                             max(0.12, min(0.5, c["d"] / 9)), "A-TEXTO", centrado=True)
+                    nom = c["n"].upper()
+                    # tamaño limitado por el ancho del local en el corte para que los nombres no se encimen
+                    tam = min(0.5, (c["d"] - 0.3) / (0.9 * max(len(nom), 1)))
+                    dx.texto((ox + c["y"] + c["d"] / 2, oy + zb + h * 0.45), nom,
+                             max(0.12, tam), "A-TEXTO", centrado=True)
     r = altura_cubierta(blq, corr)
     if r:
-        dx.polilinea([(ox + y0 - 0.4, oy + ztop), (ox + y0 + L / 2, oy + ztop + r), (ox + y0 + L + 0.4, oy + ztop)], "A-CORTE")
+        cub = corr["cubierta"]
+        if cub.startswith("una") or cub == "inclinada_irregular":
+            # una agua: sube del frente (y0) al fondo, igual que fachadas y renders
+            dx.polilinea([(ox + y0 - 0.4, oy + ztop), (ox + y0 + L + 0.4, oy + ztop), (ox + y0 + L + 0.4, oy + ztop + r),
+                          (ox + y0 - 0.4, oy + ztop + 0.1)], "A-CORTE", True)
+        elif cub == "curva":
+            dx.polilinea([(ox + y0 - 0.4 + (L + 0.8) * i / 20, oy + ztop + r * 4 * (i / 20) * (1 - i / 20)) for i in range(21)], "A-CORTE")
+        else:
+            dx.polilinea([(ox + y0 - 0.4, oy + ztop), (ox + y0 + L / 2, oy + ztop + r), (ox + y0 + L + 0.4, oy + ztop)], "A-CORTE")
     dx.cota((ox + y0 - 1.5, oy), (ox + y0 - 1.5, oy + ztop), 1.0)
     dx.texto((ox + y0 + L / 2, oy - max(1.5, L / 25)), "CORTE LONGITUDINAL A-A'", max(0.35, L / 50), "A-TEXTO", centrado=True)

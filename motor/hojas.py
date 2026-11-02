@@ -39,6 +39,11 @@ class Juego:
                 xs += [p[0] for p in e[2]]; ys += [p[1] for p in e[2]]
             else:
                 d = dict(e[2]); xs.append(d.get(10, 0)); ys.append(d.get(20, 0))
+                if e[0] == "TEXT" and abs(d.get(50, 0.0)) < 1e-6:
+                    # el texto ocupa ancho: se incluye su extensión estimada para que el marco no lo recorte
+                    ancho = 0.85 * d.get(40, 0.25) * len(str(d.get(1, "")))
+                    x0 = d.get(10, 0) - (ancho / 2 if d.get(72) == 1 else 0.0)
+                    xs += [x0, x0 + ancho]; ys.append(d.get(20, 0) + d.get(40, 0.25))
                 if 11 in d:
                     xs.append(d[11]); ys.append(d[21])
         planos.cuadro(dx, min(xs), min(ys), max(xs), max(ys), dict(self.datos, plano=f"{h['clave']}  {h['titulo']}", notas=self.notas))

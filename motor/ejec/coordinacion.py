@@ -95,7 +95,7 @@ def revisar(blq, lays, r, cc, cancel, acab, q, rev_arq):
     # bajadas pluviales vs castillos
     choques = 0
     x, y, w, d = blq["x"], blq["y"], blq["w"], blq["d"]
-    for bp in [(x + 0.35, y + d - 0.35), (x + w - 0.35, y + d - 0.35), (x + 0.35, y + 0.35), (x + w - 0.35, y + 0.35)]:
+    for bp in I.puntos_bap(blq, 5):   # todas las posiciones posibles de BAP (las mismas que dibujan A-04 e IS-01)
         if any(math.dist(bp, c) < 0.15 for c in r["castillos"][-1]):
             choques += 1
     add("Coordinación inst.–est.", "Bajadas pluviales", "Sin cruzar castillos ni trabes", "Sin interferencias" if not choques else

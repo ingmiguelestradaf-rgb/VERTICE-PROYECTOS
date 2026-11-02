@@ -81,7 +81,8 @@ def generar(V, carpeta, datos, proy, plan, corr, lays, r, spec, nombre, ins_calc
 
     gas_xy = (blq["x"] + blq["w"] - 1.2, blq["y"] + blq["d"] - 1.2)
     h = J.nueva("A-04", "Planta de azotea", disciplina="Arquitectónico")
-    arq.azotea(h["dx"], blq, lays, r, ins_calc["resumen"]["n_baj"], gas_xy, -blq["x"], -blq["y"])
+    sur_bap = corr["cubierta"].startswith("una")   # la cubierta a una agua baja al frente: bajadas al sur
+    arq.azotea(h["dx"], blq, lays, r, ins_calc["resumen"]["n_baj"], gas_xy, -blq["x"], -blq["y"], sur_primero=sur_bap)
     arq.dibujar_ejes(h["dx"], blq, xs, ys, -blq["x"], -blq["y"])
     J.cerrar(h)
 
@@ -213,7 +214,8 @@ def generar(V, carpeta, datos, proy, plan, corr, lays, r, spec, nombre, ins_calc
                 INS.gas(h["dx"], proy, blq, cu, ox, oy, k, pg)
         F = plantas(h, dib, lambda n: n["nombre"].upper(), sep_=sep + 4.0, y_titulo=-4.4)
         if fn == "is":
-            F.poner(blq["w"], blq["d"], lambda ox: INS.pluvial(h["dx"], proy, blq, ox - blq["x"], -blq["y"], ins_calc["resumen"]["n_baj"]),
+            F.poner(blq["w"], blq["d"], lambda ox: INS.pluvial(h["dx"], proy, blq, ox - blq["x"], -blq["y"], ins_calc["resumen"]["n_baj"],
+                                                    pts=INS.puntos_bap(blq, ins_calc["resumen"]["n_baj"], ox - blq["x"], -blq["y"], sur_bap)),
                     "AZOTEA — PLUVIAL", h=0.32)
         if fn == "ig":
             IE.isometrico_gas(h["dx"], blq, lays, F.x + 3.0, 0.0)

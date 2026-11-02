@@ -305,15 +305,13 @@ def _wc(dx, c, lado, despl):
 
 
 # ------------------------------------------------------------------ azotea
-def azotea(dx, blq, lays, r_est, n_baj, gas_xy, ox=0.0, oy=0.0, pretil=0.6):
+def azotea(dx, blq, lays, r_est, n_baj, gas_xy, ox=0.0, oy=0.0, pretil=0.6, sur_primero=False):
     x, y, w, d = blq["x"] + ox, blq["y"] + oy, blq["w"], blq["d"]
     dx.rect(x - 0.125, y - 0.125, w + 0.25, d + 0.25, "A-MUROS")
     dx.rect(x + 0.025, y + 0.025, w - 0.05, d - 0.05, "A-MUROS")
     # bajadas en esquinas y puntos medios del lado posterior (pendiente al norte y a los lados)
-    pts = [(x + 0.35, y + d - 0.35), (x + w - 0.35, y + d - 0.35), (x + 0.35, y + 0.35), (x + w - 0.35, y + 0.35)]
-    if n_baj > 4:
-        pts.append((x + w / 2, y + d - 0.35))
-    pts = pts[:max(2, n_baj)]
+    from .. import instalaciones as INS
+    pts = INS.puntos_bap(blq, n_baj, ox, oy, sur_primero)
     for p in pts:
         dx.circulo(p, 0.12, "A-MUROS")
         dx.texto((p[0] + 0.2, p[1] - 0.35 if p[1] > y + d / 2 else p[1] + 0.25), "BAP Ø100", 0.15, "A-TEXTO")
@@ -327,7 +325,8 @@ def azotea(dx, blq, lays, r_est, n_baj, gas_xy, ox=0.0, oy=0.0, pretil=0.6):
     if gas_xy:
         gx, gy = gas_xy[0] + ox, gas_xy[1] + oy
         dx.circulo((gx, gy), 0.55, "A-MUROS")
-        dx.texto((gx - 2.4, gy + 0.7), "TANQUE ESTACIONARIO GAS LP", 0.15, "A-TEXTO")
+        # etiqueta bajo el tanque para no encimarse con las bajadas pluviales de las esquinas
+        dx.texto((min(gx, x + w - 1.9), gy - 0.85), "TANQUE ESTACIONARIO GAS LP", 0.15, "A-TEXTO", centrado=True)
     dx.rect(x + w * 0.1, y + d * 0.42, 2.0, 1.1, "A-MUEBLES")
     dx.texto((x + w * 0.1 + 1.0, y + d * 0.42 + 0.55), "CALENTADOR SOLAR (OPCIONAL)", 0.12, "A-TEXTO", centrado=True)
     notas = [f"PRETIL DE BLOCK h = {pretil:.2f} m CON DALA D-2 Y CHAFLÁN EN ENCUENTROS",
@@ -368,7 +367,18 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
         al = 0.6
         if cub == "curva":
             dx.polilinea([(ox - al + (L + 2 * al) * i / 20, oy + ztop + rr * 4 * (i / 20) * (1 - i / 20)) for i in range(21)], F)
-        elif cub.startswith("una") or cub == "inclinada_irregular":
+        elif cub.startswith("una"):
+            # una agua: baja al sur (y0) y sube al norte, igual que en los renders y en AP-03
+            if lado in ("S", "N"):
+                dx.polilinea([(ox - al, oy + ztop), (ox + L + al, oy + ztop), (ox + L + al, oy + ztop + rr),
+                              (ox - al, oy + ztop + rr)], F, True)
+                if lado == "S":
+                    dx.linea((ox - al, oy + ztop + 0.15), (ox + L + al, oy + ztop + 0.15), F)
+            elif lado == "E":
+                dx.polilinea([(ox - al, oy + ztop), (ox + L + al, oy + ztop), (ox + L + al, oy + ztop + rr), (ox - al, oy + ztop + 0.15)], F, True)
+            else:
+                dx.polilinea([(ox - al, oy + ztop), (ox + L + al, oy + ztop), (ox + L + al, oy + ztop + 0.15), (ox - al, oy + ztop + rr)], F, True)
+        elif cub == "inclinada_irregular":
             dx.polilinea([(ox - al, oy + ztop), (ox + L + al, oy + ztop), (ox + L + al, oy + ztop + rr), (ox - al, oy + ztop + 0.15)], F, True)
         elif gable:
             dx.polilinea([(ox - al, oy + ztop), (ox + L / 2, oy + ztop + rr), (ox + L + al, oy + ztop)], F, True)
@@ -438,6 +448,16 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
         ja, jb = max(lib0, key=lambda q: q[1] - q[0])
         if "jardinera" in corr["rasgos"] and jb - ja > 1.0:
             dx.rect(ox + ja + 0.1, oy, jb - ja - 0.2, 0.5, F)
+        # parteluces y marco volumétrico: misma geometría que el render (render.py) para que plano y modelo coincidan
+        zb1 = niveles[0]["h"] if len(niveles) > 1 else 0.3
+        if "celosia" in corr["rasgos"] or "parteluces" in corr["rasgos"]:
+            ancho = 0.08 if "celosia" in corr["rasgos"] else 0.15
+            for k_ in range(int(L * 0.4 / 0.35)):
+                dx.rect(ox + L * 0.55 + k_ * 0.35, oy + zb1, ancho, ztop - zb1, F)
+        if "marco" in corr["rasgos"] and len(niveles) > 1:
+            fa, fb, e_ = L * 0.38, L + 0.05, 0.3
+            dx.rect(ox + fa, oy + zb1 - 0.3, fb - fa, ztop - zb1 + 0.3, F)
+            dx.rect(ox + fa + e_, oy + zb1, fb - fa - 2 * e_, ztop - zb1 - e_, F)
     # niveles
     zz = 0.0
     marcas = [(0.0, "NPT ±0.00")]
@@ -454,11 +474,17 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
     dx.cota((ox, oy), (ox + L, oy), -0.7, h=0.17)
     # materiales con líneas de llamada
     if lado == "S":
+        # notas arriba de la cubierta (no sobre ella) y sin truncar: se parten en renglones
+        import textwrap
+        renglones = []
         for i, m in enumerate(materiales[:4]):
-            ty = oy + ztop + (par or 0.4) + 0.6 + i * 0.32
-            dx.texto((ox, ty), f"{i + 1}. {m.upper()[:70]}", 0.14, "A-TEXTO")
+            for j, t_ in enumerate(textwrap.wrap(f"{i + 1}. {m.upper()}", 80)):
+                renglones.append(t_ if j == 0 else "    " + t_)
+        base = ztop + max(par or 0.0, rr if rr > 0 else 0.0) + 0.5
+        for i, t_ in enumerate(reversed(renglones)):
+            dx.texto((ox, oy + base + i * 0.26), t_, 0.14, "A-TEXTO")
     if lado in ("E", "O") and lado in set(blq.get("colindancias", [])):
-        dx.texto((ox + L / 2, oy + ztop / 2), "MURO DE COLINDANCIA: APLANADO DE MORTERO, SELLADOR E IMPERMEABILIZANTE", 0.17,
+        dx.texto((ox + L / 2, oy + niveles[0]["h"] / 2), "MURO DE COLINDANCIA: APLANADO DE MORTERO, SELLADOR E IMPERMEABILIZANTE", 0.17,
                  "A-TEXTO", centrado=True)
     nombre = {"S": "FACHADA PRINCIPAL (SUR)", "N": "FACHADA POSTERIOR (NORTE)", "E": "FACHADA LATERAL ORIENTE",
               "O": "FACHADA LATERAL PONIENTE"}[lado]
@@ -606,6 +632,7 @@ def acabados(c, materiales):
     t, n = c["t"], c["n"]
     piso_g = next((m for m in materiales if "porcelanato" in m.lower() or "piso" in m.lower()), "Porcelanato 60x120 tono arena")
     piso_g = piso_g if len(piso_g) < 60 else "Porcelanato 60x120 rectificado"
+    piso_g = piso_g[:1].upper() + piso_g[1:]   # la cédula de acabados empieza con mayúscula
     if t == "humedo":
         return dict(piso="Porcelanato antiderrapante 60x60", zoclo="—", muro="Azulejo 30x60 a 2.10 m en regadera y lavabo; resto pintura esmalte",
                     plafon="Aplanado de yeso + pintura antihongos", clave="B")

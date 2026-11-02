@@ -275,12 +275,27 @@ def sanitaria(dx, proy, blq, cuartos, ox, oy, nivel_idx):
         dx.texto((xc + 0.4, y0 + 0.3), "A RED MUNICIPAL", 0.18, "I-TEXTO")
 
 
-def pluvial(dx, proy, blq, ox, oy, n_baj):
+def puntos_bap(blq, n_baj, ox=0.0, oy=0.0, sur_primero=False):
+    """Bajadas de agua pluvial de un bloque de vivienda: una sola fuente para A-04, IS-01 y la coordinación.
+    Esquinas del lado bajo de la cubierta primero (norte por omisión; sur si la cubierta a una agua baja al frente)."""
+    x, y, w, d = blq["x"] + ox, blq["y"] + oy, blq["w"], blq["d"]
+    norte = [(x + 0.35, y + d - 0.35), (x + w - 0.35, y + d - 0.35)]
+    sur = [(x + 0.35, y + 0.35), (x + w - 0.35, y + 0.35)]
+    pts = sur + norte if sur_primero else norte + sur
+    if n_baj > 4:
+        pts.append((x + w / 2, (y + 0.35) if sur_primero else (y + d - 0.35)))
+    return pts[:max(2, n_baj)]
+
+
+def pluvial(dx, proy, blq, ox, oy, n_baj, pts=None):
     x, y, w, d = blq["x"] + ox, blq["y"] + oy, blq["w"], blq["d"]
     dx.rect(x, y, w, d, "IS-PLUVIAL")
     per = 2 * (w + d)
     n = max(2, n_baj // max(1, len(proy["bloques"])))
-    pts = []
+    if pts is not None:
+        n = 0
+    else:
+        pts = []
     for k in range(n):
         s = per * (k + 0.5) / n
         if s < w:
