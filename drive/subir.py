@@ -46,6 +46,27 @@ def subir(url, token, ruta_local, ruta_drive):
             time.sleep(5 * (intento + 1))
 
 
+def responde(u):
+    try:
+        with urllib.request.urlopen(u, timeout=60) as r:
+            return '"ok":true' in r.read().decode(errors="replace")
+    except Exception:
+        return False
+
+
+def elegir_url(url):
+    """Si la URL del secreto no responde, prueba las direcciones de drive/puente_candidatos.txt."""
+    if url and responde(url):
+        return url
+    ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), "puente_candidatos.txt")
+    if os.path.exists(ruta):
+        for i, u in enumerate(l.strip() for l in open(ruta) if l.strip()):
+            if responde(u):
+                print(f"::notice::Puente encontrado: candidato {i}")
+                return u
+    return url
+
+
 def main():
     url, token = (os.environ.get("VERTICE_DRIVE_URL") or "").strip(), (os.environ.get("VERTICE_DRIVE_TOKEN") or "").strip().strip('"')
     if not url or not token:
@@ -66,6 +87,7 @@ def main():
             print(f"::notice::Puente (GET {url[:45]}…{url[-12:]}): {vis[:200]}")
     except Exception as e:
         print(f"::error::Drive: el puente no responde a GET ({str(e)[:200]})")
+    url = elegir_url(url)
     base = sys.argv[1].rstrip("/")
     solo = sys.argv[sys.argv.index("--solo") + 1:] if "--solo" in sys.argv else None
     clave = os.path.basename(base)
