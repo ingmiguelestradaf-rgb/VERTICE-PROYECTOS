@@ -32,7 +32,7 @@ def subir(url, token, ruta_local, ruta_drive):
                 res = json.loads(txt)
             except ValueError:
                 import re
-                vis = re.sub(r"<(script|style)[^>]*>.*?</\\1>", " ", txt, flags=re.S | re.I)
+                vis = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", txt, flags=re.S | re.I)
                 vis = " ".join(re.sub(r"<[^>]+>", " ", vis).split())
                 raise RuntimeError("el puente no respondió JSON: " + vis[:280])
             if not res.get("ok"):
