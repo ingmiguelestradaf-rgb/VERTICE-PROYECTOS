@@ -47,7 +47,7 @@ def subir(url, token, ruta_local, ruta_drive):
 
 
 def main():
-    url, token = os.environ.get("VERTICE_DRIVE_URL"), os.environ.get("VERTICE_DRIVE_TOKEN")
+    url, token = (os.environ.get("VERTICE_DRIVE_URL") or "").strip(), (os.environ.get("VERTICE_DRIVE_TOKEN") or "").strip().strip('"')
     if not url or not token:
         falta = [n for n, v in (("VERTICE_DRIVE_URL", url), ("VERTICE_DRIVE_TOKEN", token)) if not v]
         print(f"::error::Faltan los secretos de GitHub {', '.join(falta)} (Settings → Secrets and variables → Actions → "
