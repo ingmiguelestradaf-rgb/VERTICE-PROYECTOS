@@ -267,7 +267,8 @@ def ejecutivo_basico(carpeta, datos, proy, lays, ests, ins, sep):
                     oxx, oyy = ox - blq["x"], -blq["y"]
                     planos.planta_arq(h["dx"], blq, cu, va, oxx, oyy, texto=d == "ie")
                     {"ih": lambda: inst.hidraulica(h["dx"], proy, blq, cu, oxx, oyy, k, pg),
-                     "is": lambda: inst.sanitaria(h["dx"], proy, blq, cu, oxx, oyy, k),
+                     "is": lambda: inst.sanitaria(h["dx"], proy, blq, cu, oxx, oyy, k,
+                                                  [l_[0] for l_ in lays[i][k + 1:]] if k == 0 else ()),
                      "ie": lambda: inst.electrica(h["dx"], proy, blq, cu, oxx, oyy, k, pg),
                      "ig": lambda: inst.gas(h["dx"], proy, blq, cu, oxx, oyy, k, pg)}[d]()
                 H.poner(blq["w"], blq["d"], dib, f"{n['nombre'].upper()} — {blq['nombre'].upper()}")

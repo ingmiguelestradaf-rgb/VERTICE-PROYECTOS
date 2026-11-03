@@ -100,7 +100,9 @@ def casa(plan):
         pb = N("Planta baja", 2.8, [
             Z(z1, [C("Cochera doble", 5.8 / w, T["ext"]), C("Acceso", 1.8 / w, T["circ"]),
                    G(1 - 7.6 / w, [Z(.62, [C("Despacho", 1, T["social"])]), Z(.38, [C("Bodega", 1, T["alm"])])])]),
-            Z(z2, [C("Escalera", pe, T["esc"]), C("Vestíbulo", 1 - pe - mb, T["circ"]), C("Medio baño", mb, T["hum"])]),
+            # escalera al oriente: así el local bajo ella en planta alta (cuarto de TV, 4.15 m) conserva
+            # frente a la estancia; al poniente la recámara 2 (2.90 m) quedaba encerrada tras la escalera
+            Z(z2, [C("Medio baño", mb, T["hum"]), C("Vestíbulo", 1 - pe - mb, T["circ"]), C("Escalera", pe, T["esc"])]),
             Z(z3, [C("Sala", .38, T["social"]), C("Comedor", .27, T["social"]),
                    G(.35, [Z(.30, [C("Lavandería", 1, T["serv"])]), Z(.70, [C("Cocina", 1, T["coc"])])])]),
         ])
@@ -110,7 +112,7 @@ def casa(plan):
                C("Cuarto de TV", 1 - 7.6 / w, T["social"])]
         pa = N("Planta alta", 2.8, [
             Z(z1, z1c),
-            Z(z2, [C("Escalera", pe, T["esc"]), C("Estancia familiar", 1 - pe, T["circ"])]),
+            Z(z2, [C("Estancia familiar", 1 - pe, T["circ"]), C("Escalera", pe, T["esc"])]),
             # muros alineados con sala | comedor | cocina de planta baja
             Z(z3, [C("Recámara principal", .38, T["priv"]),
                    G(.27, [Z(.45, [C("Vestidor", 1, T["priv"])]), Z(.55, [C("Baño principal", 1, T["hum"])])]),
@@ -135,10 +137,11 @@ def casa(plan):
 def _depto(nombre, p, inv=False):
     return C(nombre, p, "unidad", inv=inv, sub=[
         Z(.38, [C("Sala-comedor", .60, T["social"]), C("Recámara 2", .40, T["priv"])]),
-        Z(.20, [C("Cocina", .35, T["coc"]), C("Vestíbulo", .40, T["circ"]), C("Baño 2", .25, T["hum"])]),
-        Z(.42, [C("Recámara principal", .45, T["priv"]),
-                G(.25, [Z(.55, [C("Baño principal", 1, T["hum"])]), Z(.45, [C("Lavandería", 1, T["serv"])])]),
-                C("Recámara 3", .30, T["priv"])]),
+        # vestíbulo al centro con frente a las tres recámaras (antes la recámara 3 sólo colindaba con baños)
+        Z(.20, [C("Cocina", .28, T["coc"]), C("Vestíbulo", .50, T["circ"]), C("Baño 2", .22, T["hum"])]),
+        Z(.42, [C("Recámara principal", .40, T["priv"]),
+                G(.22, [Z(.55, [C("Baño principal", 1, T["hum"])]), Z(.45, [C("Lavandería", 1, T["serv"])])]),
+                C("Recámara 3", .38, T["priv"])]),
     ])
 
 

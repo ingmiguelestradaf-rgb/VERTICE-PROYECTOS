@@ -1,5 +1,6 @@
 """Dibujo de plantas arquitectónicas, fachadas, cortes, conjunto y láminas."""
 import math
+from . import layout
 from .dxf import DXF, ROJO, AMARILLO, VERDE, CIAN, AZUL, MAGENTA, BLANCO, GRIS, GRIS_CLARO, NARANJA
 
 TI, TE = 0.075, 0.125          # medio muro interior / exterior
@@ -409,7 +410,7 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
                 for k in range(int(L * 0.4 / 0.35)):
                     dx.rect(x0 + L * 0.55 + k * 0.35, oy + z0 + zb1, 0.15, ztop - z0 - zb1, "A-FACHADA")
             if "marco" in corr["rasgos"]:
-                fa, fb = L * 0.38, L + 0.05
+                fa, fb = layout.inicio_marco(nivel_vanos[id(zs[1][2])], blq["x"], L), L + 0.05
                 dx.rect(x0 + fa, oy + z0 + zb1 - 0.3, fb - fa, ztop - z0 - zb1 + 0.3, "A-FACHADA")
                 dx.rect(x0 + fa + 0.3, oy + z0 + zb1, fb - fa - 0.6, ztop - z0 - zb1 - 0.3, "A-FACHADA")
         dx.texto((x0 + 0.3, oy + ztop + 0.3), f"NPT +{ztop:.2f}", max(0.2, L / 80), "COTAS")

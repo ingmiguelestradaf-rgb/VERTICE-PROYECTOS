@@ -206,7 +206,7 @@ def generar(V, carpeta, datos, proy, plan, corr, lays, r, spec, nombre, ins_calc
             if fn == "ih":
                 INS.hidraulica(h["dx"], proy, blq, cu, ox, oy, k, pg)
             elif fn == "is":
-                INS.sanitaria(h["dx"], proy, blq, cu, ox, oy, k)
+                INS.sanitaria(h["dx"], proy, blq, cu, ox, oy, k, [l_[0] for l_ in lays[k + 1:]] if k == 0 else ())
             elif fn == "ie":
                 INS.electrica(h["dx"], proy, blq, cu, ox, oy, k, pg)
                 IE.tag_circuitos(h["dx"], blq, lays, cc, k, ox, oy)

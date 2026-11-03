@@ -9,6 +9,7 @@ from matplotlib.colors import to_rgb
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 
 from .planos import altura_cubierta, alturas
+from . import layout
 
 SOL = np.array([0.55, -0.62, 0.78]); SOL = SOL / np.linalg.norm(SOL)
 
@@ -221,7 +222,7 @@ def _bloque(E, blq, lay, corr, rnd):
     if "marco" in corr["rasgos"] and len(zs) > 1:
         # marco volumétrico que enmarca la planta alta de la fachada principal
         zb1 = zs[1][0]
-        fx0, fx1 = x + w * 0.38, x + w + 0.05
+        fx0, fx1 = x + layout.inicio_marco(nivel_vanos[id(zs[1][2])], x, w), x + w + 0.05
         e_ = 0.3
         E.caja(fx0, y - 0.9, zb1 - 0.3, fx1 - fx0, 0.9, e_, ac)
         E.caja(fx0, y - 0.9, ztop - e_, fx1 - fx0, 0.9, e_, ac)

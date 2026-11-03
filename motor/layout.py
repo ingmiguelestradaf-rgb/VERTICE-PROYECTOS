@@ -89,6 +89,27 @@ ANCHO_PUERTA = {"humedo": 0.8, "almacen": 0.8, "privado": 0.9, "escalera": 1.2, 
                 "tecnico": 1.0, "servicio": 0.9, "social": 0.9, "cocina": 0.9}
 
 
+def inicio_marco(vanos, bx, L, e=0.3, rel=0.38):
+    """Arranque (local, desde el paño poniente de la fachada sur) del marco volumétrico de planta alta.
+    Busca el macizo entre ventanas más cercano a rel·L donde quepa el poste (e) para que el marco
+    no cruce una ventana; si no hay, regresa rel·L."""
+    vs = sorted((v["a"] - bx, v["b"] - bx) for v in vanos if v.get("lado") == "S")
+    huecos, cur = [], 0.0
+    for a, b in vs:
+        if a > cur:
+            huecos.append((cur, a))
+        cur = max(cur, b)
+    huecos.append((cur, L))
+    obj, mejor = rel * L, None
+    for a, b in huecos:
+        if b - a < e + 0.1 or a > 0.6 * L:
+            continue
+        f = min(max(obj, a + 0.05), b - e - 0.05)
+        if mejor is None or abs(f - obj) < abs(mejor - obj):
+            mejor = f
+    return round(mejor, 3) if mejor is not None else obj
+
+
 def _puerta(seg, ancho, cuarto, tipo="puerta"):
     eje, c, i, f = seg
     ancho = min(ancho, f - i - 0.2)
@@ -172,8 +193,13 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
     for r in hojas:
         if r["t"] != "escalera" or "Elevador" in r["n"]:
             continue
+        # si la escalera colinda con una circulación, abre sólo a ella (no desemboca en recámaras ni estancias
+        # cerradas, y evita un borde abierto sin barandal hacia un local habitable)
+        tipos = ("circ", "social", "grande")
+        if any(o is not r and o["unidad"] == r["unidad"] and o["t"] == "circ" and vecinos(r, o) for o in hojas):
+            tipos = ("circ",)
         for o in hojas:
-            if o is r or o["unidad"] != r["unidad"] or o["t"] not in ("circ", "social", "grande"):
+            if o is r or o["unidad"] != r["unidad"] or o["t"] not in tipos:
                 continue
             seg = vecinos(r, o)
             if seg:

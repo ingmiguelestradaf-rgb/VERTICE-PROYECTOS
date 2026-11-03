@@ -251,7 +251,9 @@ def hidraulica(dx, proy, blq, cuartos, ox, oy, nivel_idx, primero_global):
                     dx.texto((p[0] + 0.5, p[1]), "GCI", 0.2, "CI-INCENDIO")
 
 
-def sanitaria(dx, proy, blq, cuartos, ox, oy, nivel_idx):
+def sanitaria(dx, proy, blq, cuartos, ox, oy, nivel_idx, superiores=()):
+    """superiores: listas de cuartos de los niveles de arriba; en planta baja sus bajadas (BAN) se
+    conectan al colector con su propio ramal."""
     hum = [c for c in cuartos if es_humedo(c)]
     col = set(blq.get("colindancias", []))
     xc = blq["x"] + ox + (blq["w"] - 0.6 if "E" in col else blq["w"] + 1.2)
@@ -263,12 +265,35 @@ def sanitaria(dx, proy, blq, cuartos, ox, oy, nivel_idx):
         if nivel_idx == 0:
             dx.linea(p, (xc, p[1]), "IS-SANITARIA")
             ypts.append(p[1])
+    if nivel_idx == 0:
+        vistos = {(round(x_, 2), round(y_, 2)) for x_, y_ in (punto_humedo(c, ox, oy) for c in hum)}
+        for cs in superiores:
+            for c in cs:
+                if not es_humedo(c):
+                    continue
+                p = punto_humedo(c, ox, oy)
+                if (round(p[0], 2), round(p[1], 2)) in vistos:
+                    continue
+                vistos.add((round(p[0], 2), round(p[1], 2)))
+                dx.circulo(p, 0.12, "IS-SANITARIA")
+                dx.texto((p[0] + 0.2, p[1] + 0.2), "LLEGA BAN Ø100", 0.15, "I-TEXTO")
+                dx.linea(p, (xc, p[1]), "IS-SANITARIA")
+                ypts.append(p[1])
     if nivel_idx == 0 and ypts:
         ytop = max(ypts)
         y0 = oy
         dx.linea((xc, ytop), (xc, y0), "IS-SANITARIA")
         n = max(1, int((ytop - y0) // 10))
         regs = sorted(set([round(y, 2) for y in ypts] + [round(y0 + (ytop - y0) * k / n, 2) for k in range(n + 1)]))
+        # ningún registro bajo la escalera: se recorre al paño libre más cercano (el ramal entra con "Y")
+        escs = [c for c in cuartos if c["t"] == "escalera" and c["x"] + ox <= xc <= c["x"] + ox + c["w"]]
+        def libre(y):
+            for c in escs:
+                ya, yb = c["y"] + oy, c["y"] + oy + c["d"]
+                if ya - 0.25 < y < yb + 0.25:
+                    return round(ya - 0.35 if y - ya < yb - y else yb + 0.35, 2)
+            return y
+        regs = sorted({libre(y) for y in regs})
         for y in regs:
             dx.rect(xc - 0.3, y - 0.2, 0.6, 0.4, "IS-REGISTROS")
         dx.texto((xc + 0.4, (ytop + y0) / 2), "COLECTOR PVC 2%", 0.2, "I-TEXTO", rot=90)

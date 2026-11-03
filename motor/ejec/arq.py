@@ -2,7 +2,7 @@
 cancelería y acabados. Los ejes son los mismos de los planos estructurales y de instalaciones."""
 import math
 from ..dxf import ROJO, GRIS, VERDE, CIAN
-from .. import planos
+from .. import planos, layout
 
 EPS = 0.02
 LETRAS = "ABCDEFGHJKLMNPQRSTUVWXYZ"
@@ -455,7 +455,7 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
             for k_ in range(int(L * 0.4 / 0.35)):
                 dx.rect(ox + L * 0.55 + k_ * 0.35, oy + zb1, ancho, ztop - zb1, F)
         if "marco" in corr["rasgos"] and len(niveles) > 1:
-            fa, fb, e_ = L * 0.38, L + 0.05, 0.3
+            fa, fb, e_ = layout.inicio_marco(lays[1][1], blq["x"], L), L + 0.05, 0.3
             dx.rect(ox + fa, oy + zb1 - 0.3, fb - fa, ztop - zb1 + 0.3, F)
             dx.rect(ox + fa + e_, oy + zb1, fb - fa - 2 * e_, ztop - zb1 - e_, F)
     # niveles

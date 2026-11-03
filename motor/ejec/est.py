@@ -427,6 +427,12 @@ def calcular(V, blq, lays, t_x=15, t_y=15):
         n_pel = math.ceil(alto / 0.18)
         peralte = alto / n_pel
         huella = run / max(1, n_pel - 1)
+        # regla de comodidad 2p + h ≤ 66 cm: la huella no se estira de más; el sobrante se va al descanso
+        h_com = max(0.25, 0.64 - 2 * peralte)
+        if huella > h_com:
+            huella = h_com
+            run = huella * max(1, n_pel - 1)
+            desc = Llargo - run
         Lh = run + desc / 2
         h_e = max(10, math.ceil(Lh * 100 / 20))
         wu_e = 1.3 * (h_e / 100 * 2400 / math.cos(math.atan(alto / run)) + peralte / 2 * 2400 + 100) + 1.5 * 350

@@ -40,6 +40,14 @@ def revisar(proy, lays):
             for i, c in enumerate(hojas):
                 if i not in vis:
                     add(etq, "error", f"{c['n']}: sin acceso (no conecta con la entrada ni con la escalera).")
+            # recámaras que sólo se entran por otra recámara o por un baño (salvo vestidor / baño principal)
+            ady, _ = layout.grafo(hojas, va)
+            for i, c in enumerate(hojas):
+                if c["t"] != "privado" or "Vestidor" in c["n"] or "Closet" in c["n"]:
+                    continue
+                if ady[i] and all(hojas[j]["t"] in ("privado", "humedo") for j in ady[i]):
+                    add(etq, "error", f"{c['n']}: sólo se entra por " + ", ".join(sorted(hojas[j]["n"] for j in ady[i]))
+                        + " (recámara ajena o baño); requiere acceso desde una circulación.")
             con_ventana = {v["cuarto"] for v in va if v["tipo"] in ("ventana", "porton", "puerta_ext") and v.get("lado")}
             autos = [v["cuarto"] for v in va if v.get("auto")]
             if autos:
