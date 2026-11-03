@@ -57,7 +57,10 @@ def main():
         print("::warning::VERTICE_DRIVE_URL debería terminar en /exec (implementación de Aplicación web)")
     try:
         with urllib.request.urlopen(url, timeout=60) as r:
-            print("Puente:", " ".join(r.read().decode(errors="replace").split())[:120])
+            import re
+            txt = r.read().decode(errors="replace")
+            vis = " ".join(re.sub(r"<[^>]+>", " ", re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", txt, flags=re.S | re.I)).split())
+            print(f"::notice::Puente (GET {url[:45]}…{url[-12:]}): {vis[:200]}")
     except Exception as e:
         print(f"::error::Drive: el puente no responde a GET ({str(e)[:200]})")
     base = sys.argv[1].rstrip("/")
