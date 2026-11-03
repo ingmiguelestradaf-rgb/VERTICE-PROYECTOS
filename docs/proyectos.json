@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-03-casa-deconstructivista",
+  "fecha": "2026-11-03",
+  "nombre": "Casa Fractura",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Deconstructivista",
+  "area": 334.9,
+  "terreno": 300.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-02-casa-industrial",
   "fecha": "2026-11-02",
   "nombre": "Casa Taller",
