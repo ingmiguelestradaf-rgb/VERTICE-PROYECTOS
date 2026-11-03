@@ -53,6 +53,9 @@ def main():
         print(f"::error::Faltan los secretos de GitHub {', '.join(falta)} (Settings → Secrets and variables → Actions → "
               "pestaña Secrets → Repository secrets): no se subió nada a Drive.")
         sys.exit(1)
+    import hashlib
+    ok = hashlib.sha256(token.encode()).hexdigest()[:16] == "ca42824be2924cba"
+    print(f"::notice::Token de GitHub: {len(token)} caracteres, {'coincide' if ok else 'NO coincide'} con el token entregado")
     if "/exec" not in url:
         print("::warning::VERTICE_DRIVE_URL debería terminar en /exec (implementación de Aplicación web)")
     try:
