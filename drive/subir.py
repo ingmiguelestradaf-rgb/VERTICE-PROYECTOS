@@ -27,13 +27,19 @@ def subir(url, token, ruta_local, ruta_drive):
         try:
             req = urllib.request.Request(url, data=cuerpo, headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(req, timeout=180) as r:
-                res = json.loads(r.read().decode())
+                txt = r.read().decode(errors="replace")
+            try:
+                res = json.loads(txt)
+            except ValueError:
+                raise RuntimeError("el puente no respondió JSON (¿acceso 'Cualquier usuario' y URL /exec?): "
+                                   + " ".join(txt.split())[:160])
             if not res.get("ok"):
-                raise RuntimeError(res.get("error"))
+                raise RuntimeError(f"el puente respondió: {res.get('error')}")
             return res
         except Exception as e:  # reintento con espera
             if intento == 3:
-                raise
+                print(f"::error::Drive: {ruta_local}: {str(e)[:300]}")
+                sys.exit(1)
             print(f"  reintento {intento + 1}: {e}")
             time.sleep(5 * (intento + 1))
 
@@ -45,6 +51,13 @@ def main():
         print(f"::error::Faltan los secretos de GitHub {', '.join(falta)} (Settings → Secrets and variables → Actions → "
               "pestaña Secrets → Repository secrets): no se subió nada a Drive.")
         sys.exit(1)
+    if "/exec" not in url:
+        print("::warning::VERTICE_DRIVE_URL debería terminar en /exec (implementación de Aplicación web)")
+    try:
+        with urllib.request.urlopen(url, timeout=60) as r:
+            print("Puente:", " ".join(r.read().decode(errors="replace").split())[:120])
+    except Exception as e:
+        print(f"::error::Drive: el puente no responde a GET ({str(e)[:200]})")
     base = sys.argv[1].rstrip("/")
     solo = sys.argv[sys.argv.index("--solo") + 1:] if "--solo" in sys.argv else None
     clave = os.path.basename(base)
