@@ -238,12 +238,11 @@ def _bloque(E, blq, lay, corr, rnd):
         hs.append((cur, x + w))
         return max(hs, key=lambda h_: h_[1] - h_[0])
     if "muro_acento" in corr["rasgos"]:
-        # piedra laja en el paño ciego más ancho de cada nivel de la fachada principal
+        # piedra en el paño ciego más ancho de la fachada principal, corrido en toda la altura
+        # (mismo paño que A-05 en arq.fachada y que el render fotorrealista)
         piedra = corr.get("piedra", "#8E8579")
-        for zb, h, n in zs:
-            mx0, mx1 = hueco_mayor(nivel_vanos[id(n)])
-            if mx1 - mx0 < 0.9:
-                continue
+        mx0, mx1 = hueco_mayor([v for _, _, n in zs for v in nivel_vanos[id(n)]])
+        for zb, h, n in (zs if mx1 - mx0 >= 0.9 else []):
             for k in range(int(h / 0.3)):
                 tono = piedra if k % 3 else "#7F776C"
                 za_ = zb + k * 0.3
@@ -255,7 +254,19 @@ def _bloque(E, blq, lay, corr, rnd):
             for k in range(int((jx1 - jx0 - 0.4) / 0.45)):
                 px = jx0 + 0.35 + k * 0.45
                 E.caja(px - 0.18, y - 0.63, z0 + 0.5, 0.36, 0.36, 0.35 + 0.12 * (k % 3), "#5E8C4A")
-    if "pergola" in corr["rasgos"] or "porche" in corr["rasgos"]:
+    if "porche" in corr["rasgos"] and zs:
+        # porche cubierto en la fachada principal: del acceso al extremo libre, postes y vigas de madera
+        pe = next((v for v in nivel_vanos[id(zs[0][2])] if v["tipo"] == "puerta_ext" and v.get("lado") == "S"), None)
+        if pe is not None:
+            px0 = max(x, pe["a"] - 0.6)
+            px1 = x + w if (x + w) - pe["b"] < w / 2 else min(x + w, pe["b"] + 3.0)
+            pz, pdp = z0 + 2.55, 1.8
+            E.caja(px0, y - pdp, pz, px1 - px0, pdp, 0.14, corr["techo"])
+            for k in range(int((px1 - px0) / 0.6) + 1):
+                E.caja(min(px0 + k * 0.6, px1 - 0.1), y - pdp, pz - 0.18, 0.1, pdp, 0.18, "#6B4B32")
+            for xx in (px0, px1 - 0.2):
+                E.caja(xx, y - pdp, z0, 0.2, 0.2, pz - z0, "#6B4B32")
+    if "pergola" in corr["rasgos"]:
         zp = z0 + 2.7
         for k in range(int(w / 0.6)):
             E.caja(x + k * 0.6, y + d, zp, 0.08, 2.5, 0.18, "#6B4B32")

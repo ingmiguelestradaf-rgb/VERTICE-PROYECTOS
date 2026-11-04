@@ -90,6 +90,24 @@ def construir(fecha, spec=None, salida=SALIDA, privado=PRIVADO, ejecutivo=True):
     proy = programa.generar(plan)
     if spec.get("modelo"):
         fusionar(proy, spec["modelo"])
+    # cubierta inclinada sobre la losa de azotea (vivienda de mampostería): material y peso para estructura,
+    # planta de azotea y ubicación del tanque de gas (no se coloca sobre una cubierta inclinada)
+    mats = (spec.get("materiales") or corr["materiales"]).lower()
+    for blq in proy["bloques"]:
+        if blq["sistema"] == "mamposteria" and corr["cubierta"] not in ("plana", "plana_pretil") \
+                and planos.altura_cubierta(blq, corr) > 0:
+            teja = "teja" in mats
+            al = 0.9 if "alero_amplio" in corr["rasgos"] else 0.6
+            span = min(blq["w"], blq["d"]) / (1 if corr["cubierta"].startswith("una") else 2)
+            blq["cubierta_ligera"] = dict(tipo=corr["cubierta"], material="teja de barro" if teja else "lámina",
+                                          cm=100 if teja else 30, alero=al,
+                                          pend=round(planos.altura_cubierta(blq, corr) / span, 3),
+                                          rasgos=[r_ for r_ in corr["rasgos"] if r_ in ("porche", "pergola")])
+            # tanque de gas LP a nivel de patio posterior, junto a la colindancia oriente y a >= 3 m de la fachada
+            blq["gas_L"] = "300 L" if plan["terreno"]["area"] < 300 else "500 L"   # igual que instalaciones.calcular
+            libre = plan["terreno"]["fondo"] - (blq["y"] + blq["d"])
+            blq["tanque_gas"] = [round(blq["x"] + blq["w"] - 0.6, 2),
+                                 round(blq["y"] + blq["d"] + max(1.2, min(3.6, libre - 1.0)), 2)]
     nombre = spec.get("nombre") or f"{plan['tipologia_nombre']} {plan['corriente_nombre']}"
     concepto = spec.get("concepto") or ""
     clave = f"{fecha.isoformat()}-{plan['tipologia']}-{slug(plan['corriente'])}"

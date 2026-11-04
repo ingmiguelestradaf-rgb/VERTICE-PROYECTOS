@@ -159,7 +159,7 @@ def calcular(proy, plan, lays, area_total):
                    ("Tierra física", "Electrodo de cobre 3 m + registro", "Unión equipotencial, NOM-001-SEDE-2012"),
                    ("Energía renovable", f"Sistema FV interconectado ≈ {max(2, round(kw * 0.25)):,} kWp", "Opcional, recomendado")],
         gas=[("Combustible", "Gas LP", "NOM-004-SEDG-2004"),
-             ("Almacenamiento", f"Tanque estacionario {tanques[tip]}", "En azotea o patio, ventilado, a > 3 m de flamas"),
+             ("Almacenamiento", f"Tanque estacionario {tanques[tip]}", "En patio a nivel de piso (cubierta inclinada) o en azotea, ventilado, a > 3 m de flamas"),
              ("Red", "Cobre tipo L Ø 3/8\" a 3/4\" con regulador de 2 etapas", "Prueba de hermeticidad a 1.5× presión de trabajo")],
     )
     if ci:
@@ -381,15 +381,25 @@ def electrica(dx, proy, blq, cuartos, ox, oy, nivel_idx, primero_global):
     return nlum
 
 
+def tanque_gas(blq):
+    """Ubicación del tanque estacionario: en patio si la cubierta es inclinada (blq["tanque_gas"]); si no, en azotea."""
+    if blq.get("tanque_gas"):
+        return tuple(blq["tanque_gas"])
+    return (blq["x"] + blq["w"] - 1.2, blq["y"] + blq["d"] - 1.2)
+
+
 def gas(dx, proy, blq, cuartos, ox, oy, nivel_idx, primero_global):
     coc = [c for c in cuartos if ("Cocina" in c["n"] or "Lavander" in c["n"] or "máquinas" in c["n"]
                                   or "Cocineta" in c["n"]) and not c["contenedor"]]
     if not coc:
         return
-    tq = (blq["x"] + ox + blq["w"] - 1.2, blq["y"] + oy + blq["d"] - 1.2)
+    t0 = tanque_gas(blq)
+    tq = (t0[0] + ox, t0[1] + oy)
+    patio = "tanque_gas" in blq
     if nivel_idx == 0 and primero_global:
         dx.circulo(tq, 0.6, "IG-GAS")
-        dx.texto((tq[0] - 2.5, tq[1] + 0.8), "TANQUE ESTACIONARIO (AZOTEA)", 0.18, "I-TEXTO")
+        dx.texto((tq[0] - 2.5, tq[1] + 0.8), "TANQUE ESTACIONARIO (PATIO, NPT ±0.00)" if patio else "TANQUE ESTACIONARIO (AZOTEA)",
+                 0.18, "I-TEXTO")
     else:
         dx.circulo(tq, 0.12, "IG-GAS")
     for c in coc:

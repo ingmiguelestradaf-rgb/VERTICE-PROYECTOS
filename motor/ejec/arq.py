@@ -164,9 +164,33 @@ def amueblar(dx, c, vanos, ox=0.0, oy=0.0):
         lat = [l for l in ("S", "N", "O", "E") if l not in (lado, OPUESTO[lado]) and l not in _aberturas(c, vv)]
         if lat and not princ:
             lc = lat[0]
-            lon = (d if lc in ("O", "E") else w) - 0.9
+            Lm = d if lc in ("O", "E") else w
+            # el clóset deja libre el abatimiento de las puertas que están junto al muro donde se apoya
+            ini, fin = 0.15, Lm - 0.15
+            for v in vv:
+                if v["tipo"] not in ("puerta", "vano", "puerta_ext"):
+                    continue
+                if lc in ("O", "E") and v["eje"] == "h" and v["a"] < c["x"] + w and v["b"] > c["x"] and \
+                        (abs(v["c"] - c["y"]) < EPS or abs(v["c"] - c["y"] - d) < EPS):
+                    pos = (v["a"] - c["x"]) if lc == "O" else (c["x"] + w - v["b"])
+                    lejos = abs(v["c"] - c["y"]) >= EPS            # puerta en el muro N
+                elif lc in ("S", "N") and v["eje"] == "v" and v["a"] < c["y"] + d and v["b"] > c["y"] and \
+                        (abs(v["c"] - c["x"]) < EPS or abs(v["c"] - c["x"] - w) < EPS):
+                    pos = (v["a"] - c["y"]) if lc == "S" else (c["y"] + d - v["b"])
+                    lejos = abs(v["c"] - c["x"]) >= EPS            # puerta en el muro E
+                else:
+                    continue
+                if pos < 0.6 + 0.1:
+                    libre = (v["b"] - v["a"]) + 0.15
+                    if lejos:
+                        fin = min(fin, Lm - libre)
+                    else:
+                        ini = max(ini, libre)
+            if ini == 0.15 and fin == Lm - 0.15:
+                ini = 0.8                                          # criterio original: libre hacia el sur/oeste
+            lon = fin - ini
             if lon > 1.2:
-                x1, y1, a1, b1 = _caja(dx, c, lc, lon, 0.6, despl=0.35, sep=0.0)
+                x1, y1, a1, b1 = _caja(dx, c, lc, lon, 0.6, despl=(ini + fin) / 2 - Lm / 2, sep=0.0)
                 dx.linea((x1, y1), (x1 + a1, y1 + b1), L)
                 dx.texto((x1 + a1 / 2, y1 + b1 / 2), "CLÓSET", 0.12, L, centrado=True)
     elif n.startswith("Sala") or n in ("Family room", "Cuarto de TV", "Estancia familiar"):
@@ -305,7 +329,82 @@ def _wc(dx, c, lado, despl):
 
 
 # ------------------------------------------------------------------ azotea
-def azotea(dx, blq, lays, r_est, n_baj, gas_xy, ox=0.0, oy=0.0, pretil=0.6, sur_primero=False):
+def alero(corr):
+    """Vuelo del alero de cubiertas inclinadas (igual en A-04, A-05 y renders)."""
+    return 0.9 if "alero_amplio" in corr.get("rasgos", ()) else 0.6
+
+
+def cubierta_inclinada(dx, blq, corr, r_est, n_baj, gas_xy, ox, oy, sur_primero):
+    """Planta de azotea con cubierta inclinada sobre la losa: faldones, cumbrera, limatesas, pendientes,
+    canalón perimetral y bajadas; el tanque de gas va en el patio (no sobre la cubierta)."""
+    from .. import instalaciones as INS
+    x, y, w, d = blq["x"] + ox, blq["y"] + oy, blq["w"], blq["d"]
+    cub, cl = corr["cubierta"], blq["cubierta_ligera"]
+    al = alero(corr)
+    rr = planos.altura_cubierta(blq, corr)
+    X0, Y0, X1, Y1 = x - al, y - al, x + w + al, y + d + al
+    W, D = X1 - X0, Y1 - Y0
+    dx.rect(X0, Y0, W, D, "A-MUROS")                                  # borde del alero / canalón
+    dx.rect(x, y, w, d, "A-HATCH")                                    # paramento de muros (oculto)
+    flechas = []
+    if cub.startswith("cuatro"):
+        span = min(w, d) / 2
+        if W >= D:
+            a, b = (X0 + D / 2, Y0 + D / 2), (X1 - D / 2, Y0 + D / 2)
+            flechas = [((a[0] + b[0]) / 2, a[1], 0, -1), ((a[0] + b[0]) / 2, a[1], 0, 1), (a[0], a[1], -1, 0), (b[0], b[1], 1, 0)]
+        else:
+            a, b = (X0 + W / 2, Y0 + W / 2), (X0 + W / 2, Y1 - W / 2)
+            flechas = [(a[0], (a[1] + b[1]) / 2, -1, 0), (a[0], (a[1] + b[1]) / 2, 1, 0), (a[0], a[1], 0, -1), (b[0], b[1], 0, 1)]
+        dx.linea(a, b, "A-MUROS")
+        for p_, esq in ((a, (X0, Y0)), (a, (X1, Y0) if W < D else (X0, Y1)), (b, (X1, Y1)), (b, (X0, Y1) if W < D else (X1, Y0))):
+            dx.linea(p_, esq, "A-MUROS")
+        dx.texto(((a[0] + b[0]) / 2 - (0.25 if W < D else 0), (a[1] + b[1]) / 2 + (0 if W < D else 0.25)), "CUMBRERA", 0.13,
+                 "A-TEXTO", rot=90 if W < D else 0, centrado=True)
+    elif cub.startswith("dos"):
+        span = min(w, d) / 2
+        if w >= d:
+            dx.linea((X0, (Y0 + Y1) / 2), (X1, (Y0 + Y1) / 2), "A-MUROS")
+            flechas = [((X0 + X1) / 2, (Y0 + Y1) / 2, 0, -1), ((X0 + X1) / 2, (Y0 + Y1) / 2, 0, 1)]
+        else:
+            dx.linea(((X0 + X1) / 2, Y0), ((X0 + X1) / 2, Y1), "A-MUROS")
+            flechas = [((X0 + X1) / 2, (Y0 + Y1) / 2, -1, 0), ((X0 + X1) / 2, (Y0 + Y1) / 2, 1, 0)]
+    else:
+        span = min(w, d)
+        flechas = [((X0 + X1) / 2, (Y0 + Y1) / 2, 0, -1)]
+    pend = rr / span * 100 if span else 0
+    for (px, py, ux, uy) in flechas:
+        L_ = 1.8
+        p0 = (px + ux * 1.0, py + uy * 1.0)
+        p1 = (px + ux * (1.0 + L_), py + uy * (1.0 + L_))
+        dx.linea(p0, p1, "A-MUROS")
+        for s_ in (-1, 1):
+            dx.linea(p1, (p1[0] - ux * 0.3 - uy * s_ * 0.15, p1[1] - uy * 0.3 + ux * s_ * 0.15), "A-MUROS")
+        # texto junto a la flecha, sin encimarse con la cumbrera ni con las otras flechas
+        mx, my = (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2
+        if uy:
+            dx.texto((mx + 0.25, my), f"PEND. {pend:.0f} %", 0.15, "A-TEXTO", rot=90, centrado=True)
+        else:
+            dx.texto((mx, my + 0.25), f"PEND. {pend:.0f} %", 0.15, "A-TEXTO", centrado=True)
+    for p in INS.puntos_bap(blq, n_baj, ox, oy, sur_primero):
+        dx.circulo(p, 0.12, "A-MUROS")
+        dx.texto((p[0] + 0.2, p[1] - 0.35 if p[1] > y + d / 2 else p[1] + 0.25), "BAP Ø100", 0.15, "A-TEXTO")
+    if gas_xy:
+        gx, gy = gas_xy[0] + ox, gas_xy[1] + oy
+        dx.circulo((gx, gy), 0.55, "A-MUROS")
+        dx.texto((min(gx, X1 - 2.6), gy + 0.75), "TANQUE ESTACIONARIO GAS LP EN PATIO (NPT ±0.00)", 0.14, "A-TEXTO", centrado=True)
+    mat = cl["material"].upper()
+    notas = [f"CUBIERTA {cub.replace('_', ' ').upper()} DE {mat}, PENDIENTE {pend:.0f} %, SOBRE TRIPLAY 16 mm, FIELTRO ASFÁLTICO 30 lb",
+             "Y ARMADURA LIGERA DE PTR GALVANIZADO ANCLADA A LA LOSA DE AZOTEA (CÁMARA VENTILADA BAJO LA CUBIERTA)",
+             f"ALERO DE {al:.2f} m CON CANALÓN PERIMETRAL DE LÁMINA GALV. CAL. 24 A BAJADAS PLUVIALES Ø100",
+             f"PESO DE CUBIERTA {cl['cm']} kg/m² INCLUIDO EN LA CARGA MUERTA DE AZOTEA (VER MEMORIA)",
+             f"LOSA DE AZOTEA h = {r_est['losas'][-1]['h']} cm, PLANA, CON IMPERMEABILIZANTE APP 4 mm (VER PLANO E-02)"]
+    for i, t in enumerate(notas):
+        dx.texto((X1 + 1.6, Y1 - 0.4 - i * 0.32), t, 0.16, "A-TEXTO")
+
+
+def azotea(dx, blq, lays, r_est, n_baj, gas_xy, ox=0.0, oy=0.0, pretil=0.6, sur_primero=False, corr=None):
+    if corr is not None and blq.get("cubierta_ligera"):
+        return cubierta_inclinada(dx, blq, corr, r_est, n_baj, gas_xy, ox, oy, sur_primero)
     x, y, w, d = blq["x"] + ox, blq["y"] + oy, blq["w"], blq["d"]
     dx.rect(x - 0.125, y - 0.125, w + 0.25, d + 0.25, "A-MUROS")
     dx.rect(x + 0.025, y + 0.025, w - 0.05, d - 0.05, "A-MUROS")
@@ -364,7 +463,7 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
     if rr > 0:
         ridge_x = blq["w"] >= blq["d"]
         gable = (lado in ("S", "N") and not ridge_x) or (lado in ("E", "O") and ridge_x)
-        al = 0.6
+        al = alero(corr)
         if cub == "curva":
             dx.polilinea([(ox - al + (L + 2 * al) * i / 20, oy + ztop + rr * 4 * (i / 20) * (1 - i / 20)) for i in range(21)], F)
         elif cub.startswith("una"):
@@ -454,6 +553,17 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
             ancho = 0.08 if "celosia" in corr["rasgos"] else 0.15
             for k_ in range(int(L * 0.4 / 0.35)):
                 dx.rect(ox + L * 0.55 + k_ * 0.35, oy + zb1, ancho, ztop - zb1, F)
+        if "porche" in corr["rasgos"]:
+            # porche cubierto sobre el acceso: misma geometría que render.py (postes, viga y cubierta a +2.55)
+            pe = next((v for v in lays[0][1] if v["tipo"] == "puerta_ext" and v.get("lado") == "S"), None)
+            if pe is not None:
+                pa_ = max(0.0, _u(blq, lado, pe["a"]) - 0.6)
+                pb_ = L if L - _u(blq, lado, pe["b"]) < L / 2 else min(L, _u(blq, lado, pe["b"]) + 3.0)
+                dx.rect(ox + pa_, oy + 2.37, pb_ - pa_, 0.32, F)                 # viga de madera + cubierta
+                for xx in (pa_, pb_ - 0.2):
+                    dx.rect(ox + xx, oy, 0.2, 2.37, F)                           # postes de madera 20x20
+                dx.texto((ox + (pa_ + pb_) / 2, oy + 2.98), "PORCHE: VIGAS Y POSTES DE MADERA, CUBIERTA DE TEJA",
+                         0.12, "A-TEXTO", centrado=True)
         if "marco" in corr["rasgos"] and len(niveles) > 1:
             fa, fb, e_ = layout.inicio_marco(lays[1][1], blq["x"], L), L + 0.05, 0.3
             dx.rect(ox + fa, oy + zb1 - 0.3, fb - fa, ztop - zb1 + 0.3, F)

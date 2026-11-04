@@ -367,7 +367,19 @@ for blq in E["bloques"]:
         for i in range(n):
             xx = x0 + w * 0.6 + i * 0.3
             G.caja("madera" if "celosia" in ras else "losa", xx, y0 - 0.45, blq["niveles"][0]["h"], xx + 0.06, y0 - 0.2, top)
-    if "pergola" in ras or "porche" in ras:
+    if "porche" in ras:
+        pe = next((v for v in blq["niveles"][0]["vanos"] if v["tipo"] == "puerta_ext" and v.get("lado") == "S"), None)
+        if pe is not None:
+            px0 = max(x0, pe["a"] - 0.6)
+            px1 = x0 + w if (x0 + w) - pe["b"] < w / 2 else min(x0 + w, pe["b"] + 3.0)
+            pz, pdp = 2.55, 1.8
+            G.caja("techo", px0, y0 - pdp, pz, px1, y0, pz + 0.14)
+            for i in range(int((px1 - px0) / 0.6) + 1):
+                xx = min(px0 + i * 0.6, px1 - 0.1)
+                G.caja("madera", xx, y0 - pdp, pz - 0.18, xx + 0.1, y0, pz)
+            for xx in (px0, px1 - 0.2):
+                G.caja("madera", xx, y0 - pdp, 0, xx + 0.2, y0 - pdp + 0.2, pz)
+    if "pergola" in ras:
         for i in range(int(w / 0.6)):
             G.caja("madera", x0 + i * 0.6, y0 + d, 2.7, x0 + i * 0.6 + 0.08, y0 + d + 2.6, 2.88)
         for xx in (x0 + 0.2, x0 + w - 0.4):

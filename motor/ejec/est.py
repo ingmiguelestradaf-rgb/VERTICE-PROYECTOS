@@ -226,6 +226,12 @@ def calcular(V, blq, lays, t_x=15, t_y=15):
     # ---- cargas
     ent = K.entrepiso_tipico(0.12)
     azo = K.azotea_tipica(0.12)
+    cl = blq.get("cubierta_ligera")
+    if cl:
+        # cubierta inclinada sobre la losa de azotea: la losa queda plana y protegida, sin relleno ni entortado
+        # para pendientes; se suma el peso de la cubierta (en proyección horizontal)
+        azo.capas = [c for c in azo.capas if not c.nombre.startswith(("Relleno", "Entortado"))]
+        azo.capas.append(K.Capa(f"Cubierta inclinada de {cl['material']} con estructura ligera (proy. horizontal)", 0.0, 0, cl["cm"]))
     cv_ent, cv_azo = K.CARGAS_VIVAS["habitacion"], K.CARGAS_VIVAS["azotea_pendiente_hasta_5pct"]
     w_ent = K.combinaciones_ntc(ent.carga_muerta, cv_ent[0], cv_ent[1])["envolvente"]
     w_azo = K.combinaciones_ntc(azo.carga_muerta, cv_azo[0], cv_azo[1])["envolvente"]

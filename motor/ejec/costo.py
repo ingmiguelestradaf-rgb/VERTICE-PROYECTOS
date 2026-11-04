@@ -135,12 +135,24 @@ def por_cotizar(blq, lays, r, cancel, q, cc):
               ("Calentador de paso 16 L/min a gas", "pza", 1),
               ("Cisterna prefabricada 2,500 L con accesorios", "pza", 1),
               ("Equipo hidroneumático 1/2 HP", "pza", 1),
-              ("Tanque estacionario de gas LP 300 L, regulador y tubería de cobre", "lote", 1),
+              (f"Tanque estacionario de gas LP {blq.get('gas_L', '300 L')}, regulador y tubería de cobre", "lote", 1),
               (f"{cc['tablero']} con interruptores", "lote", 1),
               ("Luminarias LED 18 W", "pza", sum(c["lum"] for c in cc["circuitos"])),
               ("Contactos y apagadores (placas y accesorios)", "pza", sum(c["cont"] for c in cc["circuitos"]) + len(hojas)),
               ("Acometida y contrato CFE / toma y descarga CESPT", "lote", 1),
               ("Limpieza final de obra", "m²", round(sum(n["h"] * 0 + blq["w"] * blq["d"] for n in blq["niveles"]), 2))]
+    cl = blq.get("cubierta_ligera")
+    if cl:
+        al = cl["alero"]
+        a_inc = (blq["w"] + 2 * al) * (blq["d"] + 2 * al) * math.sqrt(1 + cl["pend"] ** 2)
+        filas.append((f"Cubierta {cl['tipo'].replace('_', ' ')} de {cl['material']} sobre armadura ligera de PTR galvanizado, "
+                      "triplay 16 mm y fieltro asfáltico (incluye alero, cumbrera y limatesas)", "m²", round(a_inc, 2)))
+        filas.append(("Canalón perimetral de lámina galvanizada cal. 24 con bajadas", "ml",
+                      round(2 * (blq["w"] + blq["d"] + 4 * al), 2)))
+        if "porche" in cl["rasgos"]:
+            filas.append(("Porche de acceso: postes 20x20 y vigas de madera termotratada con cubierta (1.80 m de fondo)", "lote", 1))
+        if "pergola" in cl["rasgos"]:
+            filas.append((f"Pérgola posterior de madera termotratada ({blq['w']:.2f} x 2.50 m)", "lote", 1))
     if q.get("block-20"):
         filas.append(("Block hueco de concreto 20x20x40 (material, 12.5 pza/m²)", "pza", math.ceil(q["block-20"] * 12.5 * 1.05)))
     if q.get("dala"):

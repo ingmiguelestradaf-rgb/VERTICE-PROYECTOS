@@ -79,10 +79,10 @@ def generar(V, carpeta, datos, proy, plan, corr, lays, r, spec, nombre, ins_calc
     plantas(h, acot, lambda n: n["nombre"].upper(), sep_=sep + 4.0, y_titulo=-5.2)
     J.cerrar(h)
 
-    gas_xy = (blq["x"] + blq["w"] - 1.2, blq["y"] + blq["d"] - 1.2)
+    gas_xy = INS.tanque_gas(blq)
     h = J.nueva("A-04", "Planta de azotea", disciplina="Arquitectónico")
     sur_bap = corr["cubierta"].startswith("una")   # la cubierta a una agua baja al frente: bajadas al sur
-    arq.azotea(h["dx"], blq, lays, r, ins_calc["resumen"]["n_baj"], gas_xy, -blq["x"], -blq["y"], sur_primero=sur_bap)
+    arq.azotea(h["dx"], blq, lays, r, ins_calc["resumen"]["n_baj"], gas_xy, -blq["x"], -blq["y"], sur_primero=sur_bap, corr=corr)
     arq.dibujar_ejes(h["dx"], blq, xs, ys, -blq["x"], -blq["y"])
     J.cerrar(h)
 
@@ -219,7 +219,7 @@ def generar(V, carpeta, datos, proy, plan, corr, lays, r, spec, nombre, ins_calc
                     "AZOTEA — PLUVIAL", h=0.32)
         if fn == "ig":
             IE.isometrico_gas(h["dx"], blq, lays, F.x + 3.0, 0.0)
-            IE.gas_tabla(h["dx"], 0, -6.2)
+            IE.gas_tabla(h["dx"], 0, -6.2, patio="tanque_gas" in blq)
         J.cerrar(h)
     h = J.nueva("IH-02", "Isométrico hidráulico", disciplina="Instalaciones")
     IE.isometrico_hidraulico(h["dx"], blq, lays, 0, 0)

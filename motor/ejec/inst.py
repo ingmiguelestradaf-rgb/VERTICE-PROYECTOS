@@ -213,7 +213,7 @@ APARATOS_GAS = [("Estufa con horno, 4 quemadores", 8600), ("Calentador de paso 1
 PCS_LP = 22400   # kcal/m³ de vapor de gas LP (referencia)
 
 
-def gas_tabla(dx, x, y):
+def gas_tabla(dx, x, y, patio=False):
     filas = []
     tot = 0
     for n, kcal in APARATOS_GAS:
@@ -225,7 +225,8 @@ def gas_tabla(dx, x, y):
                    titulo="CONSUMOS DE GAS LP (VALORES DE REFERENCIA)")
     notas = ["Consumos de referencia: verificar con la ficha técnica de los aparatos instalados.",
              "Regulador de 2 etapas; baja presión regulada 27.94 g/cm² (11\" c.a.). Llave de paso en cada aparato.",
-             "Tanque estacionario en azotea, ventilado, a ≥ 3 m de flamas y equipos eléctricos.",
+             ("Tanque estacionario a nivel de patio sobre base de concreto, a cielo abierto, a ≥ 3 m de flamas, vanos y equipos eléctricos."
+              if patio else "Tanque estacionario en azotea, ventilado, a ≥ 3 m de flamas y equipos eléctricos."),
              "Prueba de hermeticidad a 1.5 veces la presión de trabajo; dictamen de unidad de verificación (NOM-004-SEDG-2004)."]
     for i, t in enumerate(notas):
         dx.texto((x, yy - 0.35 - i * 0.28), t, 0.14, "A-TABLA")
@@ -234,8 +235,9 @@ def gas_tabla(dx, x, y):
 
 def isometrico_gas(dx, blq, lays, ox, oy):
     x0, y0 = blq["x"], blq["y"]
-    tq = (x0 + blq["w"] - 1.2, y0 + blq["d"] - 1.2)
-    ztop = sum(n["h"] for n in blq["niveles"])
+    from .. import instalaciones as INS
+    tq = INS.tanque_gas(blq)
+    ztop = sum(n["h"] for n in blq["niveles"]) if "tanque_gas" not in blq else 0.3
     pt = iso((tq[0], tq[1], ztop + 0.3))
     dx.circulo((pt[0] + ox, pt[1] + oy), 0.35, "IG-GAS"); dx.texto((pt[0] + ox + 0.45, pt[1] + oy), "TANQUE ESTACIONARIO + REGULADOR", 0.13, "I-TEXTO")
     _lin(dx, (tq[0], tq[1], ztop + 0.3), (tq[0], tq[1], 0.6), "IG-GAS", ox, oy)
