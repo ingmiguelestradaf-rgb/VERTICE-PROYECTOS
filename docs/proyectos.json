@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-04-casa-californiana",
+  "fecha": "2026-11-04",
+  "nombre": "Casa Misión del Sauce",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Californiana (Mission Revival)",
+  "area": 363.4,
+  "terreno": 400.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-03-casa-deconstructivista",
   "fecha": "2026-11-03",
   "nombre": "Casa Fractura",
