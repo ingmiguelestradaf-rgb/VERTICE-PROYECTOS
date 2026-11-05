@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-05-casa-regionalismo-mexicano",
+  "fecha": "2026-11-05",
+  "nombre": "Casa habitación Regionalismo mexicano (arquitectura emocional)",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Regionalismo mexicano (arquitectura emocional)",
+  "area": 240.6,
+  "terreno": 180.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-04-casa-californiana",
   "fecha": "2026-11-04",
   "nombre": "Casa Misión del Sauce",

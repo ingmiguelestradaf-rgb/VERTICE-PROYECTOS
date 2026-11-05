@@ -1,0 +1,309 @@
+{
+ "clave": "2026-11-05-casa-regionalismo-mexicano",
+ "fecha": "2026-11-05",
+ "nombre": "Casa habitación Regionalismo mexicano (arquitectura emocional)",
+ "concepto": "",
+ "tipologia": "casa",
+ "tipologia_nombre": "Casa habitación",
+ "subtipo": "",
+ "corriente": "regionalismo_mexicano",
+ "corriente_nombre": "Regionalismo mexicano (arquitectura emocional)",
+ "materiales": "Muros de color intenso (rosa mexicano, ocre), planos ciegos, espejos de agua, celosías, luz cenital.",
+ "uso_suelo": "Habitacional unifamiliar",
+ "terreno": {
+  "frente": 9.0,
+  "fondo": 20.0,
+  "area": 180.0
+ },
+ "area_construida": 240.6,
+ "desplante": 120.3,
+ "cos": 0.67,
+ "cus": 1.34,
+ "niveles": 2,
+ "altura": 5.4,
+ "cajones": 1,
+ "usuarios": {
+  "ocupantes": 4
+ },
+ "areas": [
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Cochera",
+   "area": 19.04,
+   "medidas": "3.40 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Acceso",
+   "area": 20.44,
+   "medidas": "3.65 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Bodega",
+   "area": 5.24,
+   "medidas": "1.70 x 3.08"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Medio baño",
+   "area": 4.28,
+   "medidas": "1.70 x 2.52"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Escalera",
+   "area": 7.82,
+   "medidas": "2.30 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Vestíbulo",
+   "area": 21.93,
+   "medidas": "6.45 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Sala-comedor",
+   "area": 24.94,
+   "medidas": "5.25 x 4.75"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Lavandería",
+   "area": 4.99,
+   "medidas": "3.50 x 1.43"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Cocina",
+   "area": 11.64,
+   "medidas": "3.50 x 3.33"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara 2",
+   "area": 19.04,
+   "medidas": "3.40 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara 3",
+   "area": 20.44,
+   "medidas": "3.65 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Baño 2",
+   "area": 9.52,
+   "medidas": "1.70 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Escalera",
+   "area": 7.82,
+   "medidas": "2.30 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Pasillo",
+   "area": 21.93,
+   "medidas": "6.45 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara principal",
+   "area": 24.94,
+   "medidas": "5.25 x 4.75"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Vestidor",
+   "area": 4.99,
+   "medidas": "3.50 x 1.43"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Baño principal",
+   "area": 11.64,
+   "medidas": "3.50 x 3.33"
+  }
+ ],
+ "hojas": [
+  {
+   "clave": "AP-01",
+   "titulo": "Planta de conjunto",
+   "disciplina": "Anteproyecto",
+   "dxf": "planos/AP-01_planta-de-conjunto.dxf",
+   "img": "laminas/AP-01.jpg"
+  },
+  {
+   "clave": "AP-02",
+   "titulo": "Plantas arquitectónicas",
+   "disciplina": "Anteproyecto",
+   "dxf": "planos/AP-02_plantas-arquitectonicas.dxf",
+   "img": "laminas/AP-02.jpg"
+  },
+  {
+   "clave": "AP-03",
+   "titulo": "Fachadas y corte",
+   "disciplina": "Anteproyecto",
+   "dxf": "planos/AP-03_fachadas-y-corte.dxf",
+   "img": "laminas/AP-03.jpg"
+  }
+ ],
+ "render": [
+  "render_aereo.jpg",
+  "render_peatonal.jpg"
+ ],
+ "pdf": "anteproyecto.pdf",
+ "zip": "2026-11-05-casa-regionalismo-mexicano_anteproyecto_dxf.zip",
+ "extra": {},
+ "revision": {
+  "observaciones": [
+   {
+    "nivel": "Casa · Planta baja",
+    "tipo": "aviso",
+    "mensaje": "Medio baño: ventilación mecánica (extractor) obligatoria."
+   }
+  ],
+  "errores": 0,
+  "avisos": 1
+ },
+ "ejecutivo": {
+  "laminas": [
+   {
+    "clave": "A-01",
+    "titulo": "Planta de conjunto",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-02",
+    "titulo": "Plantas arquitectónicas amuebladas",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-03",
+    "titulo": "Plantas acotadas a ejes",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-04",
+    "titulo": "Planta de azotea",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-05",
+    "titulo": "Fachadas",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-06",
+    "titulo": "Cortes arquitectónicos",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-07",
+    "titulo": "Cancelería y acabados",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "E-01",
+    "titulo": "Planta de cimentación",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "E-02",
+    "titulo": "Losas, trabes y castillos",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "E-03",
+    "titulo": "Detalles estructurales",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "E-04",
+    "titulo": "Cuantificación de acero y concreto",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "IH-01",
+    "titulo": "Instalación hidráulica",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IS-01",
+    "titulo": "Instalación sanitaria y pluvial",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IE-01",
+    "titulo": "Instalación eléctrica",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IG-01",
+    "titulo": "Instalación de gas LP",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IH-02",
+    "titulo": "Isométrico hidráulico",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IE-02",
+    "titulo": "Cuadro de cargas y diagrama unifilar",
+    "disciplina": "Instalaciones"
+   }
+  ],
+  "coordinacion": {
+   "errores": 0,
+   "avisos": 0,
+   "verificaciones": 29
+  },
+  "nivel": "Proyecto ejecutivo completo",
+  "documentos": [
+   "Memoria técnica (Word/PDF)",
+   "Presupuesto (Excel)",
+   "Programa de obra (Excel y Gantt)",
+   "Juego de planos (PDF y DXF)"
+  ]
+ },
+ "generado_por": "motor automático"
+}
