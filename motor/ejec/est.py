@@ -523,7 +523,8 @@ def cuantificar(r, blq, niveles, vanos, VAR):
         return sum(l["b"] - l["a"] for l in lns)
     for etiqueta, lns in [("Dala de desplante D-1", r["estructurales"][0])] + \
             [(f"Dala de cerramiento D-1 ({niveles[k]['nombre']})", r["estructurales"][k]) for k in range(n_lev)] + \
-            [("Dala de pretil D-2", [l for l in r["estructurales"][-1] if _perimetral(l, blq)])]:
+            ([] if blq.get("cubierta_ligera") else      # con cubierta inclinada sobre la losa no hay pretil
+             [("Dala de pretil D-2", [l for l in r["estructurales"][-1] if _perimetral(l, blq)])]):
         Lm = largo(lns) * 1.06
         filas.append(dict(elemento=etiqueta, cantidad=round(Lm, 2), unidad="ml", longitud=round(Lm, 2),
                           kg3=round(kg(3, 4 * Lm), 1), kg2=round(kg(2.5, Lm / 0.20 * 0.62), 1), kg4=0.0,

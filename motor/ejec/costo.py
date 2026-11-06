@@ -61,7 +61,11 @@ def generadores(blq, lays, r, cancel, acab):
             add("block-20" if t == 20 else "block-15", maciza * hn)
         add("castillo", len(r["castillos"][k]) * n["h"])
     per = 2 * (blq["w"] + blq["d"])
-    add("block-15", per * 0.6, "Pretil h = 0.60 m")
+    # pretil sólo con azotea plana: con cubierta inclinada sobre la losa (A-04/A-05/A-06) no existe y antes
+    # se cobraba block, dala D-2 y aplanado de un pretil que no aparece en los planos
+    h_pre = 0.0 if blq.get("cubierta_ligera") else 0.6
+    if h_pre:
+        add("block-15", per * h_pre, "Pretil h = 0.60 m")
     for f in r["cuantificacion"]["filas"]:
         if f["elemento"].startswith("Dala"):
             add("dala", f["cantidad"])
@@ -70,7 +74,7 @@ def generadores(blq, lays, r, cancel, acab):
     add("firme", blq["w"] * blq["d"])
     ventanas = sum(t["ancho"] * t["alto"] * t["cant"] for t in cancel if t["clave"].startswith(("V", "PT", "P")))
     H = sum(n["h"] for n in niveles)
-    add("aplanado", max(0.0, (per * (H + 0.6) - ventanas * 0.6)), "Fachadas y pretil (mortero)")
+    add("aplanado", max(0.0, (per * (H + h_pre) - ventanas * 0.6)), "Fachadas y pretil (mortero)" if h_pre else "Fachadas (mortero)")
     piso = azul = yeso = plaf = 0.0
     for k, n in enumerate(niveles):
         for c in [c for c in lays[k][0] if not c["contenedor"]]:

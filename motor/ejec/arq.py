@@ -200,10 +200,10 @@ def amueblar(dx, c, vanos, ox=0.0, oy=0.0):
             # sala en la mitad lejana a la puerta, comedor en la otra
             half = dict(c, d=d / 2, y=c["y"] + d / 2) if d >= w else dict(c, w=w / 2, x=c["x"] + w / 2)
             otra = dict(c, d=d / 2) if d >= w else dict(c, w=w / 2)
-            _sala(dx, half, "N" if d >= w else "E")
+            _sala(dx, half, "N" if d >= w else "E", vv)
             _comedor(dx, otra)
         else:
-            _sala(dx, c, lado)
+            _sala(dx, c, lado, vv)
     elif n == "Comedor":
         _comedor(dx, c)
     elif n.startswith("Cocina") and corto >= 1.8:
@@ -270,14 +270,47 @@ def amueblar(dx, c, vanos, ox=0.0, oy=0.0):
         dx.texto((x1 + a1 / 2, y1 + b1 / 2), "ANAQUEL", 0.1, L, centrado=True)
 
 
-def _sala(dx, c, lado):
+def _libre_puertas(c, lado, vanos, fondo):
+    """Tramo (u0, u1) a lo largo del muro `lado`, medido desde x (S/N) o y (O/E), que no invade el
+    abatimiento de las puertas de los muros contiguos dentro de la franja de `fondo` junto a ese muro."""
+    x, y, w, d = c["x"], c["y"], c["w"], c["d"]
+    L_ = w if lado in ("S", "N") else d
+    u0, u1 = 0.0, L_
+    for v in vanos or ():
+        if v["tipo"] not in ("puerta", "puerta_ext"):
+            continue
+        g = v["b"] - v["a"]                                  # radio del abatimiento = ancho de la hoja
+        if lado in ("O", "E") and v["eje"] == "h":
+            if abs(v["c"] - y) < EPS or abs(v["c"] - (y + d)) < EPS:
+                fx0, fx1 = (x, x + fondo + 0.1) if lado == "O" else (x + w - fondo - 0.1, x + w)
+                if v["a"] < fx1 and v["b"] > fx0:
+                    if abs(v["c"] - y) < EPS:
+                        u0 = max(u0, g + 0.05)
+                    else:
+                        u1 = min(u1, d - g - 0.05)
+        elif lado in ("S", "N") and v["eje"] == "v":
+            if abs(v["c"] - x) < EPS or abs(v["c"] - (x + w)) < EPS:
+                fy0, fy1 = (y, y + fondo + 0.1) if lado == "S" else (y + d - fondo - 0.1, y + d)
+                if v["a"] < fy1 and v["b"] > fy0:
+                    if abs(v["c"] - x) < EPS:
+                        u0 = max(u0, g + 0.05)
+                    else:
+                        u1 = min(u1, w - g - 0.05)
+    return u0, u1
+
+
+def _sala(dx, c, lado, vanos=None):
     L = "A-MUEBLES"
     w, d = c["w"], c["d"]
     lon = (w if lado in ("S", "N") else d)
-    sof = min(2.2, lon - 0.6)
+    # el sofá no debe quedar dentro del abatimiento de puertas en los muros contiguos (p. ej. el baño que
+    # abre a la estancia familiar): se acomoda en el tramo libre y se acorta si hace falta
+    u0, u1 = _libre_puertas(c, lado, vanos, 0.9 + 0.08)
+    sof = min(2.2, lon - 0.6, u1 - u0 - 0.1)
     if sof < 1.4:
         return
-    x0, y0, a, b = _caja(dx, c, lado, sof, 0.9)
+    despl = (u0 + u1) / 2 - lon / 2
+    x0, y0, a, b = _caja(dx, c, lado, sof, 0.9, despl=despl)
     # mesa de centro
     cx, cy = x0 + a / 2, y0 + b / 2
     off = 1.35
@@ -482,7 +515,9 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
         elif gable:
             dx.polilinea([(ox - al, oy + ztop), (ox + L / 2, oy + ztop + rr), (ox + L + al, oy + ztop)], F, True)
         else:
-            k = min(L / 2, rr * 1.5) if cub.startswith("cuatro") else 0
+            # cuatro aguas: faldones laterales en escorzo; dos aguas: hastiales verticales con su volado
+            # (con k = 0 la vista lateral de un dos aguas parecía cuatro aguas)
+            k = min(L / 2, rr * 1.5) if cub.startswith("cuatro") else -al
             dx.polilinea([(ox - al, oy + ztop), (ox + k, oy + ztop + rr), (ox + L - k, oy + ztop + rr), (ox + L + al, oy + ztop)], F, True)
     z = 0.0
     for k, n in enumerate(niveles):
@@ -562,8 +597,11 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
                 dx.rect(ox + pa_, oy + 2.37, pb_ - pa_, 0.32, F)                 # viga de madera + cubierta
                 for xx in (pa_, pb_ - 0.2):
                     dx.rect(ox + xx, oy, 0.2, 2.37, F)                           # postes de madera 20x20
-                dx.texto((ox + (pa_ + pb_) / 2, oy + 2.98), "PORCHE: VIGAS Y POSTES DE MADERA, CUBIERTA DE TEJA",
-                         0.12, "A-TEXTO", centrado=True)
+                # rótulo bajo la viga, entre la puerta y el poste (sobre la viga se encimaba con la celosía);
+                # el material de la cubierta va en las notas de materiales (antes decía teja siempre)
+                db_ = max(_u(blq, lado, pe["a"]), _u(blq, lado, pe["b"]))
+                xt = (db_ + pb_) / 2 if pb_ - db_ > 1.8 else (pa_ + pb_) / 2
+                dx.texto((ox + xt, oy + 2.15), "PORCHE DE MADERA", 0.12, "A-TEXTO", centrado=True)
         if "marco" in corr["rasgos"] and len(niveles) > 1:
             fa, fb, e_ = layout.inicio_marco(lays[1][1], blq["x"], L), L + 0.05, 0.3
             dx.rect(ox + fa, oy + zb1 - 0.3, fb - fa, ztop - zb1 + 0.3, F)
@@ -674,9 +712,38 @@ def corte(dx, blq, lays, r_est, eje, pos, ox, oy, titulo):
             if pb - pa > 1.8 and c["t"] != "escalera":
                 dx.cota((ox + (pa + pb) / 2 - a0 + 0.35, oy + z), (ox + (pa + pb) / 2 - a0 + 0.35, oy + z + h - losa), 0.0, h=0.13)
         z += h
-    # pretil
-    dx.rect(ox - 0.125, oy + z, 0.15, 0.6, C_)
-    dx.rect(ox + L - 0.025, oy + z, 0.15, 0.6, C_)
+    cl = blq.get("cubierta_ligera")
+    if cl:
+        # cubierta inclinada sobre la losa de azotea (antes el corte dibujaba pretiles que no existen y no
+        # mostraba la cubierta que sí aparece en A-04, A-05 y renders)
+        tipo, al = cl["tipo"], cl["alero"]
+        una = tipo.startswith("una") or tipo == "inclinada_irregular"
+        rr = cl["pend"] * min(blq["w"], blq["d"]) / (1 if una else 2)
+        ridge_x = blq["w"] >= blq["d"]
+        perp = (eje == "x") == ridge_x                      # cumbrera perpendicular al plano de corte
+        if una:
+            if eje == "x":
+                pts = [(-al, z), (L + al, z + rr)]
+            else:
+                zc = rr * (pos - blq["y"]) / blq["d"]
+                pts = [(-al, z + zc), (L + al, z + zc)]
+            dx.polilinea([(ox + a, oy + b) for a, b in pts], C_)
+        elif perp:
+            dx.polilinea([(ox - al, oy + z), (ox + L / 2, oy + z + rr), (ox + L + al, oy + z)], C_)
+        else:
+            if eje == "x":
+                zc = rr * min(pos - blq["x"], blq["x"] + blq["w"] - pos) / (blq["w"] / 2)
+            else:
+                zc = rr * min(pos - blq["y"], blq["y"] + blq["d"] - pos) / (blq["d"] / 2)
+            k = min(L / 2, rr * 1.5) if tipo.startswith("cuatro") else -al
+            dx.polilinea([(ox - al, oy + z), (ox + k, oy + z + rr), (ox + L - k, oy + z + rr), (ox + L + al, oy + z)], C_)
+            dx.rect(ox - al, oy + z + zc - 0.04, L + 2 * al, 0.08, C_)
+        dx.texto((ox + L / 2, oy + z + rr + 0.25), f"CUBIERTA DE {cl['material'].upper()} SOBRE ARMADURA DE PTR "
+                 f"(PEND. {cl['pend'] * 100:.0f} %)", 0.13, "A-TEXTO", centrado=True)
+    else:
+        # pretil
+        dx.rect(ox - 0.125, oy + z, 0.15, 0.6, C_)
+        dx.rect(ox + L - 0.025, oy + z, 0.15, 0.6, C_)
     zz = 0.0
     for z_, t in [(0.0, "NPT ±0.00")] + [(sum(n["h"] for n in niveles[:i + 1]), f"N +{sum(n['h'] for n in niveles[:i + 1]):.2f}")
                                           for i in range(len(niveles))] + [(-Df, f"DESPLANTE -{Df:.2f}")]:

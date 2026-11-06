@@ -331,6 +331,17 @@ def pluvial(dx, proy, blq, ox, oy, n_baj, pts=None):
             pts.append((x + w - (s - w - d), y + d - 0.3))
         else:
             pts.append((x + 0.3, y + d - (s - 2 * w - d)))
+    cl = blq.get("cubierta_ligera")
+    if cl:
+        # cubierta inclinada: el agua baja por los faldones al canalón perimetral del alero y de ahí a las BAP
+        # (antes se dibujaban pendientes de 2 % de azotea plana hacia el centro, contrario a A-04)
+        al = cl["alero"]
+        dx.rect(x - al, y - al, w + 2 * al, d + 2 * al, "IS-PLUVIAL")
+        for p in pts:
+            dx.circulo(p, 0.2, "IS-PLUVIAL")
+        dx.texto((x + w / 2, y + d / 2 + 0.4), f"CUBIERTA INCLINADA {cl['pend'] * 100:.0f} %: CANALÓN PERIMETRAL A BAP",
+                 max(0.2, w / 60), "I-TEXTO", centrado=True)
+        return
     for p in pts:
         dx.circulo(p, 0.2, "IS-PLUVIAL")
         dx.linea(p, (x + w / 2, y + d / 2), "IS-PLUVIAL")

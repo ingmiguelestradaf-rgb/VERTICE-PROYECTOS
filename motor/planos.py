@@ -381,7 +381,9 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
                 dx.polilinea([(x0 - al, oy + ztop), (x0 + min(L / 2, r * 1.5), oy + ztop + r),
                               (x0 + L - min(L / 2, r * 1.5), oy + ztop + r), (x0 + L + al, oy + ztop)], "A-FACHADA", True)
             else:
-                dx.polilinea([(x0 - al, oy + ztop), (x0 - al, oy + ztop + 0.25), (x0 + L + al, oy + ztop + r),
+                # dos aguas visto desde el alero: faldón entre el alero (ztop) y la cumbrera horizontal (ztop + r),
+                # con los volados de los hastiales a ambos lados (antes se dibujaba como una sola agua)
+                dx.polilinea([(x0 - al, oy + ztop), (x0 - al, oy + ztop + r), (x0 + L + al, oy + ztop + r),
                               (x0 + L + al, oy + ztop)], "A-FACHADA", True)
         # vanos del lado de la fachada
         bi = proy["bloques"].index(blq)
@@ -409,6 +411,25 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
             if "celosia" in corr["rasgos"] or "parteluces" in corr["rasgos"]:
                 for k in range(int(L * 0.4 / 0.35)):
                     dx.rect(x0 + L * 0.55 + k * 0.35, oy + z0 + zb1, 0.15, ztop - z0 - zb1, "A-FACHADA")
+            # porche y jardinera: misma geometría que A-05 y render (antes AP-03 no los dibujaba)
+            v0 = nivel_vanos[id(zs[0][2])]
+            pe = next((v for v in v0 if v["tipo"] == "puerta_ext" and v.get("lado") == "S"), None)
+            if "porche" in corr["rasgos"] and pe is not None:
+                pa_ = max(0.0, pe["a"] - blq["x"] - 0.6)
+                pb_ = L if L - (pe["b"] - blq["x"]) < L / 2 else min(L, pe["b"] - blq["x"] + 3.0)
+                dx.rect(x0 + pa_, oy + z0 + 2.37, pb_ - pa_, 0.32, "A-FACHADA")
+                for xx in (pa_, pb_ - 0.2):
+                    dx.rect(x0 + xx, oy + z0, 0.2, 2.37, "A-FACHADA")
+            if "jardinera" in corr["rasgos"]:
+                libres, cur = [], 0.0
+                for a_, b_ in sorted((v["a"] - blq["x"], v["b"] - blq["x"]) for v in v0 if v.get("lado") == "S"):
+                    if a_ - 0.3 > cur:
+                        libres.append((cur, a_ - 0.3))
+                    cur = max(cur, b_ + 0.3)
+                libres.append((cur, L))
+                ja, jb = max(libres, key=lambda q: q[1] - q[0])
+                if jb - ja > 1.0:
+                    dx.rect(x0 + ja + 0.1, oy + z0, jb - ja - 0.2, 0.5, "A-FACHADA")
             if "marco" in corr["rasgos"]:
                 fa, fb = layout.inicio_marco(nivel_vanos[id(zs[1][2])], blq["x"], L), L + 0.05
                 dx.rect(x0 + fa, oy + z0 + zb1 - 0.3, fb - fa, ztop - z0 - zb1 + 0.3, "A-FACHADA")
@@ -456,7 +477,16 @@ def corte(dx, proy, lays, corr, ox, oy):
                           (ox + y0 - 0.4, oy + ztop + 0.1)], "A-CORTE", True)
         elif cub == "curva":
             dx.polilinea([(ox + y0 - 0.4 + (L + 0.8) * i / 20, oy + ztop + r * 4 * (i / 20) * (1 - i / 20)) for i in range(21)], "A-CORTE")
-        else:
+        elif blq["w"] >= blq["d"]:
+            # cumbrera paralela a x: el corte (plano y-z) corta el hastial → triángulo
             dx.polilinea([(ox + y0 - 0.4, oy + ztop), (ox + y0 + L / 2, oy + ztop + r), (ox + y0 + L + 0.4, oy + ztop)], "A-CORTE")
+        else:
+            # cumbrera paralela al corte: faldón cortado a la altura que corresponde a xm y cumbrera vista detrás
+            # (antes se dibujaba un hastial triangular que no coincidía con fachadas, azotea ni renders)
+            zc = r * min(xm - blq["x"], blq["x"] + blq["w"] - xm) / (blq["w"] / 2)
+            k = min(L / 2, r * 1.5) if cub.startswith("cuatro") else -0.4
+            dx.polilinea([(ox + y0 - 0.4, oy + ztop), (ox + y0 + k, oy + ztop + r), (ox + y0 + L - k, oy + ztop + r),
+                          (ox + y0 + L + 0.4, oy + ztop)], "A-CORTE")
+            dx.rect(ox + y0 - 0.4, oy + ztop + zc - 0.05, L + 0.8, 0.1, "A-CORTE")
     dx.cota((ox + y0 - 1.5, oy), (ox + y0 - 1.5, oy + ztop), 1.0)
     dx.texto((ox + y0 + L / 2, oy - max(1.5, L / 25)), "CORTE LONGITUDINAL A-A'", max(0.35, L / 50), "A-TEXTO", centrado=True)
