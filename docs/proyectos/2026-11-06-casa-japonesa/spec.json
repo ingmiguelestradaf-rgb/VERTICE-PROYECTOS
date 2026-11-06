@@ -1,0 +1,255 @@
+{
+ "nombre": "Casa Engawa",
+ "concepto": "Vivienda de dos niveles en un lote de 10 x 20 m en Tijuana que interpreta la casa japonesa contemporánea: un volumen sobrio de aplanado claro bajo una cubierta a dos aguas de baja pendiente (18 %), con la cumbrera en el sentido largo del lote y alero amplio de 0.90 m que sombrea los muros del sol fuerte del sur y desaloja con rapidez las lluvias de invierno. Un porche de madera sobre el acceso funciona como engawa, el umbral techado entre la calle y la casa, y conduce a un acceso amplio tipo genkan y a una sala-comedor abierta al jardín posterior, por donde entra luz difusa del norte y la brisa marina cruza la casa. En planta alta, el corredor se convierte en estancia familiar que reparte a las recámaras, y una celosía de listones de madera filtra el sol del sur frente a la recámara 3 sin cerrar la vista. Una jardinera de concreto con grava y bambú al frente suaviza el paso de la banqueta al interior, como el roji de un jardín de té.",
+ "materiales": "Muros de block de concreto con aplanado fino color arroz; cubierta a dos aguas de baja pendiente de lámina engargolada color grafito sobre armadura ligera de PTR y losa de concreto impermeabilizada; porche (engawa), celosía y plafón de alero de madera termotratada de pino en tono claro; jardinera de concreto aparente con grava y bambú; pisos de porcelanato 60x120 rectificado tono piedra gris claro en zonas secas y antiderrapante 60x60 en baños; cancelería de aluminio negro mate con vidrio claro de 6 mm; puerta de acceso de madera de parota",
+ "paleta": {
+  "muro": "#E9E4DA",
+  "acento": "#8A6A48",
+  "techo": "#3B3B3B",
+  "vidrio": "#4D6670",
+  "ventana": 0.5
+ },
+ "rasgos": [
+  "porche",
+  "celosia",
+  "alero_amplio",
+  "jardinera"
+ ],
+ "extra": {
+  "dictamen_arquitectura": [
+   "Terreno de 10.00 x 20.00 m (200 m²); casa de 9.75 x 13.75 m a ejes entre colindancias oriente y poniente, 268.1 m² construidos en 2 niveles con desplante de 134.1 m²: COS 0.67 y CUS 1.34 (por verificar con el PDU de Tijuana); 3.00 m libres al frente con cajón y jardinera, patio posterior de 3.25 m con tanque de gas a nivel de piso.",
+   "Recorrido: puerta doble de 1.20 m bajo el porche → acceso (4.65 x 5.60 m, tipo genkan) con medio baño, bodega y paso a cochera → vestíbulo con escalera en U → sala-comedor (5.85 x 4.75 m) comunicada con la cocina (3.90 x 3.33 m), lavandería desde el vestíbulo. Escalera de 1.15 m de tramo, peralte 16.9 cm, huella 30.2 cm (2p+h = 64 cm).",
+   "Planta alta: el corredor de 3.40 x 7.45 m se proyecta como estancia familiar (antes 'Pasillo' en el programa base) que da acceso a las recámaras 2 (3.40 x 5.60 m) y 3 (4.65 x 5.60 m) y al baño 2; recámara principal de 5.85 x 4.75 m con vestidor y baño sólo desde ella. Todas las recámaras con ventana al exterior; altura libre 2.56 m (PB) y 2.57 m (PA) ≥ 2.30 m. Medio baño sin ventana: extractor obligatorio.",
+   "Lenguaje japonés contemporáneo: cubierta a dos aguas de lámina al 18 % con alero de 0.90 m, porche de madera sobre el acceso, celosía de listones en planta alta al sur y jardinera frontal; AP-03, A-04, A-05, A-06 y renders muestran la misma geometría de cubierta.",
+   "Correcciones de motor en revisión: la fachada lateral de un dos aguas se dibujaba como una sola agua (AP-03) o como cuatro aguas (A-05); los cortes dibujaban el hastial en el sentido equivocado y pretiles inexistentes; AP-03 omitía porche y jardinera; el rótulo del porche decía 'cubierta de teja' y se encimaba con la celosía; el sofá de la estancia familiar invadía el abatimiento de la puerta del baño 2; IS-01 mostraba pendientes de azotea plana; y el presupuesto cobraba un pretil que no existe."
+  ],
+  "dictamen_ingenieria": [
+   "Veredicto: construible conforme a norma — 0 errores y 0 avisos en 29 verificaciones de coordinación —, sujeto a los supuestos por validar indicados abajo.",
+   "Mampostería confinada con block de 15 cm en ambas direcciones, castillos K-1 15x20 (43 por nivel) y dalas D-1; todos los muros de planta alta apoyados en muros de planta baja. Método simplificado NTC: X VR 65.8 t ≥ Vu 56.6 t (dirección crítica, margen 16 %); Y VR 88.6 t ≥ 56.6 t; V basal 51.4 t con c/Q'R = 0.213 supuesto y T = 0.17 s.",
+   "Losa de entrepiso de 14 cm y de azotea de 13 cm, macizas, con #3 @ 10–20 cm; 9 trabes de cerramiento de 15x30 a 20x35 cm (claro máximo 3.81 m); escalera de losa de 14 cm. La cubierta de lámina (30 kg/m²) va sobre armadura ligera de PTR anclada a la losa; sin pretil, por lo que se eliminaron la dala D-2 y el block de pretil del presupuesto.",
+   "Zapatas corridas de 50 x 20 cm: ZC-1 perimetral (q = 5.12 t/m², excéntricas en los linderos oriente y poniente) y ZC-2 interior (q = 8.63 t/m²) contra una q adm supuesta de 12 t/m² a -0.80 m: requiere estudio de mecánica de suelos y confirmar el espectro sísmico del sitio. Cuantificación: 5,689 kg de acero y 63.4 m³ de concreto.",
+   "Instalaciones: toma Ø13 mm, 22 UM (1.21 L/s), alimentación Ø25 mm, cisterna de 2 m³ con hidroneumático y calentador de paso; bajadas sanitarias de baño 2 y baño principal junto a muro, colector al 2 % a la red CESPT; gasto pluvial de 3.7 L/s por canalón perimetral a 2 bajadas Ø100 mm; 13 circuitos (12.9 kW instalados, 9.0 kW de demanda, 45.7 A), interruptor general 2P-60 A, desbalance 0.3 %; gas LP con tanque estacionario de 300 L en el patio posterior a nivel de piso. Factibilidades de CESPT y CFE por tramitar.",
+   "Presupuesto de $1,530,733 + IVA ($5,709/m²) y programa de 18 semanas; la cubierta de lámina, el canalón y el porche quedan en la hoja \"Por cotizar\" (36 partidas) hasta tener cotización de proveedores de Tijuana. La celosía de madera y la jardinera frontal todavía no están cuantificadas: agregarlas a la cotización."
+  ]
+ },
+ "modelo": {
+  "bloques": [
+   {
+    "nombre": "Casa",
+    "x": 0.12,
+    "y": 3.12,
+    "w": 9.75,
+    "d": 13.75,
+    "z0": 0.0,
+    "niveles": [
+     {
+      "nombre": "Planta baja",
+      "h": 2.7,
+      "rep": 1,
+      "zonas": [
+       {
+        "p": 0.40727272727272723,
+        "cuartos": [
+         {
+          "n": "Cochera",
+          "p": 0.3487179487179487,
+          "t": "ext"
+         },
+         {
+          "n": "Acceso",
+          "p": 0.4769230769230769,
+          "t": "circ"
+         },
+         {
+          "n": "",
+          "p": 0.17435897435897435,
+          "t": "grupo",
+          "sub": [
+           {
+            "p": 0.55,
+            "cuartos": [
+             {
+              "n": "Bodega",
+              "p": 1,
+              "t": "almacen"
+             }
+            ]
+           },
+           {
+            "p": 0.45,
+            "cuartos": [
+             {
+              "n": "Medio baño",
+              "p": 1,
+              "t": "humedo"
+             }
+            ]
+           }
+          ],
+          "grupo": true
+         }
+        ]
+       },
+       {
+        "p": 0.24727272727272726,
+        "cuartos": [
+         {
+          "n": "Escalera",
+          "p": 0.2358974358974359,
+          "t": "escalera"
+         },
+         {
+          "n": "Vestíbulo",
+          "p": 0.764102564102564,
+          "t": "circ"
+         }
+        ]
+       },
+       {
+        "p": 0.3454545454545455,
+        "cuartos": [
+         {
+          "n": "Sala-comedor",
+          "p": 0.6,
+          "t": "social"
+         },
+         {
+          "n": "",
+          "p": 0.4,
+          "t": "grupo",
+          "sub": [
+           {
+            "p": 0.3,
+            "cuartos": [
+             {
+              "n": "Lavandería",
+              "p": 1,
+              "t": "servicio"
+             }
+            ]
+           },
+           {
+            "p": 0.7,
+            "cuartos": [
+             {
+              "n": "Cocina",
+              "p": 1,
+              "t": "cocina"
+             }
+            ]
+           }
+          ],
+          "grupo": true
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "nombre": "Planta alta",
+      "h": 2.7,
+      "rep": 1,
+      "zonas": [
+       {
+        "p": 0.40727272727272723,
+        "cuartos": [
+         {
+          "n": "Recámara 2",
+          "p": 0.3487179487179487,
+          "t": "privado"
+         },
+         {
+          "n": "Recámara 3",
+          "p": 0.47692307692307695,
+          "t": "privado"
+         },
+         {
+          "n": "Baño 2",
+          "p": 0.17435897435897435,
+          "t": "humedo"
+         }
+        ]
+       },
+       {
+        "p": 0.24727272727272726,
+        "cuartos": [
+         {
+          "n": "Escalera",
+          "p": 0.2358974358974359,
+          "t": "escalera"
+         },
+         {
+          "n": "Estancia familiar",
+          "p": 0.764102564102564,
+          "t": "circ"
+         }
+        ]
+       },
+       {
+        "p": 0.3454545454545455,
+        "cuartos": [
+         {
+          "n": "Recámara principal",
+          "p": 0.6,
+          "t": "privado"
+         },
+         {
+          "n": "",
+          "p": 0.4,
+          "t": "grupo",
+          "sub": [
+           {
+            "p": 0.3,
+            "cuartos": [
+             {
+              "n": "Vestidor",
+              "p": 1,
+              "t": "privado"
+             }
+            ]
+           },
+           {
+            "p": 0.7,
+            "cuartos": [
+             {
+              "n": "Baño principal",
+              "p": 1,
+              "t": "humedo"
+             }
+            ]
+           }
+          ],
+          "grupo": true
+         }
+        ]
+       }
+      ]
+     }
+    ],
+    "sistema": "mamposteria",
+    "claro_max": 5.0,
+    "uso": "habitacional",
+    "colindancias": [
+     "O",
+     "E"
+    ],
+    "trabes_carga": [],
+    "cubierta_ligera": {
+     "tipo": "dos_aguas_baja",
+     "material": "lámina",
+     "cm": 30,
+     "alero": 0.9,
+     "pend": 0.18,
+     "rasgos": [
+      "porche"
+     ]
+    },
+    "gas_L": "300 L",
+    "tanque_gas": [
+     9.27,
+     19.0
+    ]
+   }
+  ]
+ }
+}

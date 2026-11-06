@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-06-casa-japonesa",
+  "fecha": "2026-11-06",
+  "nombre": "Casa Engawa",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Japonesa contemporánea",
+  "area": 268.1,
+  "terreno": 200.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-05-casa-regionalismo-mexicano",
   "fecha": "2026-11-05",
   "nombre": "Casa habitación Regionalismo mexicano (arquitectura emocional)",
