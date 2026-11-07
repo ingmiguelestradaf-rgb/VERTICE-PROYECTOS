@@ -277,7 +277,7 @@ def _libre_puertas(c, lado, vanos, fondo):
     L_ = w if lado in ("S", "N") else d
     u0, u1 = 0.0, L_
     for v in vanos or ():
-        if v["tipo"] not in ("puerta", "puerta_ext"):
+        if v["tipo"] not in ("puerta", "puerta_ext") or v.get("corrediza"):
             continue
         g = v["b"] - v["a"]                                  # radio del abatimiento = ancho de la hoja
         if lado in ("O", "E") and v["eje"] == "h":
@@ -602,6 +602,29 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
                 db_ = max(_u(blq, lado, pe["a"]), _u(blq, lado, pe["b"]))
                 xt = (db_ + pb_) / 2 if pb_ - db_ > 1.8 else (pa_ + pb_) / 2
                 dx.texto((ox + xt, oy + 2.15), "PORCHE DE MADERA", 0.12, "A-TEXTO", centrado=True)
+        if "pilotis" in corr["rasgos"] and len(niveles) > 1:
+            # marquesina de concreto a nivel de entrepiso sobre pilotis (misma geometría que render y AP-03)
+            P = layout.pilotis(blq, lays[0][1])
+            e_, r_ = P["losa"], P["diam"] / 2
+            dx.rect(ox, oy + zb1 - e_, L, e_, F)
+            for cx in P["cols"]:
+                u = _u(blq, lado, cx)
+                dx.rect(ox + u - r_, oy, 2 * r_, zb1 - e_, F)
+            dx.texto((ox + L / 2, oy + zb1 + 0.25),
+                     f"MARQUESINA DE CONCRETO e = {e_ * 100:.0f} CM, VUELO {P['fondo']:.2f} M, SOBRE PILOTIS Ø{r_ * 200:.0f} CM",
+                     0.12, "A-TEXTO", centrado=True)
+        if "ventana_corrida" in corr["rasgos"] and len(niveles) > 1:
+            zk = 0.0
+            for k_, n_ in enumerate(niveles):
+                if k_:
+                    bc = layout.banda_corrida(lays[k_][1])
+                    if bc:
+                        a_, b_ = sorted((_u(blq, lado, bc[0]), _u(blq, lado, bc[1])))
+                        z2_ = min(n_["h"] - 0.35, 2.35)
+                        dx.rect(ox + a_ - 0.05, oy + zk + 0.85, b_ - a_ + 0.1, z2_ - 0.8, F)
+                        dx.texto((ox + (a_ + b_) / 2, oy + zk + 0.6), "BANDA CORRIDA: CANCELERÍA Y PANELES DE ALUMINIO",
+                                 0.11, "A-TEXTO", centrado=True)
+                zk += n_["h"]
         if "marco" in corr["rasgos"] and len(niveles) > 1:
             fa, fb, e_ = layout.inicio_marco(lays[1][1], blq["x"], L), L + 0.05, 0.3
             dx.rect(ox + fa, oy + zb1 - 0.3, fb - fa, ztop - zb1 + 0.3, F)
@@ -744,11 +767,19 @@ def corte(dx, blq, lays, r_est, eje, pos, ox, oy, titulo):
         # pretil
         dx.rect(ox - 0.125, oy + z, 0.15, 0.6, C_)
         dx.rect(ox + L - 0.025, oy + z, 0.15, 0.6, C_)
-    zz = 0.0
+    P = blq.get("pilotis")
+    om = 0.0
+    if P and eje == "x" and len(niveles) > 1:
+        # marquesina en voladizo al frente y pilotis en vista (misma geometría que fachadas y render)
+        zb1, f, e_, r_ = niveles[0]["h"], P["fondo"], P["losa"], P["diam"] / 2
+        dx.rect(ox - 0.125 - f, oy + zb1 - e_, f, e_, C_)
+        dx.rect(ox - f + 0.05, oy, 2 * r_, zb1 - e_, "A-FACHADA")
+        dx.rect(ox - f + 0.05 - 0.3, oy - Df, 2 * r_ + 0.6, 0.25, C_)            # zapata aislada del piloti
+        om = f + 0.3                                                           # niveles a la izquierda de la marquesina
     for z_, t in [(0.0, "NPT ±0.00")] + [(sum(n["h"] for n in niveles[:i + 1]), f"N +{sum(n['h'] for n in niveles[:i + 1]):.2f}")
                                           for i in range(len(niveles))] + [(-Df, f"DESPLANTE -{Df:.2f}")]:
-        dx.polilinea([(ox - 0.9, oy + z_), (ox - 0.65, oy + z_ + 0.2), (ox - 1.15, oy + z_ + 0.2)], "A-NIVELES", True)
-        dx.texto((ox - 2.9, oy + z_ + 0.06), t, 0.14, "A-NIVELES")
+        dx.polilinea([(ox - om - 0.9, oy + z_), (ox - om - 0.65, oy + z_ + 0.2), (ox - om - 1.15, oy + z_ + 0.2)], "A-NIVELES", True)
+        dx.texto((ox - om - 2.9, oy + z_ + 0.06), t, 0.14, "A-NIVELES")
     dx.texto((ox + L / 2, oy - Df - 0.9), titulo, 0.3, "T-TITULO", centrado=True)
 
 
@@ -777,9 +808,10 @@ def claves_cancel(lays, niveles, corr, materiales):
             else:
                 alto = 2.1
                 ext = v["tipo"] == "puerta_ext"
-                key = ("P", ancho, alto, ext)
-                desc = "Puerta de acceso doble" if ext else ("Puerta de baño" if ancho <= 0.8 else "Puerta interior")
-                mat = "Puerta de madera sólida de parota, chapa de seguridad" if ext else "Puerta de tambor MDF 6 mm, marco de pino, chapa de paso"
+                cor = bool(v.get("corrediza"))
+                key = ("P", ancho, alto, ext, cor)
+                desc = "Cancel corredizo al patio" if cor else ("Puerta de acceso doble" if ext else ("Puerta de baño" if ancho <= 0.8 else "Puerta interior"))
+                mat = mat_v if cor else ("Puerta de madera sólida de parota, chapa de seguridad" if ext else "Puerta de tambor MDF 6 mm, marco de pino, chapa de paso")
             if key not in tipos:
                 pref = key[0]
                 n = sum(1 for kk in tipos if kk[0] == pref) + 1

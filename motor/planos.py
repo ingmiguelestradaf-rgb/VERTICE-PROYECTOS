@@ -66,6 +66,24 @@ def planta_arq(dx, blq, cuartos, vanos, ox=0.0, oy=0.0, texto=True, cotas=True, 
     _linea_huecos(dx, "v", bx + bw + TE, by - TE, by + bd + TE, _huecos(vv, "v", bx + bw, by, by + bd), "A-MUROS")
     for v in vv:
         _vano(dx, v)
+    P = blq.get("pilotis")
+    if P and cuartos and cuartos[0].get("piso", 0) == 0:
+        # marquesina sobre pilotis: proyección punteada y columnas circulares (antes no aparecía en planta)
+        f, r_ = P["fondo"], P["diam"] / 2
+        for (p0, p1) in (((P["x0"], blq["y"] - f), (P["x1"], blq["y"] - f)), ((P["x0"], blq["y"]), (P["x0"], blq["y"] - f)),
+                         ((P["x1"], blq["y"]), (P["x1"], blq["y"] - f))):
+            L_ = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
+            n_ = max(1, int(L_ / 0.45))
+            for i in range(n_):
+                t0, t1 = i / n_, min(1.0, (i + 0.65) / n_)
+                dx.linea((p0[0] + (p1[0] - p0[0]) * t0 + ox, p0[1] + (p1[1] - p0[1]) * t0 + oy),
+                         (p0[0] + (p1[0] - p0[0]) * t1 + ox, p0[1] + (p1[1] - p0[1]) * t1 + oy), "COTAS")
+        yc = blq["y"] - f + r_ + 0.05
+        for cx in P["cols"]:
+            dx.circulo((cx + ox, yc + oy), r_, "A-MUROS")
+        if texto:
+            dx.texto(((P["x0"] + P["x1"]) / 2 + ox, blq["y"] - f - 0.35 + oy), "MARQUESINA SOBRE PILOTIS (PROYECCIÓN)",
+                     max(0.12, escala_txt * 0.6), "A-AREA", centrado=True)
     if cotas:
         dx.cota((bx - TE, by - TE), (bx + bw + TE, by - TE), -1.2 - escala_txt)
         dx.cota((bx - TE, by - TE), (bx - TE, by + bd + TE), 1.2 + escala_txt)
@@ -96,6 +114,14 @@ def _vano(dx, v):
             dx.linea((a, c), (b, c), "A-VANOS")
         else:
             dx.linea((c, a), (c, b), "A-VANOS")
+    elif v["tipo"] == "puerta_ext" and v.get("corrediza"):
+        # cancel corredizo: dos hojas de vidrio traslapadas, sin abatimiento
+        m = (a + b) / 2
+        for (p0, p1, off) in ((a, m + 0.05, -0.04), (m - 0.05, b, 0.04)):
+            if v["eje"] == "h":
+                dx.linea((p0, c + off), (p1, c + off), "A-VANOS")
+            else:
+                dx.linea((c + off, p0), (c + off, p1), "A-VANOS")
     elif v["tipo"] in ("puerta", "puerta_ext"):
         hojas = [(a, b)] if v["tipo"] == "puerta" else [(a, (a + b) / 2), (b, (a + b) / 2)]
         for h, e in hojas:
@@ -430,6 +456,18 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
                 ja, jb = max(libres, key=lambda q: q[1] - q[0])
                 if jb - ja > 1.0:
                     dx.rect(x0 + ja + 0.1, oy + z0, jb - ja - 0.2, 0.5, "A-FACHADA")
+            if "pilotis" in corr["rasgos"]:
+                # marquesina de concreto sobre pilotis: misma geometría que render, A-05 y Blender
+                P = layout.pilotis(blq, v0)
+                e_, r_ = P["losa"], P["diam"] / 2
+                dx.rect(ox + P["x0"], oy + z0 + zb1 - e_, P["x1"] - P["x0"], e_, "A-FACHADA")
+                for cx in P["cols"]:
+                    dx.rect(ox + cx - r_, oy + z0, 2 * r_, zb1 - e_, "A-FACHADA")
+            if "ventana_corrida" in corr["rasgos"]:
+                for zb, h, n in zs[1:]:
+                    bc = layout.banda_corrida(nivel_vanos[id(n)])
+                    if bc:
+                        dx.rect(ox + bc[0] - 0.05, oy + zb + 0.85, bc[1] - bc[0] + 0.1, min(h - 0.3, 2.4) - 0.8, "A-FACHADA")
             if "marco" in corr["rasgos"]:
                 fa, fb = layout.inicio_marco(nivel_vanos[id(zs[1][2])], blq["x"], L), L + 0.05
                 dx.rect(x0 + fa, oy + z0 + zb1 - 0.3, fb - fa, ztop - z0 - zb1 + 0.3, "A-FACHADA")
@@ -468,6 +506,16 @@ def corte(dx, proy, lays, corr, ox, oy):
                     tam = min(0.5, (c["d"] - 0.3) / (0.9 * max(len(nom), 1)))
                     dx.texto((ox + c["y"] + c["d"] / 2, oy + zb + h * 0.45), nom,
                              max(0.12, tam), "A-TEXTO", centrado=True)
+    P = blq.get("pilotis")
+    if P and len(zs) > 1:
+        zb1, f, e_ = zs[1][0], P["fondo"], P["losa"]
+        dx.rect(ox + y0 - TE - f, oy + zb1 - e_, f, e_, "A-CORTE")                      # marquesina en voladizo
+        r_ = P["diam"] / 2
+        dx.rect(ox + y0 - f + 0.05, oy + blq.get("z0", 0.0), 2 * r_, zb1 - e_, "A-FACHADA")   # pilotis (vista)
+    if corr["cubierta"] in ("plana", "plana_pretil"):
+        par = 0.6 if corr["cubierta"] == "plana" else 1.1
+        for yy in (y0 - TE, y0 + L + TE - 0.15):
+            dx.rect(ox + yy, oy + ztop, 0.15, par, "A-CORTE")                     # pretil (antes faltaba en el corte)
     r = altura_cubierta(blq, corr)
     if r:
         cub = corr["cubierta"]

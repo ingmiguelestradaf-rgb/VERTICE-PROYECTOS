@@ -240,6 +240,10 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
                                   cuarto=r["n"], cx=r["x"] + r["w"] / 2, cy=r["y"] + r["d"] / 2))
     # vanos al exterior
     col = set(blq.get("colindancias", []))
+    # vivienda: la zona social de planta baja sale al patio posterior por un cancel corredizo (antes ninguna casa
+    # tenía puerta al patio: el jardín y el tanque de gas quedaban sin acceso)
+    import math as _m
+    patio = piso_idx == 0 and blq.get("z0", 0) == 0 and blq.get("uso") == "habitacional" and len(blq["niveles"]) <= 3
     for r in hojas:
         ext = [e for e in bordes_ext(r, blq) if e[0] not in col]
         if r["t"] == "ext" and not any(e[0] == "S" for e in ext) and "Cochera" not in r["n"]:
@@ -294,6 +298,16 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
                 n_fach = sum(1 for e_ in ext if e_[4] - e_[3] >= 1.0)
                 req = 0.175 * r["w"] * r["d"] / 1.45 / max(1, n_fach) + 0.05
                 ancho = max(ancho, min(L - 0.6, req))
+            if patio and r["t"] == "social" and lado == "N" and L >= 2.4:
+                # ancho justo para el 17.5 % de iluminación con hoja de 2.10 m (mínimo 1.80 m): un cancel más ancho
+                # quita longitud de muro en la dirección X, que suele ser la crítica por sismo en lotes angostos
+                an = min(L - 0.6, max(1.8, _m.ceil((0.175 * r["w"] * r["d"] / 2.0 + 0.05) * 20) / 20))
+                cen = (i + f) / 2
+                vanos.append(dict(tipo="puerta_ext", eje=eje, c=c, a=round(cen - an / 2, 3), b=round(cen + an / 2, 3),
+                                  lado=lado, cuarto=r["n"], vidrio=True, corrediza=True,
+                                  cx=r["x"] + r["w"] / 2, cy=r["y"] + r["d"] / 2))
+                patio = False
+                continue
             # ventanas repartidas en claros grandes
             n = max(1, int(L // 9)) if L > 12 else 1
             paso = L / n
@@ -389,3 +403,48 @@ def conectar(hojas, vanos, blq, piso_idx):
         pv["auto"] = True
         nuevos.append(pv)
     return nuevos
+
+
+# ------------------------------------------------------------------ rasgos de fachada con geometría compartida
+PILOTIS_FONDO = 1.20       # vuelo de la marquesina de concreto al frente (m)
+PILOTIS_DIAM = 0.30        # columnas circulares de concreto aparente (m)
+PILOTIS_LOSA = 0.15        # peralte de la marquesina (m)
+
+
+def pilotis(blq, vanos_pb, sep_max=4.0):
+    """Marquesina de concreto a nivel de entrepiso sobre pilotis, al frente (sur) del bloque.
+
+    Devuelve dict(x0, x1, fondo, losa, cols=[x centro...]) en coordenadas absolutas. Las columnas van en los
+    extremos y en los macizos de la fachada de planta baja (nunca frente a un portón o una puerta), a no más de
+    `sep_max` entre ejes; antes el render dibujaba postes sueltos que no cargaban nada y los planos los omitían.
+    """
+    x0, x1 = blq["x"], blq["x"] + blq["w"]
+    r = PILOTIS_DIAM / 2
+    huecos = sorted((v["a"], v["b"]) for v in vanos_pb if v.get("lado") == "S")
+    cand, cur = [], x0
+    for a, b in huecos:
+        if a - cur >= PILOTIS_DIAM + 0.1:
+            cand.append((cur + a) / 2)
+        cur = max(cur, b)
+    cols = [x0 + r, x1 - r]
+    for _ in range(12):
+        cols.sort()
+        gaps = [(cols[i + 1] - cols[i], i) for i in range(len(cols) - 1)]
+        g, i = max(gaps)
+        if g <= sep_max:
+            break
+        mid = (cols[i] + cols[i + 1]) / 2
+        dentro = [c for c in cand if cols[i] + 0.8 < c < cols[i + 1] - 0.8]
+        if not dentro:
+            break
+        cols.append(min(dentro, key=lambda c: abs(c - mid)))
+    return dict(x0=x0, x1=x1, fondo=PILOTIS_FONDO, losa=PILOTIS_LOSA, diam=PILOTIS_DIAM,
+                cols=[round(c, 3) for c in sorted(cols)])
+
+
+def banda_corrida(vanos_nivel):
+    """Tramo (a, b) de la banda corrida de cancelería en la fachada sur de un nivel superior, o None."""
+    vs = [(v["a"], v["b"]) for v in vanos_nivel if v["tipo"] == "ventana" and v.get("lado") == "S"]
+    if len(vs) < 2:
+        return None
+    return min(a for a, _ in vs), max(b for _, b in vs)

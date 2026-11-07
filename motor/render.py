@@ -198,7 +198,7 @@ def _bloque(E, blq, lay, corr, rnd):
                 continue
             if v["tipo"] == "ventana":
                 z1, z2 = (1.6, 2.2) if v.get("alta") else ((0.9, min(h - 0.35, 2.4)) if h < 4 else (1.0, h - 0.8))
-                if "muro_cortina" in corr["rasgos"] or "ventana_corrida" in corr["rasgos"]:
+                if ("muro_cortina" in corr["rasgos"] or "ventana_corrida" in corr["rasgos"]) and not v.get("alta"):
                     z1 = 0.2 if "muro_cortina" in corr["rasgos"] else 0.9
                     z2 = h - 0.35 if "muro_cortina" in corr["rasgos"] else min(h - 0.3, 2.2)
                 col = vid
@@ -276,8 +276,31 @@ def _bloque(E, blq, lay, corr, rnd):
         for xx in np.linspace(x, x + w, max(2, int(w / 8)) + 1):
             E.caja(xx - 0.15, y - 0.35, z0, 0.3, 0.3, ztop - z0 + 0.3, ac)
     if "pilotis" in corr["rasgos"] and len(zs) > 1:
-        for xx in np.linspace(x + 0.5, x + w - 0.5, max(2, int(w / 5))):
-            E.caja(xx - 0.12, y - 1.2, z0, 0.24, 0.24, zs[1][0] - z0, "#F2F2EE")
+        # marquesina de concreto a nivel de entrepiso sobre pilotis (misma geometría que AP-03, A-05 y Blender;
+        # antes eran postes sueltos frente a la fachada que no cargaban nada)
+        P = layout.pilotis(blq, nivel_vanos[id(zs[0][2])])
+        zb1, f, e_, r_ = zs[1][0], P["fondo"], P["losa"], P["diam"] / 2
+        E.caja(P["x0"], y - f, zb1 - e_, P["x1"] - P["x0"], f, e_, "#E4E2DC")
+        E.q([(P["x0"], y - f - 0.005, zb1 - e_), (P["x1"], y - f - 0.005, zb1 - e_),
+             (P["x1"], y - f - 0.005, zb1), (P["x0"], y - f - 0.005, zb1)], ac)        # canto en color de acento
+        yc = y - f + r_ + 0.05
+        for cx in P["cols"]:
+            E.caja(cx - r_, yc - r_, z0, 2 * r_, 2 * r_, zb1 - e_ - z0, "#D9D7D0")
+    if "ventana_corrida" in corr["rasgos"]:
+        # banda corrida: paneles de aluminio entre las ventanas de la fachada sur de los niveles superiores
+        for zb, h, n in zs:
+            if zb <= z0:
+                continue
+            vs = sorted((v["a"], v["b"]) for v in nivel_vanos[id(n)] if v["tipo"] == "ventana" and v.get("lado") == "S")
+            z1, z2 = 0.9, min(h - 0.3, 2.2)
+            if len(vs) < 2:
+                continue
+            for (a1, b1), (a2, b2) in zip(vs, vs[1:]):
+                if a2 > b1:
+                    _quad(E, blq, "S", b1, a2, zb + z1, zb + z2, 0.03, "#3A3D40", 0.9)
+            for v in nivel_vanos[id(n)]:      # ventila alta de baño: panel bajo el vano para no cortar la banda
+                if v["tipo"] == "ventana" and v.get("alta") and v.get("lado") == "S":
+                    _quad(E, blq, "S", v["a"], v["b"], zb + z1, zb + 1.6, 0.03, "#3A3D40", 0.9)
     return ztech
 
 
@@ -454,7 +477,7 @@ def render(proy, lays, corr, ruta_aereo, ruta_peatonal, titulo, seed=1, ss=2, W=
             _auto(E, cx, 0.2, rnd)
         b0 = proy["bloques"][0]
         for v in lays[0][0][1]:          # jardín frontal junto al acceso
-            if v["tipo"] == "puerta_ext":
+            if v["tipo"] == "puerta_ext" and v.get("lado") == "S":
                 xa, xb = v["b"] + 0.3, b0["x"] + b0["w"] - 0.2
                 if xb - xa > 0.8:
                     E.q([(xa, 0.3, 0.05), (xb, 0.3, 0.05), (xb, b0["y"] - 0.4, 0.05), (xa, b0["y"] - 0.4, 0.05)], "#8FB06A", 0.95)

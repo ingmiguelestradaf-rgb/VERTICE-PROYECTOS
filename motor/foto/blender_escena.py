@@ -384,6 +384,31 @@ for blq in E["bloques"]:
             G.caja("madera", x0 + i * 0.6, y0 + d, 2.7, x0 + i * 0.6 + 0.08, y0 + d + 2.6, 2.88)
         for xx in (x0 + 0.2, x0 + w - 0.4):
             G.caja("madera", xx, y0 + d + 2.3, 0, xx + 0.2, y0 + d + 2.5, 2.7)
+    if blq.get("pilotis"):
+        # marquesina de concreto sobre pilotis (misma geometría que render.py, AP-03 y A-05)
+        P = blq["pilotis"]
+        zb1 = blq["niveles"][1]["z"]
+        f, e_, r_ = P["fondo"], P["losa"], P["diam"] / 2
+        G.caja("losa", P["x0"], y0 - f, zb1 - e_, P["x1"], y0 - 0.08, zb1)
+        G.caja("acento", P["x0"], y0 - f - 0.01, zb1 - e_, P["x1"], y0 - f, zb1)
+        yc = y0 - f + r_ + 0.05
+        for cx in P["cols"]:
+            G.caja("losa", cx - r_, yc - r_, 0.0, cx + r_, yc + r_, zb1 - e_)
+    if "ventana_corrida" in ras:
+        # banda corrida: paneles de aluminio entre las ventanas sur de los niveles superiores
+        for nv in blq["niveles"]:
+            if nv["piso"] == 0:
+                continue
+            vs = sorted((v["a"], v["b"], v["z1"], v["z2"]) for v in nv["vanos"] if v["tipo"] == "ventana" and v.get("lado") == "S")
+            if len(vs) < 2:
+                continue
+            ye = y0 - nv["tx"] / 2
+            for (a1, b1, q1, w1), (a2, b2, q2, w2) in zip(vs, vs[1:]):
+                if a2 > b1:
+                    G.caja("marco", b1, ye - 0.03, nv["z"] + 0.9, a2, ye, nv["z"] + max(w1, w2))
+            for a1, b1, q1, w1 in vs:
+                if q1 > 0.95:
+                    G.caja("marco", a1, ye - 0.03, nv["z"] + 0.9, b1, ye, nv["z"] + q1)
     if "marco" in ras and len(blq["niveles"]) > 1:
         zb1 = blq["niveles"][1]["z"]
         fx0 = x0 + w * 0.38
@@ -619,7 +644,7 @@ if "--sin-fotos" not in ARGS:
 # ------------------------------------------------------------------ recorrido virtual
 def ruta_interior():
     """Calle → acceso → recorrido por circulaciones y zona social/cocina de planta baja."""
-    pe = next((v for v in nv0["vanos"] if v["tipo"] == "puerta_ext"), None)
+    pe = next((v for v in nv0["vanos"] if v["tipo"] == "puerta_ext" and v.get("lado") == "S"), None)
     if not pe or not E["unifamiliar"]:
         return []
     px = (pe["a"] + pe["b"]) / 2

@@ -6,6 +6,7 @@ cancelería, terreno, exteriores y materiales de la corriente arquitectónica.
 import json
 
 from ..ejec import est as EST
+from .. import layout
 
 ALTOS = {"ventana": (0.90, 2.35), "ventana_alta": (1.60, 2.20), "puerta": (0.0, 2.10), "puerta_ext": (0.0, 2.10),
          "porton": (0.0, 2.40), "vano": (0.0, 2.30)}
@@ -37,7 +38,9 @@ def exportar(ruta, proy, lays, corr, plan, nombre, r_est=None, spec=None):
                                     muros=lns, vanos=vanos, piso=k))
                 z += n["h"]
         bloques.append(dict(nombre=blq["nombre"], x=blq["x"], y=blq["y"], w=blq["w"], d=blq["d"], niveles=niveles,
-                            sistema=blq["sistema"], colindancias=blq.get("colindancias", [])))
+                            sistema=blq["sistema"], colindancias=blq.get("colindancias", []),
+                            pilotis=layout.pilotis(blq, lays[bi][0][1])
+                            if "pilotis" in corr.get("rasgos", []) and len(blq["niveles"]) > 1 else None))
     escena = dict(nombre=nombre, clave=plan.get("fecha"), tipologia=plan["tipologia"],
                   corriente=dict(nombre=corr["nombre"], cubierta=corr["cubierta"], muro=corr["muro"], acento=corr["acento"],
                                  techo=corr["techo"], vidrio=corr["vidrio"], rasgos=corr.get("rasgos", [])),

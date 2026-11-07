@@ -113,7 +113,7 @@ def generadores(blq, lays, r, cancel, acab):
     return {k: round(v, 2) for k, v in q.items()}, notas
 
 
-def por_cotizar(blq, lays, r, cancel, q, cc):
+def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=()):
     filas = []
     for t in cancel:
         if t["clave"].startswith("V"):
@@ -157,6 +157,22 @@ def por_cotizar(blq, lays, r, cancel, q, cc):
             filas.append(("Porche de acceso: postes 20x20 y vigas de madera termotratada con cubierta (1.80 m de fondo)", "lote", 1))
         if "pergola" in cl["rasgos"]:
             filas.append((f"Pérgola posterior de madera termotratada ({blq['w']:.2f} x 2.50 m)", "lote", 1))
+    # rasgos de fachada que no forman parte de los generadores de obra negra (antes no se cuantificaban)
+    from .. import layout
+    if "pilotis" in rasgos and len(blq["niveles"]) > 1:
+        P = layout.pilotis(blq, lays[0][1])
+        filas.append((f"Marquesina de concreto armado f'c = 250 kg/cm² e = {P['losa'] * 100:.0f} cm, vuelo {P['fondo']:.2f} m, "
+                      "con trabe de borde, impermeabilizada", "m²", round((P["x1"] - P["x0"]) * P["fondo"], 2)))
+        filas.append((f"Pilotis: columnas circulares de concreto aparente Ø{P['diam'] * 100:.0f} cm con zapata aislada "
+                      f"(h = {blq['niveles'][0]['h']:.2f} m)", "pza", len(P["cols"])))
+    if "ventana_corrida" in rasgos and len(blq["niveles"]) > 1:
+        # sólo los paños entre ventanas (las ventanas ya están en la cancelería), con la altura de la ventana (1.45 m)
+        area = 0.0
+        for k_ in range(1, len(blq["niveles"])):
+            vs = sorted((v["a"], v["b"]) for v in lays[k_][1] if v["tipo"] == "ventana" and v.get("lado") == "S")
+            area += sum(max(0.0, a2 - b1) for (_, b1), (a2, _) in zip(vs, vs[1:])) * 1.45
+        if area > 0:
+            filas.append(("Banda corrida: paneles de aluminio compuesto entre ventanas de fachada principal", "m²", round(area, 2)))
     if q.get("block-20"):
         filas.append(("Block hueco de concreto 20x20x40 (material, 12.5 pza/m²)", "pza", math.ceil(q["block-20"] * 12.5 * 1.05)))
     if q.get("dala"):

@@ -70,6 +70,17 @@ def cimentacion(dx, blq, r, xs, ys, ox=0.0, oy=0.0):
     for c in r.get("columnas", []):
         dx.rect(c["x"] - 0.075 + ox, c["y"] - 0.15 + oy, 0.15, 0.30, "E-CASTILLOS")
         dx.texto((c["x"] + 0.2 + ox, c["y"] + oy + 0.25), "C-1", 0.15, "E-TEXTO")
+    P = blq.get("pilotis")
+    if P:
+        # pilotis de la marquesina: zapatas aisladas fuera del paño (antes la cimentación no las incluía)
+        r_, f = P["diam"] / 2, P["fondo"]
+        yc = blq["y"] - f + r_ + 0.05
+        for cx in P["cols"]:
+            dx.rect(cx - 0.4 + ox, yc - 0.4 + oy, 0.8, 0.8, "E-ZAPATAS")
+            dx.circulo((cx + ox, yc + oy), r_, "E-CASTILLOS")
+        dx.texto(((P["x0"] + P["x1"]) / 2 + ox, yc - 0.75 + oy),
+                 f"ZA-P: ZAPATA AISLADA 80x80x20 CM BAJO PILOTI Ø{P['diam'] * 100:.0f} CM (4 #4 + E #2.5 @ 15) — MARQUESINA e = {P['losa'] * 100:.0f} CM",
+                 0.15, "E-TEXTO", centrado=True)
     dx.texto((blq["x"] + ox, blq["y"] + blq["d"] + oy + 1.0), "K-1: CASTILLO (VER DETALLE)   ZC: ZAPATA CORRIDA (VER CUADRO)", 0.17, "E-TEXTO")
 
 

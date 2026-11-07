@@ -224,17 +224,21 @@ def calcular(V, blq, lays, t_x=15, t_y=15):
         tabs.append(partir(tableros(hojas[k], estr[k] + apoyo_tr[k], excl), apoyo_tr[k]))
 
     # ---- cargas
-    ent = K.entrepiso_tipico(0.12)
-    azo = K.azotea_tipica(0.12)
     cl = blq.get("cubierta_ligera")
-    if cl:
-        # cubierta inclinada sobre la losa de azotea: la losa queda plana y protegida, sin relleno ni entortado
-        # para pendientes; se suma el peso de la cubierta (en proyección horizontal)
-        azo.capas = [c for c in azo.capas if not c.nombre.startswith(("Relleno", "Entortado"))]
-        azo.capas.append(K.Capa(f"Cubierta inclinada de {cl['material']} con estructura ligera (proy. horizontal)", 0.0, 0, cl["cm"]))
     cv_ent, cv_azo = K.CARGAS_VIVAS["habitacion"], K.CARGAS_VIVAS["azotea_pendiente_hasta_5pct"]
-    w_ent = K.combinaciones_ntc(ent.carga_muerta, cv_ent[0], cv_ent[1])["envolvente"]
-    w_azo = K.combinaciones_ntc(azo.carga_muerta, cv_azo[0], cv_azo[1])["envolvente"]
+
+    def sistemas(h_ent, h_azo):
+        ent = K.entrepiso_tipico(h_ent)
+        azo = K.azotea_tipica(h_azo)
+        if cl:
+            # cubierta inclinada sobre la losa de azotea: la losa queda plana y protegida, sin relleno ni entortado
+            # para pendientes; se suma el peso de la cubierta (en proyección horizontal)
+            azo.capas = [c for c in azo.capas if not c.nombre.startswith(("Relleno", "Entortado"))]
+            azo.capas.append(K.Capa(f"Cubierta inclinada de {cl['material']} con estructura ligera (proy. horizontal)", 0.0, 0, cl["cm"]))
+        return (ent, azo, K.combinaciones_ntc(ent.carga_muerta, cv_ent[0], cv_ent[1])["envolvente"],
+                K.combinaciones_ntc(azo.carga_muerta, cv_azo[0], cv_azo[1])["envolvente"])
+
+    ent, azo, w_ent, w_azo = sistemas(0.12, 0.12)
 
     # ---- losas
     def disenar_losa(ts, wu, nombre):
@@ -277,11 +281,23 @@ def calcular(V, blq, lays, t_x=15, t_y=15):
         return dict(nombre=nombre, h=h, wu=round(wu), d=round(d, 2), s=s, filas=filas,
                     armado=f"#3 en ambos sentidos en lecho inferior con la separación indicada por tablero (general @ {s} cm); "
                            f"bastones #3 a la misma separación en lecho superior sobre apoyos continuos, longitud ln/4 a cada lado")
-    losas = []
-    for k in range(len(L)):
-        ultimo = k == len(L) - 1
-        losas.append(disenar_losa(tabs[k], w_azo if ultimo else w_ent, "Azotea" if ultimo else
-                                  ("Entrepiso" if len(L) == 2 else f"Entrepiso N{k + 1}")))
+    def disenar_todas():
+        out = []
+        for k in range(len(L)):
+            ultimo = k == len(L) - 1
+            out.append(disenar_losa(tabs[k], w_azo if ultimo else w_ent, "Azotea" if ultimo else
+                                    ("Entrepiso" if len(L) == 2 else f"Entrepiso N{k + 1}")))
+        return out
+    losas = disenar_todas()
+    # el análisis de cargas suponía siempre losa de 12 cm aunque el diseño pidiera 13–14 cm (peso propio subestimado):
+    # se recalculan cargas con el peralte de diseño y se rediseña hasta que el peralte no cambie
+    for _ in range(3):
+        h_e = max([ls["h"] for ls in losas[:-1]] or [12]) / 100
+        h_a = losas[-1]["h"] / 100
+        if abs(h_e - ent.capas[0].espesor_m) < 1e-6 and abs(h_a - azo.capas[0].espesor_m) < 1e-6:
+            break
+        ent, azo, w_ent, w_azo = sistemas(max(0.12, h_e), max(0.12, h_a))
+        losas = disenar_todas()
 
     # ---- cargas por línea de muro (servicio, kg) del nivel 0
     cm_e, cm_a = ent.carga_muerta, azo.carga_muerta

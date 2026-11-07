@@ -29,7 +29,8 @@ def revisar(blq, lays, r, cc, cancel, acab, q, rev_arq):
         add("Arquitectura", "Escalera: ancho de tramo", "≥ 0.90 m (vivienda)", f"{e['ancho_tramo']:.2f} m", e["ancho_tramo"] >= 0.90)
         add("Arquitectura", "Escalera: regla de comodidad", "2p + h entre 61 y 66 cm", f"{e['regla']:.1f} cm",
             61 <= e["regla"] <= 66, aviso=True)
-    puertas_ext = [v for v in lays[0][1] if v["tipo"] == "puerta_ext"]
+    # acceso principal: sin contar el cancel corredizo al patio (que no es acceso desde la calle)
+    puertas_ext = [v for v in lays[0][1] if v["tipo"] == "puerta_ext" and not v.get("corrediza")]
     add("Arquitectura", "Acceso principal", "Puerta ≥ 0.90 m (accesibilidad NMX-R-050)",
         f"{max((v['b'] - v['a'] for v in puertas_ext), default=0):.2f} m", any(v["b"] - v["a"] >= 0.9 for v in puertas_ext))
     # ---------------- estructura

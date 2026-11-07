@@ -127,6 +127,10 @@ def construir(fecha, spec=None, salida=SALIDA, privado=PRIVADO, ejecutivo=True):
             lays = [lays0]
     if r_est is None:
         lays = [[layout.distribuir(blq, n, corr, k) for k, n in enumerate(blq["niveles"])] for blq in proy["bloques"]]
+    # geometría única de la marquesina sobre pilotis para plantas y cortes (render, fachadas y Blender la recalculan igual)
+    for i, blq in enumerate(proy["bloques"]):
+        if "pilotis" in corr["rasgos"] and len(blq["niveles"]) > 1:
+            blq["pilotis"] = layout.pilotis(blq, lays[i][0][1])
     esp = (r_est["t_x"] / 100, r_est["t_y"] / 100) if r_est else (0.15, 0.15)
     area_total = sum(b["w"] * b["d"] * sum(n["rep"] for n in b["niveles"]) for b in proy["bloques"])
     desplante = sum(b["w"] * b["d"] for b in proy["bloques"] if b.get("z0", 0) == 0)
