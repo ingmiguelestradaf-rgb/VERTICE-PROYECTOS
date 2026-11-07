@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-07-casa-moderna-bauhaus",
+  "fecha": "2026-11-07",
+  "nombre": "Casa Pilotis",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Moderna (Bauhaus / Movimiento Moderno)",
+  "area": 334.9,
+  "terreno": 300.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-06-casa-japonesa",
   "fecha": "2026-11-06",
   "nombre": "Casa Engawa",
