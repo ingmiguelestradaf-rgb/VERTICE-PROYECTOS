@@ -530,6 +530,8 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
             h = n["h"]
             if v["tipo"] == "ventana":
                 z1, z2 = (1.6, 2.2) if v.get("alta") else (0.9, min(h - 0.35, 2.35))
+                if layout.es_cortina(corr, k, v):
+                    z1 = layout.ANTEPECHO_CORTINA
             elif v["tipo"] == "porton":
                 z1, z2 = 0.0, min(h - 0.35, 2.4)
             else:
@@ -663,7 +665,7 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
 
 
 # ------------------------------------------------------------------ cortes
-def corte(dx, blq, lays, r_est, eje, pos, ox, oy, titulo):
+def corte(dx, blq, lays, r_est, eje, pos, ox, oy, titulo, corr=None):
     """eje='x': plano x = pos (se ve el eje y en horizontal). eje='y': plano y = pos."""
     niveles = blq["niveles"]
     if eje == "x":
@@ -693,6 +695,8 @@ def corte(dx, blq, lays, r_est, eje, pos, ox, oy, titulo):
             else:
                 if vano["tipo"] == "ventana":
                     z1, z2 = (1.6, 2.2) if vano.get("alta") else (0.9, min(h - 0.35, 2.35))
+                    if corr and layout.es_cortina(corr, k, vano):
+                        z1 = layout.ANTEPECHO_CORTINA
                     dx.rect(ox + u - t_ / 2, oy + z, t_, z1, C_)
                     dx.rect(ox + u - t_ / 2, oy + z + z2, t_, h - losa - z2, C_)
                     dx.linea((ox + u, oy + z + z1), (ox + u, oy + z + z2), "A-FACHADA-VIDRIO")
@@ -796,9 +800,12 @@ def claves_cancel(lays, niveles, corr, materiales):
                 continue
             ancho = round(v["b"] - v["a"], 2)
             if v["tipo"] == "ventana":
-                alto = 0.6 if v.get("alta") else 1.45
+                cort = layout.es_cortina(corr, k, v)
+                alto = 0.6 if v.get("alta") else (round(2.35 - layout.ANTEPECHO_CORTINA, 2) if cort else 1.45)
                 key = ("V", ancho, alto)
                 desc = "Ventana fija/corrediza" if not v.get("alta") else "Ventila de baño (abatible)"
+                if cort:
+                    desc = "Muro cortina fijo + corredizo"
                 mat = mat_v
             elif v["tipo"] == "porton":
                 alto = 2.4
@@ -839,9 +846,14 @@ def etiquetar(dx, et, ox, oy):
 
 def acabados(c, materiales):
     t, n = c["t"], c["n"]
-    piso_g = next((m for m in materiales if "porcelanato" in m.lower() or "piso" in m.lower()), "Porcelanato 60x120 tono arena")
+    # primero el porcelanato; "piso" sólo como respaldo (un "muro cortina de piso a cerramiento" no es un acabado de piso)
+    piso_g = next((m for m in materiales if "porcelanato" in m.lower()),
+                  next((m for m in materiales if m.lower().startswith("piso")), "Porcelanato 60x120 tono arena"))
     piso_g = piso_g if len(piso_g) < 60 else "Porcelanato 60x120 rectificado"
     piso_g = piso_g[:1].upper() + piso_g[1:]   # la cédula de acabados empieza con mayúscula
+    if t == "humedo" and "MEDIO" in n.upper():
+        return dict(piso="Porcelanato antiderrapante 60x60", zoclo="—", muro="Azulejo 30x60 a 1.20 m en muro de lavabo; resto pintura esmalte",
+                    plafon="Aplanado de yeso + pintura antihongos", clave="B")
     if t == "humedo":
         return dict(piso="Porcelanato antiderrapante 60x60", zoclo="—", muro="Azulejo 30x60 a 2.10 m en regadera y lavabo; resto pintura esmalte",
                     plafon="Aplanado de yeso + pintura antihongos", clave="B")

@@ -448,3 +448,16 @@ def banda_corrida(vanos_nivel):
     if len(vs) < 2:
         return None
     return min(a for a, _ in vs), max(b for _, b in vs)
+
+
+# Muro cortina: en planta baja las ventanas de los locales habitables bajan su antepecho a un zoclo de 10 cm
+# (cancel de piso a cerramiento) con el mismo cabezal de 2.35 m, de modo que cerramientos, castillos y cargas
+# no cambian. En planta alta se conserva el antepecho de 0.90 m (protección contra caídas) y nunca aplica a
+# cocina, lavandería, baños ni ventilas altas.
+ANTEPECHO_CORTINA = 0.10
+_SIN_CORTINA = ("COCINA", "LAVANDER", "BAÑO", "BODEGA", "COCHERA", "ESCALERA", "VESTIDOR")
+
+
+def es_cortina(corr, piso_idx, v):
+    return ("muro_cortina" in corr.get("rasgos", ()) and piso_idx == 0 and v.get("tipo") == "ventana"
+            and not v.get("alta") and v.get("lado") and not any(s in str(v.get("cuarto", "")).upper() for s in _SIN_CORTINA))

@@ -423,6 +423,8 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
                 b = v["b"] + ox
                 if v["tipo"] == "ventana":
                     z1, z2 = (1.6, 2.2) if v.get("alta") else (0.9 if h < 4 else 1.0, min(h - 0.3, 2.4 if h < 4 else h - 0.8))
+                    if layout.es_cortina(corr, blq["niveles"].index(n), v):
+                        z1, z2 = layout.ANTEPECHO_CORTINA, min(h - 0.35, 2.35)
                 else:
                     z1, z2 = 0.0, min(h - 0.3, 2.4 if h < 3.2 else h - 0.9)
                 capa = "A-FACHADA-VIDRIO" if v["tipo"] == "ventana" or v.get("vidrio") else "A-FACHADA"

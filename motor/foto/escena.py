@@ -30,6 +30,8 @@ def exportar(ruta, proy, lays, corr, plan, nombre, r_est=None, spec=None):
                 z1, z2 = ALTOS.get(tipo, (0.0, 2.1))
                 if v["tipo"] == "ventana" and n["h"] > 3.5:
                     z1, z2 = 1.0, n["h"] - 0.8
+                elif layout.es_cortina(corr, k, v):
+                    z1 = layout.ANTEPECHO_CORTINA
                 vanos.append(dict(eje=v["eje"], c=v["c"], a=v["a"], b=v["b"], tipo=v["tipo"], z1=z1, z2=min(z2, n["h"] - losa - 0.05),
                                   lado=v.get("lado"), vidrio=bool(v.get("vidrio")), cuarto=v.get("cuarto")))
             for rep in range(n["rep"]):

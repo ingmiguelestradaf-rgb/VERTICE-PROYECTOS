@@ -1,4 +1,5 @@
 """Proyecto ejecutivo de vivienda: láminas, memoria técnica, presupuesto, programa y revisión de coordinación."""
+import re
 import json
 import os
 import shutil
@@ -19,7 +20,8 @@ def generar(V, carpeta, datos, proy, plan, corr, lays, r, spec, nombre, ins_calc
     t = proy["terreno"]
     esp = (r["t_x"] / 100, r["t_y"] / 100)
     xs, ys = arq.ejes(r)
-    materiales = [m.strip() for m in (spec.get("materiales") or corr["materiales"]).replace(";", ".").split(".") if m.strip()]
+    # separa por ";" o por punto final de frase; nunca por el punto decimal ("aleros de 0.90 m" quedaba en dos notas)
+    materiales = [m.strip() for m in re.split(r";|\.(?!\d)", spec.get("materiales") or corr["materiales"]) if m.strip()]
     notas = ["Cotas en metros. Ejes, niveles y cotas rigen sobre el dibujo.",
              "Proyecto ejecutivo generado por el motor Vértice y revisado por coordinación automática.",
              "Requiere revisión y firma de DRO y corresponsables, y estudio de mecánica de suelos.",
@@ -96,8 +98,8 @@ def generar(V, carpeta, datos, proy, plan, corr, lays, r, spec, nombre, ins_calc
     J.cerrar(h)
 
     h = J.nueva("A-06", "Cortes arquitectónicos", disciplina="Arquitectónico")
-    arq.corte(h["dx"], blq, lays, r, "x", xA, 0, 0, "CORTE A-A' (POR ESCALERA)")
-    arq.corte(h["dx"], blq, lays, r, "y", yB, 0, -(ztop + 5.0), "CORTE B-B' (POR ZONA SOCIAL)")
+    arq.corte(h["dx"], blq, lays, r, "x", xA, 0, 0, "CORTE A-A' (POR ESCALERA)", corr)
+    arq.corte(h["dx"], blq, lays, r, "y", yB, 0, -(ztop + 5.0), "CORTE B-B' (POR ZONA SOCIAL)", corr)
     J.cerrar(h)
 
     cancel, etiquetas = arq.claves_cancel(lays, niveles, corr, materiales)

@@ -198,9 +198,10 @@ def _bloque(E, blq, lay, corr, rnd):
                 continue
             if v["tipo"] == "ventana":
                 z1, z2 = (1.6, 2.2) if v.get("alta") else ((0.9, min(h - 0.35, 2.4)) if h < 4 else (1.0, h - 0.8))
-                if ("muro_cortina" in corr["rasgos"] or "ventana_corrida" in corr["rasgos"]) and not v.get("alta"):
-                    z1 = 0.2 if "muro_cortina" in corr["rasgos"] else 0.9
-                    z2 = h - 0.35 if "muro_cortina" in corr["rasgos"] else min(h - 0.3, 2.2)
+                if layout.es_cortina(corr, blq["niveles"].index(n), v):
+                    z1, z2 = layout.ANTEPECHO_CORTINA, min(h - 0.35, 2.35)
+                elif "ventana_corrida" in corr["rasgos"] and not v.get("alta"):
+                    z1, z2 = 0.9, min(h - 0.3, 2.2)
                 col = vid
             else:
                 z1, z2 = 0.0, min(h - 0.3, 2.4 if h < 3.2 else h - 0.9)

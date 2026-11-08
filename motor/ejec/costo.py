@@ -84,7 +84,11 @@ def generadores(blq, lays, r, cancel, acab):
             plaf += A
             if c["t"] not in ("ext", "almacen"):
                 piso += A
-            if c["t"] == "humedo":
+            if c["t"] == "humedo" and "MEDIO" in c["n"].upper():
+                # medio baño: sin regadera, azulejo sólo en el muro del lavabo a 1.20 m (igual que la cédula de acabados)
+                azul += P * 1.2 * 0.3
+                yeso += P * hm * 0.7
+            elif c["t"] == "humedo":
                 azul += P * 2.1 * 0.6
                 yeso += P * hm * 0.4
             elif c["t"] == "cocina":
