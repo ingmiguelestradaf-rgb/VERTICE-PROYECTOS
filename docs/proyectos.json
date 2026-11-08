@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-08-casa-mid-century",
+  "fecha": "2026-11-08",
+  "nombre": "Casa Mirador Naranja",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Mid-Century Modern",
+  "area": 363.4,
+  "terreno": 400.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-07-casa-moderna-bauhaus",
   "fecha": "2026-11-07",
   "nombre": "Casa Pilotis",
