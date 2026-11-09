@@ -268,11 +268,12 @@ def _bloque(E, blq, lay, corr, rnd):
             for xx in (px0, px1 - 0.2):
                 E.caja(xx, y - pdp, z0, 0.2, 0.2, pz - z0, "#6B4B32")
     if "pergola" in corr["rasgos"]:
-        zp = z0 + 2.7
-        for k in range(int(w / 0.6)):
-            E.caja(x + k * 0.6, y + d, zp, 0.08, 2.5, 0.18, "#6B4B32")
-        for xx in (x + 0.2, x + w - 0.4):
-            E.caja(xx, y + d + 2.2, z0, 0.2, 0.2, zp - z0, "#6B4B32")
+        PG = layout.pergola(blq)
+        zp = z0 + PG["z"]
+        for xv in PG["vigas"]:
+            E.caja(xv, PG["y0"], zp, PG["ancho_viga"], PG["y1"] - PG["y0"], PG["viga"], "#6B4B32")
+        for xx in PG["postes"]:
+            E.caja(xx, PG["y_poste"], z0, PG["poste"], PG["poste"], zp - z0, "#6B4B32")
     if "estructura_aparente" in corr["rasgos"] and blq["sistema"] != "mamposteria":
         for xx in np.linspace(x, x + w, max(2, int(w / 8)) + 1):
             E.caja(xx - 0.15, y - 0.35, z0, 0.3, 0.3, ztop - z0 + 0.3, ac)

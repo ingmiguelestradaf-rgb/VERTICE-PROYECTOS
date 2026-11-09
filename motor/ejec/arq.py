@@ -631,6 +631,26 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
             fa, fb, e_ = layout.inicio_marco(lays[1][1], blq["x"], L), L + 0.05, 0.3
             dx.rect(ox + fa, oy + zb1 - 0.3, fb - fa, ztop - zb1 + 0.3, F)
             dx.rect(ox + fa + e_, oy + zb1, fb - fa - 2 * e_, ztop - zb1 - e_, F)
+    # pérgola posterior: vigas vistas de testa en la fachada norte y de canto en las laterales
+    # (misma geometría que render y Blender vía layout.pergola; antes ningún plano la dibujaba)
+    if "pergola" in corr["rasgos"]:
+        PG = layout.pergola(blq)
+        zp, hv, pp = PG["z"], PG["viga"], PG["poste"]
+        if lado == "N":
+            for xv in PG["vigas"]:
+                u = _u(blq, lado, xv + PG["ancho_viga"])
+                dx.rect(ox + u, oy + zp, PG["ancho_viga"], hv, F)
+            dx.linea((ox + _u(blq, lado, PG["x1"]), oy + zp), (ox + _u(blq, lado, PG["x0"]), oy + zp), F)
+            for xx in PG["postes"]:
+                dx.rect(ox + _u(blq, lado, xx + pp), oy, pp, zp, F)
+            dx.texto((ox + L / 2, oy + zp + hv + 0.12), "PÉRGOLA DE MADERA TERMOTRATADA (VUELO 2.50 M)", 0.12,
+                     "A-TEXTO", centrado=True)
+        elif lado in ("E", "O"):
+            ua, ub = sorted((_u(blq, lado, PG["y0"]), _u(blq, lado, PG["y1"])))
+            dx.linea((ox + min(ua, -1.5), oy), (ox + max(ub, L + 1.5), oy), F)
+            dx.rect(ox + ua, oy + zp, ub - ua, hv, F)
+            up = sorted((_u(blq, lado, PG["y_poste"]), _u(blq, lado, PG["y_poste"] + pp)))
+            dx.rect(ox + up[0], oy, pp, zp, F)
     # niveles
     zz = 0.0
     marcas = [(0.0, "NPT ±0.00")]
@@ -640,10 +660,12 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
     marcas.append((ztop, f"NLA +{ztop:.2f}"))
     if par:
         marcas.append((ztop + par, f"PRETIL +{ztop + par:.2f}"))
+    # en la lateral oriente la pérgola vuela 2.50 m a la derecha: las marcas de nivel se recorren para no encimarse
+    xn = L + (layout.PERGOLA_FONDO if lado == "E" and "pergola" in corr["rasgos"] else 0.0)
     for z_, t in marcas:
-        dx.polilinea([(ox + L + 0.4, oy + z_), (ox + L + 0.65, oy + z_ + 0.2), (ox + L + 0.15, oy + z_ + 0.2)], "A-NIVELES", True)
-        dx.linea((ox + L + 0.4, oy + z_), (ox + L + 1.9, oy + z_), "A-NIVELES")
-        dx.texto((ox + L + 0.75, oy + z_ + 0.06), t, 0.15, "A-NIVELES")
+        dx.polilinea([(ox + xn + 0.4, oy + z_), (ox + xn + 0.65, oy + z_ + 0.2), (ox + xn + 0.15, oy + z_ + 0.2)], "A-NIVELES", True)
+        dx.linea((ox + xn + 0.4, oy + z_), (ox + xn + 1.9, oy + z_), "A-NIVELES")
+        dx.texto((ox + xn + 0.75, oy + z_ + 0.06), t, 0.15, "A-NIVELES")
     dx.cota((ox, oy), (ox + L, oy), -0.7, h=0.17)
     # materiales con líneas de llamada
     if lado == "S":
@@ -793,6 +815,10 @@ def claves_cancel(lays, niveles, corr, materiales):
     tipos = {}
     etiquetas = []
     mat_v = next((m for m in materiales if "cancel" in m.lower()), "Aluminio línea 3\" color negro, vidrio claro 6 mm")
+    # puerta de acceso: la que describa el arquitecto en materiales (antes siempre decía parota, aunque el spec
+    # pidiera otra madera o un acabado de color)
+    mat_pa = next((m[0].upper() + m[1:] + ", chapa de seguridad" for m in materiales if "puerta de acceso" in m.lower()),
+                  "Puerta de madera sólida de parota, chapa de seguridad")
     for k, (cu, va) in enumerate(lays):
         et = []
         for v in va:
@@ -818,7 +844,7 @@ def claves_cancel(lays, niveles, corr, materiales):
                 cor = bool(v.get("corrediza"))
                 key = ("P", ancho, alto, ext, cor)
                 desc = "Cancel corredizo al patio" if cor else ("Puerta de acceso doble" if ext else ("Puerta de baño" if ancho <= 0.8 else "Puerta interior"))
-                mat = mat_v if cor else ("Puerta de madera sólida de parota, chapa de seguridad" if ext else "Puerta de tambor MDF 6 mm, marco de pino, chapa de paso")
+                mat = mat_v if cor else (mat_pa if ext else "Puerta de tambor MDF 6 mm, marco de pino, chapa de paso")
             if key not in tipos:
                 pref = key[0]
                 n = sum(1 for kk in tipos if kk[0] == pref) + 1
@@ -851,6 +877,8 @@ def acabados(c, materiales):
                   next((m for m in materiales if m.lower().startswith("piso")), "Porcelanato 60x120 tono arena"))
     piso_g = piso_g if len(piso_g) < 60 else "Porcelanato 60x120 rectificado"
     piso_g = piso_g[:1].upper() + piso_g[1:]   # la cédula de acabados empieza con mayúscula
+    # zoclo del mismo material que el piso (antes era siempre porcelanato aunque el piso fuera de barro o madera)
+    zoclo_g = "Porcelanato 10 cm" if "porcelanato" in piso_g.lower() else "Zoclo de 10 cm del mismo material del piso"
     if t == "humedo" and "MEDIO" in n.upper():
         return dict(piso="Porcelanato antiderrapante 60x60", zoclo="—", muro="Azulejo 30x60 a 1.20 m en muro de lavabo; resto pintura esmalte",
                     plafon="Aplanado de yeso + pintura antihongos", clave="B")
@@ -858,7 +886,7 @@ def acabados(c, materiales):
         return dict(piso="Porcelanato antiderrapante 60x60", zoclo="—", muro="Azulejo 30x60 a 2.10 m en regadera y lavabo; resto pintura esmalte",
                     plafon="Aplanado de yeso + pintura antihongos", clave="B")
     if t == "cocina":
-        return dict(piso=piso_g, zoclo="Porcelanato 10 cm", muro="Salpicadero de azulejo 60 cm sobre cubierta; resto pintura vinílica lavable",
+        return dict(piso=piso_g, zoclo=zoclo_g, muro="Salpicadero de azulejo 60 cm sobre cubierta; resto pintura vinílica lavable",
                     plafon="Aplanado de yeso + pintura vinílica", clave="C")
     if t == "servicio":
         return dict(piso="Cerámico antiderrapante 45x45", zoclo="Cerámico 10 cm", muro="Azulejo a 1.20 m; resto pintura esmalte",
@@ -871,5 +899,5 @@ def acabados(c, materiales):
                     muro="Aplanado fino + pintura vinílica; barandal de herrería h = 0.90 m", plafon="Aplanado de yeso + pintura", clave="ES")
     if t == "almacen":
         return dict(piso="Concreto pulido", zoclo="—", muro="Aplanado de mortero + pintura vinílica", plafon="Aplanado + pintura", clave="A")
-    return dict(piso=piso_g, zoclo="Porcelanato 10 cm", muro="Aplanado fino de yeso + pintura vinílica mate",
+    return dict(piso=piso_g, zoclo=zoclo_g, muro="Aplanado fino de yeso + pintura vinílica mate",
                 plafon="Aplanado de yeso a regla + pintura vinílica", clave="H")

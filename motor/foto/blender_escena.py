@@ -380,10 +380,11 @@ for blq in E["bloques"]:
             for xx in (px0, px1 - 0.2):
                 G.caja("madera", xx, y0 - pdp, 0, xx + 0.2, y0 - pdp + 0.2, pz)
     if "pergola" in ras:
+        # misma geometría que motor/layout.pergola (render, AP-03 y A-05): vuelo 2.50 m, postes a 2.20 m
         for i in range(int(w / 0.6)):
-            G.caja("madera", x0 + i * 0.6, y0 + d, 2.7, x0 + i * 0.6 + 0.08, y0 + d + 2.6, 2.88)
+            G.caja("madera", x0 + i * 0.6, y0 + d, 2.7, x0 + i * 0.6 + 0.08, y0 + d + 2.5, 2.88)
         for xx in (x0 + 0.2, x0 + w - 0.4):
-            G.caja("madera", xx, y0 + d + 2.3, 0, xx + 0.2, y0 + d + 2.5, 2.7)
+            G.caja("madera", xx, y0 + d + 2.2, 0, xx + 0.2, y0 + d + 2.4, 2.7)
     if blq.get("pilotis"):
         # marquesina de concreto sobre pilotis (misma geometría que render.py, AP-03 y A-05)
         P = blq["pilotis"]

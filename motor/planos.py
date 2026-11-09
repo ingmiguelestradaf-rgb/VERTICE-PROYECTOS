@@ -433,6 +433,11 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
                     for k in range(1, 6):
                         zz = zb + z1 + (z2 - z1) * k / 6
                         dx.linea((a, oy + zz), (b, oy + zz), "A-FACHADA")
+        if lado == "E" and "pergola" in corr["rasgos"]:
+            # pérgola posterior vista de canto (misma geometría que render y A-05 vía layout.pergola)
+            PG = layout.pergola(blq)
+            dx.rect(ox + PG["y0"], oy + z0 + PG["z"], PG["y1"] - PG["y0"], PG["viga"], "A-FACHADA")
+            dx.rect(ox + PG["y_poste"], oy + z0, PG["poste"], PG["z"], "A-FACHADA")
         if lado == "S" and len(zs) > 1:
             # parteluces y marco con la geometría del render
             zb1 = zs[1][0] - z0

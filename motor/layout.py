@@ -442,6 +442,25 @@ def pilotis(blq, vanos_pb, sep_max=4.0):
                 cols=[round(c, 3) for c in sorted(cols)])
 
 
+# Pérgola posterior de madera: vigas de 8 x 18 cm @ 60 cm con su cara superior a +2.88 (desplantadas a +2.70) que
+# vuelan 2.50 m desde la fachada norte, sobre dos postes de 20 x 20 cm. Una sola geometría para render, Blender,
+# AP-03 y A-05 (antes sólo los renders la dibujaban y Blender usaba 2.60 m de vuelo).
+PERGOLA_FONDO = 2.50
+PERGOLA_Z = 2.70
+PERGOLA_VIGA = 0.18
+PERGOLA_SEP = 0.60
+PERGOLA_POSTE = 0.20
+
+
+def pergola(blq):
+    """Geometría de la pérgola posterior en coordenadas absolutas (x a lo ancho, y hacia el fondo)."""
+    x0, w, y1 = blq["x"], blq["w"], blq["y"] + blq["d"]
+    return dict(x0=x0, x1=x0 + w, y0=y1, y1=y1 + PERGOLA_FONDO, z=PERGOLA_Z, viga=PERGOLA_VIGA, ancho_viga=0.08,
+                vigas=[round(x0 + k * PERGOLA_SEP, 3) for k in range(int(w / PERGOLA_SEP))],
+                postes=[round(x0 + 0.2, 3), round(x0 + w - 0.2 - PERGOLA_POSTE, 3)],
+                y_poste=round(y1 + PERGOLA_FONDO - 0.3, 3), poste=PERGOLA_POSTE)
+
+
 def banda_corrida(vanos_nivel):
     """Tramo (a, b) de la banda corrida de cancelería en la fachada sur de un nivel superior, o None."""
     vs = [(v["a"], v["b"]) for v in vanos_nivel if v["tipo"] == "ventana" and v.get("lado") == "S"]
