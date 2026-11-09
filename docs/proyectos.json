@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-09-casa-mediterranea",
+  "fecha": "2026-11-09",
+  "nombre": "Casa Cal y Teja",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Mediterránea",
+  "area": 240.6,
+  "terreno": 180.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-08-casa-mid-century",
   "fecha": "2026-11-08",
   "nombre": "Casa Mirador Naranja",
