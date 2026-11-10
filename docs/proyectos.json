@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-10-casa-art-deco",
+  "fecha": "2026-11-10",
+  "nombre": "Casa Marfil Déco",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Art Déco",
+  "area": 268.1,
+  "terreno": 200.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-09-casa-mediterranea",
   "fecha": "2026-11-09",
   "nombre": "Casa Cal y Teja",
