@@ -363,10 +363,11 @@ for blq in E["bloques"]:
             G.caja("losa", ja + 0.1, y0 - 0.85, 0, jb - 0.1, y0 - 0.25, 0.5)
             G.caja("pasto", ja + 0.15, y0 - 0.8, 0.45, jb - 0.15, y0 - 0.3, 0.55)
     if "celosia" in ras or "parteluces" in ras:
-        n = int(w * 0.35 / 0.3)
-        for i in range(n):
-            xx = x0 + w * 0.6 + i * 0.3
-            G.caja("madera" if "celosia" in ras else "losa", xx, y0 - 0.45, blq["niveles"][0]["h"], xx + 0.06, y0 - 0.2, top)
+        PL = blq.get("parteluces") or dict(xs=[x0 + 0.55 * w + i * 0.35 for i in range(int(w * 0.4 / 0.35))],
+                                           ancho=0.08 if "celosia" in ras else 0.15, y0=0.35, y1=0.10)
+        for xx in PL["xs"]:
+            G.caja("madera" if "celosia" in ras else "acento", xx, y0 - PL["y0"], blq["niveles"][0]["h"],
+                   xx + PL["ancho"], y0 - PL["y1"], top)
     if "porche" in ras:
         pe = next((v for v in blq["niveles"][0]["vanos"] if v["tipo"] == "puerta_ext" and v.get("lado") == "S"), None)
         if pe is not None:
@@ -412,7 +413,7 @@ for blq in E["bloques"]:
                     G.caja("marco", a1, ye - 0.03, nv["z"] + 0.9, b1, ye, nv["z"] + q1)
     if "marco" in ras and len(blq["niveles"]) > 1:
         zb1 = blq["niveles"][1]["z"]
-        fx0 = x0 + w * 0.38
+        fx0 = blq.get("marco_x0") or x0 + w * 0.38       # mismo arranque que layout.inicio_marco (render, AP-03, A-05)
         G.caja("acento", fx0, y0 - 0.9, zb1 - 0.3, x0 + w + 0.05, y0, zb1)
         G.caja("acento", fx0, y0 - 0.9, top - 0.3, x0 + w + 0.05, y0, top)
         G.caja("acento", fx0, y0 - 0.9, zb1 - 0.3, fx0 + 0.3, y0, top)

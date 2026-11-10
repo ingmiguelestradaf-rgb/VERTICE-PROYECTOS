@@ -461,6 +461,24 @@ def pergola(blq):
                 y_poste=round(y1 + PERGOLA_FONDO - 0.3, 3), poste=PERGOLA_POSTE)
 
 
+def altura_pretil(cubierta):
+    """Altura del pretil sobre la losa de azotea según la cubierta de la corriente: una sola fuente para fachadas,
+    cortes, azotea, render, Blender y presupuesto (antes A-06, A-03 y el presupuesto usaban 0.60 m mientras
+    AP-03, A-05 y los renders dibujaban 1.10 m en azoteas con pretil alto, p. ej. Art Déco o colonial)."""
+    return 0.6 if cubierta == "plana" else (1.1 if cubierta == "plana_pretil" else 0.0)
+
+
+PARTELUZ_SEP = 0.35
+
+
+def parteluces(blq, celosia=False):
+    """Parteluces (o celosía) de la fachada principal en planta alta, en coordenadas absolutas: una sola geometría
+    para render, AP-03, A-05 y Blender (antes Blender usaba otro arranque, separación, número y sección)."""
+    x0, w = blq["x"], blq["w"]
+    return dict(xs=[round(x0 + 0.55 * w + k * PARTELUZ_SEP, 3) for k in range(int(w * 0.4 / PARTELUZ_SEP))],
+                ancho=0.08 if celosia else 0.15, y0=0.35, y1=0.10)     # y0/y1: distancia hacia la calle desde el paño
+
+
 def banda_corrida(vanos_nivel):
     """Tramo (a, b) de la banda corrida de cancelería en la fachada sur de un nivel superior, o None."""
     vs = [(v["a"], v["b"]) for v in vanos_nivel if v["tipo"] == "ventana" and v.get("lado") == "S"]

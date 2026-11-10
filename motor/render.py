@@ -213,13 +213,11 @@ def _bloque(E, blq, lay, corr, rnd):
     if "volado" in corr["rasgos"] and blq["sistema"] != "acero":
         E.caja(x - 0.3, y - 1.6, ztop - 0.35, w * 0.65 + 0.3, 1.6, 0.35, ac)
     if "celosia" in corr["rasgos"] or "parteluces" in corr["rasgos"]:
-        n = int(w * 0.4 / 0.35)
-        x1 = x + w * 0.55
+        PL = layout.parteluces(blq, "celosia" in corr["rasgos"])
         top = min(ztop, z0 + 7.0 if blq["sistema"] == "mamposteria" else ztop)
         base = z0 + (zs[1][0] - z0 if len(zs) > 1 else 0.3)
-        for k in range(n):
-            xx = x1 + k * 0.35
-            E.caja(xx, y - 0.35, base, 0.08 if "celosia" in corr["rasgos"] else 0.15, 0.25, top - base, ac)
+        for xx in PL["xs"]:
+            E.caja(xx, y - PL["y0"], base, PL["ancho"], PL["y0"] - PL["y1"], top - base, ac)
     if "marco" in corr["rasgos"] and len(zs) > 1:
         # marco volumétrico que enmarca la planta alta de la fachada principal
         zb1 = zs[1][0]

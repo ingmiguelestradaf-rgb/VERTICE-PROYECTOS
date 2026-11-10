@@ -42,7 +42,11 @@ def exportar(ruta, proy, lays, corr, plan, nombre, r_est=None, spec=None):
         bloques.append(dict(nombre=blq["nombre"], x=blq["x"], y=blq["y"], w=blq["w"], d=blq["d"], niveles=niveles,
                             sistema=blq["sistema"], colindancias=blq.get("colindancias", []),
                             pilotis=layout.pilotis(blq, lays[bi][0][1])
-                            if "pilotis" in corr.get("rasgos", []) and len(blq["niveles"]) > 1 else None))
+                            if "pilotis" in corr.get("rasgos", []) and len(blq["niveles"]) > 1 else None,
+                            # misma geometría que render, AP-03 y A-05 (antes Blender las recalculaba con otros valores)
+                            parteluces=layout.parteluces(blq, "celosia" in corr.get("rasgos", [])),
+                            marco_x0=round(blq["x"] + layout.inicio_marco(lays[bi][1][1], blq["x"], blq["w"]), 3)
+                            if len(blq["niveles"]) > 1 else None))
     escena = dict(nombre=nombre, clave=plan.get("fecha"), tipologia=plan["tipologia"],
                   corriente=dict(nombre=corr["nombre"], cubierta=corr["cubierta"], muro=corr["muro"], acento=corr["acento"],
                                  techo=corr["techo"], vidrio=corr["vidrio"], rasgos=corr.get("rasgos", [])),

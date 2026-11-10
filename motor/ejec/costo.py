@@ -63,9 +63,9 @@ def generadores(blq, lays, r, cancel, acab):
     per = 2 * (blq["w"] + blq["d"])
     # pretil sólo con azotea plana: con cubierta inclinada sobre la losa (A-04/A-05/A-06) no existe y antes
     # se cobraba block, dala D-2 y aplanado de un pretil que no aparece en los planos
-    h_pre = 0.0 if blq.get("cubierta_ligera") else 0.6
+    h_pre = 0.0 if blq.get("cubierta_ligera") else (blq.get("pretil") or 0.6)   # misma altura que A-05 y A-06
     if h_pre:
-        add("block-15", per * h_pre, "Pretil h = 0.60 m")
+        add("block-15", per * h_pre, f"Pretil h = {h_pre:.2f} m")
     for f in r["cuantificacion"]["filas"]:
         if f["elemento"].startswith("Dala"):
             add("dala", f["cantidad"])
@@ -117,7 +117,7 @@ def generadores(blq, lays, r, cancel, acab):
     return {k: round(v, 2) for k, v in q.items()}, notas
 
 
-def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=()):
+def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None):
     filas = []
     for t in cancel:
         if t["clave"].startswith("V"):
@@ -127,7 +127,10 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=()):
     hojas = [c for k in range(len(lays)) for c in lays[k][0] if not c["contenedor"]]
     wc = sum(1 for c in hojas if c["t"] == "humedo")
     reg = sum(1 for c in hojas if c["t"] == "humedo" and "Medio" not in c["n"])
-    filas += [("Porcelanato y adhesivo (material)", "m²", round(q.get("piso-cer", 0) * 1.08, 2)),
+    # material de piso según la cédula de acabados (antes decía porcelanato aunque el spec pidiera terrazo, barro o madera)
+    piso_txt = ("Porcelanato y adhesivo (material)" if not piso or "porcelanato" in piso.lower() else
+                f"{piso} en locales habitables; porcelanato antiderrapante y cerámico en baños y servicio (material)")
+    filas += [(piso_txt, "m²", round(q.get("piso-cer", 0) * 1.08, 2)),
               ("Azulejo y adhesivo (material)", "m²", round(q.get("azulejo", 0) * 1.08, 2)),
               ("Pintura vinílica y sellador (material, 2 manos)", "L", round(q.get("pintura", 0) / 4.5, 1)),
               ("Impermeabilizante prefabricado APP 4 mm (material)", "m²", round(q.get("imper", 0) * 1.1, 2)),
@@ -169,6 +172,21 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=()):
                       "con trabe de borde, impermeabilizada", "m²", round((P["x1"] - P["x0"]) * P["fondo"], 2)))
         filas.append((f"Pilotis: columnas circulares de concreto aparente Ø{P['diam'] * 100:.0f} cm con zapata aislada "
                       f"(h = {blq['niveles'][0]['h']:.2f} m)", "pza", len(P["cols"])))
+    if len(blq["niveles"]) > 1:
+        zb1 = blq["niveles"][0]["h"]
+        ztop = sum(n["h"] for n in blq["niveles"])
+        if "celosia" in rasgos or "parteluces" in rasgos:
+            # misma geometría que render, AP-03, A-05 y Blender (layout.parteluces); antes no se cuantificaban
+            PL = layout.parteluces(blq, "celosia" in rasgos)
+            desc = ("Celosía de madera termotratada (listones de 8 cm)" if "celosia" in rasgos else
+                    f"Parteluces verticales de concreto armado {PL['ancho'] * 100:.0f}x{(PL['y0'] - PL['y1']) * 100:.0f} cm "
+                    "anclados a losas, aplanado y pintura")
+            filas.append((f"{desc} en fachada principal, h = {ztop - zb1:.2f} m", "pza", len(PL["xs"])))
+        if "marco" in rasgos:
+            fx0 = layout.inicio_marco(lays[1][1], blq["x"], blq["w"])
+            largo = 2 * (blq["w"] + 0.05 - fx0) + 2 * (ztop - zb1 + 0.3)
+            filas.append(("Marco volumétrico de concreto armado 30 x 90 cm en planta alta de la fachada principal, "
+                          "aplanado y pintura en color de acento", "ml", round(largo, 2)))
     if "ventana_corrida" in rasgos and len(blq["niveles"]) > 1:
         # sólo los paños entre ventanas (las ventanas ya están en la cancelería), con la altura de la ventana (1.45 m)
         area = 0.0

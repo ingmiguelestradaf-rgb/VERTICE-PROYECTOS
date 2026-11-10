@@ -1,6 +1,7 @@
 """Planos arquitectónicos ejecutivos (vivienda): amueblado, acotado a ejes, azotea, fachadas, cortes,
 cancelería y acabados. Los ejes son los mismos de los planos estructurales y de instalaciones."""
 import math
+import re
 from ..dxf import ROJO, GRIS, VERDE, CIAN
 from .. import planos, layout
 
@@ -435,7 +436,8 @@ def cubierta_inclinada(dx, blq, corr, r_est, n_baj, gas_xy, ox, oy, sur_primero)
         dx.texto((X1 + 1.6, Y1 - 0.4 - i * 0.32), t, 0.16, "A-TEXTO")
 
 
-def azotea(dx, blq, lays, r_est, n_baj, gas_xy, ox=0.0, oy=0.0, pretil=0.6, sur_primero=False, corr=None):
+def azotea(dx, blq, lays, r_est, n_baj, gas_xy, ox=0.0, oy=0.0, pretil=None, sur_primero=False, corr=None):
+    pretil = pretil if pretil is not None else (blq.get("pretil") or 0.6)
     if corr is not None and blq.get("cubierta_ligera"):
         return cubierta_inclinada(dx, blq, corr, r_est, n_baj, gas_xy, ox, oy, sur_primero)
     x, y, w, d = blq["x"] + ox, blq["y"] + oy, blq["w"], blq["d"]
@@ -486,7 +488,7 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
     hs = [n["h"] for n in niveles]
     ztop = sum(hs)
     cub = corr["cubierta"]
-    par = 0.6 if cub == "plana" else (1.1 if cub == "plana_pretil" else 0.0)
+    par = layout.altura_pretil(cub)
     F = "A-FACHADA"
     dx.linea((ox - 1.5, oy), (ox + L + 1.5, oy), F)
     dx.rect(ox, oy, L, ztop, F)
@@ -587,9 +589,9 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
         # parteluces y marco volumétrico: misma geometría que el render (render.py) para que plano y modelo coincidan
         zb1 = niveles[0]["h"] if len(niveles) > 1 else 0.3
         if "celosia" in corr["rasgos"] or "parteluces" in corr["rasgos"]:
-            ancho = 0.08 if "celosia" in corr["rasgos"] else 0.15
-            for k_ in range(int(L * 0.4 / 0.35)):
-                dx.rect(ox + L * 0.55 + k_ * 0.35, oy + zb1, ancho, ztop - zb1, F)
+            PL = layout.parteluces(blq, "celosia" in corr["rasgos"])
+            for xx in PL["xs"]:
+                dx.rect(ox + _u(blq, lado, xx), oy + zb1, PL["ancho"], ztop - zb1, F)
         if "porche" in corr["rasgos"]:
             # porche cubierto sobre el acceso: misma geometría que render.py (postes, viga y cubierta a +2.55)
             pe = next((v for v in lays[0][1] if v["tipo"] == "puerta_ext" and v.get("lado") == "S"), None)
@@ -790,9 +792,10 @@ def corte(dx, blq, lays, r_est, eje, pos, ox, oy, titulo, corr=None):
         dx.texto((ox + L / 2, oy + z + rr + 0.25), f"CUBIERTA DE {cl['material'].upper()} SOBRE ARMADURA DE PTR "
                  f"(PEND. {cl['pend'] * 100:.0f} %)", 0.13, "A-TEXTO", centrado=True)
     else:
-        # pretil
-        dx.rect(ox - 0.125, oy + z, 0.15, 0.6, C_)
-        dx.rect(ox + L - 0.025, oy + z, 0.15, 0.6, C_)
+        # pretil (misma altura que fachadas A-05, AP-03 y render: layout.altura_pretil)
+        hp = blq.get("pretil") or 0.6
+        dx.rect(ox - 0.125, oy + z, 0.15, hp, C_)
+        dx.rect(ox + L - 0.025, oy + z, 0.15, hp, C_)
     P = blq.get("pilotis")
     om = 0.0
     if P and eje == "x" and len(niveles) > 1:
@@ -895,7 +898,10 @@ def acabados(c, materiales):
         return dict(piso="Concreto f'c 200 escobillado, juntas a 3 m", zoclo="—", muro="Aplanado de mortero + pintura vinílica",
                     plafon="Aplanado de mortero + pintura", clave="E")
     if t == "escalera":
-        return dict(piso="Huella y peralte de porcelanato con nariz antiderrapante", zoclo="Porcelanato 10 cm",
+        # mismo material que el piso general (antes siempre porcelanato aunque el resto fuera terrazo, barro o madera)
+        mat_e = "porcelanato" if "porcelanato" in piso_g.lower() else re.sub(r"^piso (de )?", "", piso_g, flags=re.I)
+        return dict(piso=f"Huella y peralte de {mat_e} con nariz antiderrapante",
+                    zoclo="Porcelanato 10 cm" if mat_e == "porcelanato" else "Zoclo de 10 cm del mismo material de la huella",
                     muro="Aplanado fino + pintura vinílica; barandal de herrería h = 0.90 m", plafon="Aplanado de yeso + pintura", clave="ES")
     if t == "almacen":
         return dict(piso="Concreto pulido", zoclo="—", muro="Aplanado de mortero + pintura vinílica", plafon="Aplanado + pintura", clave="A")

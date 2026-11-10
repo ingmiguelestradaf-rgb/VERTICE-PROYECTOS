@@ -94,6 +94,7 @@ def construir(fecha, spec=None, salida=SALIDA, privado=PRIVADO, ejecutivo=True):
     # planta de azotea y ubicación del tanque de gas (no se coloca sobre una cubierta inclinada)
     mats = (spec.get("materiales") or corr["materiales"]).lower()
     for blq in proy["bloques"]:
+        blq["pretil"] = layout.altura_pretil(corr["cubierta"])
         if blq["sistema"] == "mamposteria" and corr["cubierta"] not in ("plana", "plana_pretil") \
                 and planos.altura_cubierta(blq, corr) > 0:
             teja = "teja" in mats

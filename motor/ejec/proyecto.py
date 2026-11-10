@@ -235,7 +235,8 @@ def generar(V, carpeta, datos, proy, plan, corr, lays, r, spec, nombre, ins_calc
     q, notas_q = costo.generadores(blq, lays, r, cancel, acab)
     area = sum(blq["w"] * blq["d"] for _ in niveles)
     pres, db, solo_mo = costo.presupuesto(V, nombre, blq, q, area)
-    cot = costo.por_cotizar(blq, lays, r, cancel, q, cc, rasgos=corr.get("rasgos", []))
+    cot = costo.por_cotizar(blq, lays, r, cancel, q, cc, rasgos=corr.get("rasgos", []),
+                            piso=next((a["piso"] for a in acab.values() if a.get("clave") == "H"), None))
     costo.excel(pres, os.path.join(carpeta, "presupuesto.xlsx"), q, notas_q, cot, db)
     pr, flujo, res_f = costo.programa(V, nombre, pres, db, q)
     from vertice import programa as P

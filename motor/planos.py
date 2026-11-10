@@ -378,7 +378,7 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
         z0 = blq.get("z0", 0.0)
         x0 = ox + a0
         dx.rect(x0, oy + z0, L, ztop - z0, "A-FACHADA")
-        par = 0.0 if corr["cubierta"] not in ("plana", "plana_pretil") else (0.6 if corr["cubierta"] == "plana" else 1.1)
+        par = layout.altura_pretil(corr["cubierta"])
         if par:
             dx.rect(x0, oy + ztop, L, par, "A-FACHADA")
         r = altura_cubierta(blq, corr)
@@ -442,8 +442,9 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
             # parteluces y marco con la geometría del render
             zb1 = zs[1][0] - z0
             if "celosia" in corr["rasgos"] or "parteluces" in corr["rasgos"]:
-                for k in range(int(L * 0.4 / 0.35)):
-                    dx.rect(x0 + L * 0.55 + k * 0.35, oy + z0 + zb1, 0.15, ztop - z0 - zb1, "A-FACHADA")
+                PL = layout.parteluces(blq, "celosia" in corr["rasgos"])
+                for xx in PL["xs"]:
+                    dx.rect(x0 + xx - blq["x"], oy + z0 + zb1, PL["ancho"], ztop - z0 - zb1, "A-FACHADA")
             # porche y jardinera: misma geometría que A-05 y render (antes AP-03 no los dibujaba)
             v0 = nivel_vanos[id(zs[0][2])]
             pe = next((v for v in v0 if v["tipo"] == "puerta_ext" and v.get("lado") == "S"), None)
@@ -520,7 +521,7 @@ def corte(dx, proy, lays, corr, ox, oy):
         r_ = P["diam"] / 2
         dx.rect(ox + y0 - f + 0.05, oy + blq.get("z0", 0.0), 2 * r_, zb1 - e_, "A-FACHADA")   # pilotis (vista)
     if corr["cubierta"] in ("plana", "plana_pretil"):
-        par = 0.6 if corr["cubierta"] == "plana" else 1.1
+        par = layout.altura_pretil(corr["cubierta"])
         for yy in (y0 - TE, y0 + L + TE - 0.15):
             dx.rect(ox + yy, oy + ztop, 0.15, par, "A-CORTE")                     # pretil (antes faltaba en el corte)
     r = altura_cubierta(blq, corr)
