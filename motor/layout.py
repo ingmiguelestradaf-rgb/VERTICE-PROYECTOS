@@ -498,3 +498,11 @@ _SIN_CORTINA = ("COCINA", "LAVANDER", "BAÑO", "BODEGA", "COCHERA", "ESCALERA", 
 def es_cortina(corr, piso_idx, v):
     return ("muro_cortina" in corr.get("rasgos", ()) and piso_idx == 0 and v.get("tipo") == "ventana"
             and not v.get("alta") and v.get("lado") and not any(s in str(v.get("cuarto", "")).upper() for s in _SIN_CORTINA))
+
+
+def alero(blq, defecto):
+    """Vuelo del alero de la cubierta inclinada: el de `cubierta_ligera` (generar.py, 0.90 m con alero_amplio, 0.60 m
+    sin él) que usan el ejecutivo, el presupuesto y la pluvial; `defecto` sólo para bloques sin cubierta ligera.
+    Antes AP-03 (fachadas 0.60, corte 0.40), el render (0.40/0.90) y Blender (0.60) dibujaban vuelos distintos."""
+    cl = blq.get("cubierta_ligera")
+    return cl["alero"] if cl and cl.get("alero") is not None else defecto

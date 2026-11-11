@@ -70,7 +70,7 @@ def _cubierta(E, blq, corr, ztop):
     cub = corr["cubierta"]
     r = altura_cubierta(blq, corr)
     tc = corr["techo"]
-    al = 0.9 if ("alero_amplio" in corr["rasgos"] or cub.endswith("baja")) else 0.4
+    al = layout.alero(blq, 0.9 if ("alero_amplio" in corr["rasgos"] or cub.endswith("baja")) else 0.4)
     if blq["sistema"] == "acero" and cub in ("plana", "plana_pretil"):
         cub, r = "dos_aguas", 0.05 * min(w, d) / 2
     if cub in ("plana", "plana_pretil") or r <= 0:

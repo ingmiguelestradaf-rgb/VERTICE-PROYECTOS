@@ -41,6 +41,7 @@ def exportar(ruta, proy, lays, corr, plan, nombre, r_est=None, spec=None):
                 z += n["h"]
         bloques.append(dict(nombre=blq["nombre"], x=blq["x"], y=blq["y"], w=blq["w"], d=blq["d"], niveles=niveles,
                             sistema=blq["sistema"], colindancias=blq.get("colindancias", []),
+                            alero=layout.alero(blq, 0.6),
                             pilotis=layout.pilotis(blq, lays[bi][0][1])
                             if "pilotis" in corr.get("rasgos", []) and len(blq["niveles"]) > 1 else None,
                             # misma geometría que render, AP-03 y A-05 (antes Blender las recalculaba con otros valores)

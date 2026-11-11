@@ -41,7 +41,7 @@ def _castillo(dx, p, tx, ty, ox, oy):
 
 def cimentacion(dx, blq, r, xs, ys, ox=0.0, oy=0.0):
     tx, ty = r["t_x"] / 100, r["t_y"] / 100
-    arq.dibujar_ejes(dx, blq, xs, ys, ox, oy, capa="E-EJES")
+    arq.dibujar_ejes(dx, blq, xs, ys, ox, oy, capa="E-EJES", sur=arq.sur_pilotis(blq))
     col = set(blq.get("colindancias", []))
     for cl in r["cargas_lineas"]:
         z = r["zap_linea"][(cl["eje"], round(cl["c"], 3), cl["a"])]

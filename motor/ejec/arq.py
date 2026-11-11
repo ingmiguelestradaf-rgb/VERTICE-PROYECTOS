@@ -64,9 +64,15 @@ def nombre_eje(i, eje):
     return str(i + 1) if eje == "x" else LETRAS[i % len(LETRAS)]
 
 
-def dibujar_ejes(dx, blq, xs, ys, ox=0.0, oy=0.0, cotas=True, capa="A-EJES", r=0.32):
+def sur_pilotis(blq):
+    """Franja al sur que ocupan la marquesina sobre pilotis y su leyenda (o sus zapatas ZA-P) en planta."""
+    return blq["pilotis"]["fondo"] + 0.6 if blq.get("pilotis") else 0.0
+
+
+def dibujar_ejes(dx, blq, xs, ys, ox=0.0, oy=0.0, cotas=True, capa="A-EJES", r=0.32, sur=0.0):
     x0, y0, x1, y1 = blq["x"] + ox, blq["y"] + oy, blq["x"] + blq["w"] + ox, blq["y"] + blq["d"] + oy
-    ext = 1.6
+    # `sur`: la cadena de cotas al sur se recorre por fuera de la marquesina (antes se encimaban en A-03 y E-01)
+    ext = 1.6 + sur
     for i, x in enumerate(xs):
         dx.linea((x + ox, y0 - ext - 1.2), (x + ox, y1 + 0.6), capa)
         c = (x + ox, y0 - ext - 1.2 - r)
@@ -633,6 +639,14 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
             fa, fb, e_ = layout.inicio_marco(lays[1][1], blq["x"], L), L + 0.05, 0.3
             dx.rect(ox + fa, oy + zb1 - 0.3, fb - fa, ztop - zb1 + 0.3, F)
             dx.rect(ox + fa + e_, oy + zb1, fb - fa - 2 * e_, ztop - zb1 - e_, F)
+    if lado in ("E", "O") and "pilotis" in corr["rasgos"] and len(niveles) > 1:
+        # marquesina y piloti extremo vistos de canto en las laterales (antes sólo aparecían en la fachada sur;
+        # misma geometría que A-02, AP-03 y render vía layout.pilotis)
+        P = layout.pilotis(blq, lays[0][1])
+        f, e_, d_ = P["fondo"], P["losa"], P["diam"]
+        zp = niveles[0]["h"]
+        dx.rect(ox + (-f if lado == "E" else L), oy + zp - e_, f, e_, F)
+        dx.rect(ox + (-f + 0.05 if lado == "E" else L + f - 0.05 - d_), oy, d_, zp - e_, F)
     # pérgola posterior: vigas vistas de testa en la fachada norte y de canto en las laterales
     # (misma geometría que render y Blender vía layout.pergola; antes ningún plano la dibujaba)
     if "pergola" in corr["rasgos"]:
@@ -664,6 +678,8 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
         marcas.append((ztop + par, f"PRETIL +{ztop + par:.2f}"))
     # en la lateral oriente la pérgola vuela 2.50 m a la derecha: las marcas de nivel se recorren para no encimarse
     xn = L + (layout.PERGOLA_FONDO if lado == "E" and "pergola" in corr["rasgos"] else 0.0)
+    if lado == "O" and "pilotis" in corr["rasgos"] and len(niveles) > 1:
+        xn = max(xn, L + layout.PILOTIS_FONDO)          # ídem con la marquesina sobre pilotis en la poniente
     for z_, t in marcas:
         dx.polilinea([(ox + xn + 0.4, oy + z_), (ox + xn + 0.65, oy + z_ + 0.2), (ox + xn + 0.15, oy + z_ + 0.2)], "A-NIVELES", True)
         dx.linea((ox + xn + 0.4, oy + z_), (ox + xn + 1.9, oy + z_), "A-NIVELES")
@@ -782,13 +798,17 @@ def corte(dx, blq, lays, r_est, eje, pos, ox, oy, titulo, corr=None):
         elif perp:
             dx.polilinea([(ox - al, oy + z), (ox + L / 2, oy + z + rr), (ox + L + al, oy + z)], C_)
         else:
+            # altura del faldón cortado en `pos`, medida desde el borde del alero (mismo faldón que el corte
+            # perpendicular, que sube de -al a la cumbrera)
             if eje == "x":
-                zc = rr * min(pos - blq["x"], blq["x"] + blq["w"] - pos) / (blq["w"] / 2)
+                zc = rr * (min(pos - blq["x"], blq["x"] + blq["w"] - pos) + al) / (blq["w"] / 2 + al)
             else:
-                zc = rr * min(pos - blq["y"], blq["y"] + blq["d"] - pos) / (blq["d"] / 2)
+                zc = rr * (min(pos - blq["y"], blq["y"] + blq["d"] - pos) + al) / (blq["d"] / 2 + al)
             k = min(L / 2, rr * 1.5) if tipo.startswith("cuatro") else -al
             dx.polilinea([(ox - al, oy + z), (ox + k, oy + z + rr), (ox + L - k, oy + z + rr), (ox + L + al, oy + z)], C_)
-            dx.rect(ox - al, oy + z + zc - 0.04, L + 2 * al, 0.08, C_)
+            # en cuatro aguas el faldón cortado sólo existe entre las limatesas (antes salía por fuera de la cubierta)
+            a_ = -al + (k + al) * zc / rr if tipo.startswith("cuatro") else -al
+            dx.rect(ox + a_, oy + z + zc - 0.04, L - 2 * a_, 0.08, C_)
         dx.texto((ox + L / 2, oy + z + rr + 0.25), f"CUBIERTA DE {cl['material'].upper()} SOBRE ARMADURA DE PTR "
                  f"(PEND. {cl['pend'] * 100:.0f} %)", 0.13, "A-TEXTO", centrado=True)
     else:
@@ -878,7 +898,9 @@ def acabados(c, materiales):
     # primero el porcelanato; "piso" sólo como respaldo (un "muro cortina de piso a cerramiento" no es un acabado de piso)
     piso_g = next((m for m in materiales if "porcelanato" in m.lower()),
                   next((m for m in materiales if m.lower().startswith("piso")), "Porcelanato 60x120 tono arena"))
-    piso_g = piso_g if len(piso_g) < 60 else "Porcelanato 60x120 rectificado"
+    if len(piso_g) >= 60:
+        # recorta a la primera cláusula del spec (antes ponía "Porcelanato 60x120 rectificado", un piso que el spec no pedía)
+        piso_g = re.split(r",|\s+(?:en|con|y|sobre)\s+", piso_g)[0].strip()
     piso_g = piso_g[:1].upper() + piso_g[1:]   # la cédula de acabados empieza con mayúscula
     # zoclo del mismo material que el piso (antes era siempre porcelanato aunque el piso fuera de barro o madera)
     zoclo_g = "Porcelanato 10 cm" if "porcelanato" in piso_g.lower() else "Zoclo de 10 cm del mismo material del piso"

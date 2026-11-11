@@ -89,7 +89,14 @@ def calcular(proy, plan, lays, area_total):
     cist = math.ceil(D * 2 / 1000 + ci)
     col = 100 if ud <= 180 else 150 if ud <= 700 else 200 if ud <= 1600 else 250
     # pluvial
-    techo = sum(b["w"] * b["d"] for b in proy["bloques"])
+    # área de captación en proyección horizontal: con cubierta inclinada incluye el alero (el canalón perimetral va en
+    # su borde) y suma la marquesina sobre pilotis; antes sólo contaba el desplante y subestimaba el gasto pluvial
+    techo = 0.0
+    for b in proy["bloques"]:
+        al = (b.get("cubierta_ligera") or {}).get("alero", 0.0)
+        techo += (b["w"] + 2 * al) * (b["d"] + 2 * al)
+        if b.get("pilotis"):
+            techo += (b["pilotis"]["x1"] - b["pilotis"]["x0"]) * b["pilotis"]["fondo"]
     i_mm = 100
     Qp = techo * i_mm / 3600
     gr = techo > 1500

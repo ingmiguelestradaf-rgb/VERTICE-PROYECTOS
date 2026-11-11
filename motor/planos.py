@@ -67,7 +67,10 @@ def planta_arq(dx, blq, cuartos, vanos, ox=0.0, oy=0.0, texto=True, cotas=True, 
     for v in vv:
         _vano(dx, v)
     P = blq.get("pilotis")
+    extra_cota = 0.0
     if P and cuartos and cuartos[0].get("piso", 0) == 0:
+        # la cota inferior se recorre por fuera de la marquesina y de su leyenda (antes se encimaban)
+        extra_cota = P["fondo"] + (0.35 + max(0.12, escala_txt * 0.6) if texto else 0.1)
         # marquesina sobre pilotis: proyección punteada y columnas circulares (antes no aparecía en planta)
         f, r_ = P["fondo"], P["diam"] / 2
         for (p0, p1) in (((P["x0"], blq["y"] - f), (P["x1"], blq["y"] - f)), ((P["x0"], blq["y"]), (P["x0"], blq["y"] - f)),
@@ -85,7 +88,7 @@ def planta_arq(dx, blq, cuartos, vanos, ox=0.0, oy=0.0, texto=True, cotas=True, 
             dx.texto(((P["x0"] + P["x1"]) / 2 + ox, blq["y"] - f - 0.35 + oy), "MARQUESINA SOBRE PILOTIS (PROYECCIÓN)",
                      max(0.12, escala_txt * 0.6), "A-AREA", centrado=True)
     if cotas:
-        dx.cota((bx - TE, by - TE), (bx + bw + TE, by - TE), -1.2 - escala_txt)
+        dx.cota((bx - TE, by - TE), (bx + bw + TE, by - TE), -1.2 - escala_txt - extra_cota)
         dx.cota((bx - TE, by - TE), (bx - TE, by + bd + TE), 1.2 + escala_txt)
 
 
@@ -386,7 +389,7 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
         if r > 0:
             ridge_x = blq["w"] >= blq["d"]
             frontal_gable = (lado == "S" and not ridge_x) or (lado == "E" and ridge_x)
-            al = 0.6 if "alero" in " ".join(corr["rasgos"]) or cub.startswith("cuatro") else 0.3
+            al = layout.alero(blq, 0.6 if "alero" in " ".join(corr["rasgos"]) or cub.startswith("cuatro") else 0.3)
             if cub == "curva":
                 pts = [(x0 - al + (L + 2 * al) * i / 20, oy + ztop + r * 4 * (i / 20) * (1 - i / 20)) for i in range(21)]
                 dx.polilinea(pts, "A-FACHADA")
@@ -527,22 +530,26 @@ def corte(dx, proy, lays, corr, ox, oy):
     r = altura_cubierta(blq, corr)
     if r:
         cub = corr["cubierta"]
+        al = layout.alero(blq, 0.4)
         if cub.startswith("una") or cub == "inclinada_irregular":
             # una agua: sube del frente (y0) al fondo, igual que fachadas y renders
-            dx.polilinea([(ox + y0 - 0.4, oy + ztop), (ox + y0 + L + 0.4, oy + ztop), (ox + y0 + L + 0.4, oy + ztop + r),
-                          (ox + y0 - 0.4, oy + ztop + 0.1)], "A-CORTE", True)
+            dx.polilinea([(ox + y0 - al, oy + ztop), (ox + y0 + L + al, oy + ztop), (ox + y0 + L + al, oy + ztop + r),
+                          (ox + y0 - al, oy + ztop + 0.1)], "A-CORTE", True)
         elif cub == "curva":
-            dx.polilinea([(ox + y0 - 0.4 + (L + 0.8) * i / 20, oy + ztop + r * 4 * (i / 20) * (1 - i / 20)) for i in range(21)], "A-CORTE")
+            dx.polilinea([(ox + y0 - al + (L + 2 * al) * i / 20, oy + ztop + r * 4 * (i / 20) * (1 - i / 20)) for i in range(21)], "A-CORTE")
         elif blq["w"] >= blq["d"]:
             # cumbrera paralela a x: el corte (plano y-z) corta el hastial → triángulo
-            dx.polilinea([(ox + y0 - 0.4, oy + ztop), (ox + y0 + L / 2, oy + ztop + r), (ox + y0 + L + 0.4, oy + ztop)], "A-CORTE")
+            dx.polilinea([(ox + y0 - al, oy + ztop), (ox + y0 + L / 2, oy + ztop + r), (ox + y0 + L + al, oy + ztop)], "A-CORTE")
         else:
             # cumbrera paralela al corte: faldón cortado a la altura que corresponde a xm y cumbrera vista detrás
             # (antes se dibujaba un hastial triangular que no coincidía con fachadas, azotea ni renders)
-            zc = r * min(xm - blq["x"], blq["x"] + blq["w"] - xm) / (blq["w"] / 2)
-            k = min(L / 2, r * 1.5) if cub.startswith("cuatro") else -0.4
-            dx.polilinea([(ox + y0 - 0.4, oy + ztop), (ox + y0 + k, oy + ztop + r), (ox + y0 + L - k, oy + ztop + r),
-                          (ox + y0 + L + 0.4, oy + ztop)], "A-CORTE")
-            dx.rect(ox + y0 - 0.4, oy + ztop + zc - 0.05, L + 0.8, 0.1, "A-CORTE")
+            zc = r * (min(xm - blq["x"], blq["x"] + blq["w"] - xm) + al) / (blq["w"] / 2 + al)
+            k = min(L / 2, r * 1.5) if cub.startswith("cuatro") else -al
+            dx.polilinea([(ox + y0 - al, oy + ztop), (ox + y0 + k, oy + ztop + r), (ox + y0 + L - k, oy + ztop + r),
+                          (ox + y0 + L + al, oy + ztop)], "A-CORTE")
+            # faldón cortado: en cuatro aguas sólo existe entre las limatesas de los extremos (antes la losa cortada se
+            # dibujaba en todo el largo y salía por fuera de la cubierta, encima del alero)
+            ya = y0 - al + (k + al) * zc / r if cub.startswith("cuatro") else y0 - al
+            dx.rect(ox + ya, oy + ztop + zc - 0.05, (y0 + L / 2 - ya) * 2, 0.1, "A-CORTE")
     dx.cota((ox + y0 - 1.5, oy), (ox + y0 - 1.5, oy + ztop), 1.0)
     dx.texto((ox + y0 + L / 2, oy - max(1.5, L / 25)), "CORTE LONGITUDINAL A-A'", max(0.35, L / 50), "A-TEXTO", centrado=True)

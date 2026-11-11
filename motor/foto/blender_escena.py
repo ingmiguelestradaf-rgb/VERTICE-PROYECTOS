@@ -301,7 +301,7 @@ for blq in E["bloques"]:
                                  (x0 - e, y0, x0, y0 + d), (x0 + w, y0, x0 + w + e, y0 + d)):
             G.caja("muro", a0, b0, top, a1, b1, top + par)
     else:
-        al = 0.6
+        al = blq.get("alero", 0.6)   # mismo vuelo que planos y ejecutivo (antes fijo en 0.60)
         X0, Y0, X1, Y1 = x0 - al, y0 - al, x0 + w + al, y0 + d + al
         span = min(w, d)
         pend = {"dos_aguas_pronunciada": 0.8, "dos_aguas_baja": 0.18, "cuatro_aguas_baja": 0.18}.get(cub, 0.3)

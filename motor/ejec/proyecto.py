@@ -20,6 +20,8 @@ def generar(V, carpeta, datos, proy, plan, corr, lays, r, spec, nombre, ins_calc
     t = proy["terreno"]
     esp = (r["t_x"] / 100, r["t_y"] / 100)
     xs, ys = arq.ejes(r)
+    # con marquesina sobre pilotis los ejes de A-03 bajan (arq.dibujar_ejes, sur=): sus títulos bajan lo mismo
+    dye = arq.sur_pilotis(blq)
     # separa por ";" o por punto final de frase; nunca por el punto decimal ("aleros de 0.90 m" quedaba en dos notas)
     materiales = [m.strip() for m in re.split(r";|\.(?!\d)", spec.get("materiales") or corr["materiales"]) if m.strip()]
     notas = ["Cotas en metros. Ejes, niveles y cotas rigen sobre el dibujo.",
@@ -71,14 +73,15 @@ def generar(V, carpeta, datos, proy, plan, corr, lays, r, spec, nombre, ins_calc
 
     def acot(ox, oy, k, cu, va):
         planos.planta_arq(h["dx"], blq, cu, va, ox, oy, texto=True, cotas=False, esp=esp)
-        arq.dibujar_ejes(h["dx"], blq, xs, ys, ox, oy)
+        arq.dibujar_ejes(h["dx"], blq, xs, ys, ox, oy, sur=dye)
         if k == 0:
-            for (p0, p1, et) in (((xA, blq["y"] - 1.0), (xA, blq["y"] + blq["d"] + 1.0), "A"),
+            ya_ = 1.0 + (blq["pilotis"]["fondo"] + 0.7 if blq.get("pilotis") else 0.0)   # fuera de la marquesina
+            for (p0, p1, et) in (((xA, blq["y"] - ya_), (xA, blq["y"] + blq["d"] + 1.0), "A"),
                                  ((blq["x"] - 1.0, yB), (blq["x"] + blq["w"] + 1.0, yB), "B")):
                 h["dx"].linea((p0[0] + ox, p0[1] + oy), (p1[0] + ox, p1[1] + oy), "A-EJES")
                 for pp, s_ in ((p0, et), (p1, et + "'")):
                     h["dx"].texto((pp[0] + ox, pp[1] + oy), s_, 0.3, "A-TEXTO", centrado=True)
-    plantas(h, acot, lambda n: n["nombre"].upper(), sep_=sep + 4.0, y_titulo=-5.2)
+    plantas(h, acot, lambda n: n["nombre"].upper(), sep_=sep + 4.0, y_titulo=-5.2 - dye)
     J.cerrar(h)
 
     gas_xy = INS.tanque_gas(blq)
