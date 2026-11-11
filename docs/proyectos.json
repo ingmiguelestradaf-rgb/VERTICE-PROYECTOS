@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-11-casa-neoclasica",
+  "fecha": "2026-11-11",
+  "nombre": "Casa Pórtico Clásico",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Neoclásica",
+  "area": 334.9,
+  "terreno": 300.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-10-casa-art-deco",
   "fecha": "2026-11-10",
   "nombre": "Casa Marfil Déco",

@@ -1,0 +1,357 @@
+{
+ "clave": "2026-11-11-casa-neoclasica",
+ "fecha": "2026-11-11",
+ "nombre": "Casa Pórtico Clásico",
+ "concepto": "Vivienda de dos niveles en un lote de 12 x 25 m que traduce la gramática neoclásica —orden, columnata y cornisa— al clima semiárido de la costa de Tijuana. Toda la fachada sur se ordena con un pórtico de columnas cilíndricas de concreto que sostiene una marquesina a nivel de entrepiso: es la columnata clásica y, a la vez, la sombra que protege del sol alto del sur la puerta, el despacho y la cochera. La cubierta a cuatro aguas con alero amplio funciona como cornisa: sombrea los muros de planta alta frente al sol del poniente y desaloja rápido las lluvias de invierno. Las ventanas medidas (40 % de vano) en norte y sur permiten la ventilación cruzada con la brisa marina y el jardín frontal se planta con especies de bajo consumo de agua (olivo enano, lavanda, romero).",
+ "tipologia": "casa",
+ "tipologia_nombre": "Casa habitación",
+ "subtipo": "",
+ "corriente": "neoclasica",
+ "corriente_nombre": "Neoclásica",
+ "materiales": "Muros de block de concreto con aplanado fino de mortero cemento-arena y pintura vinílica color hueso; columnas cilíndricas de concreto aparente pintadas hueso con marquesina de concreto; cubierta a cuatro aguas de lámina engargolada color grafito sobre armadura de PTR apoyada en la losa de azotea, con alero amplio a modo de cornisa; repisones de ventana en concreto prefabricado; cancelería de aluminio blanco con vidrio claro 6 mm; puerta de acceso de madera de encino con tableros; piso de mármol travertino 40x60 pulido en locales secos de ambos niveles; azulejo blanco en baños; piso antiderrapante 60x60 en baños; guarnición y huella de acceso en cantera rosa-gris de la región",
+ "uso_suelo": "Habitacional unifamiliar",
+ "terreno": {
+  "frente": 12.0,
+  "fondo": 25.0,
+  "area": 300.0
+ },
+ "area_construida": 334.9,
+ "desplante": 167.4,
+ "cos": 0.56,
+ "cus": 1.12,
+ "niveles": 2,
+ "altura": 7.4,
+ "cajones": 2,
+ "usuarios": {
+  "ocupantes": 6
+ },
+ "areas": [
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Cochera doble",
+   "area": 32.48,
+   "medidas": "5.80 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Acceso",
+   "area": 10.08,
+   "medidas": "1.80 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Despacho",
+   "area": 14.41,
+   "medidas": "4.15 x 3.47"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Bodega",
+   "area": 8.83,
+   "medidas": "4.15 x 2.13"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Medio baño",
+   "area": 5.78,
+   "medidas": "1.70 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Vestíbulo",
+   "area": 26.35,
+   "medidas": "7.75 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Escalera",
+   "area": 7.82,
+   "medidas": "2.30 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Sala",
+   "area": 23.44,
+   "medidas": "4.46 x 5.25"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Comedor",
+   "area": 16.66,
+   "medidas": "3.17 x 5.25"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Lavandería",
+   "area": 6.48,
+   "medidas": "4.11 x 1.57"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Cocina",
+   "area": 15.11,
+   "medidas": "4.11 x 3.67"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara 2",
+   "area": 16.24,
+   "medidas": "2.90 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara 3",
+   "area": 16.24,
+   "medidas": "2.90 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Baño 2",
+   "area": 10.08,
+   "medidas": "1.80 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Cuarto de TV",
+   "area": 23.24,
+   "medidas": "4.15 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Estancia familiar",
+   "area": 32.13,
+   "medidas": "9.45 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Escalera",
+   "area": 7.82,
+   "medidas": "2.30 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara principal",
+   "area": 23.44,
+   "medidas": "4.46 x 5.25"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Vestidor",
+   "area": 7.5,
+   "medidas": "3.17 x 2.36"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Baño principal",
+   "area": 9.16,
+   "medidas": "3.17 x 2.89"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara 4",
+   "area": 21.59,
+   "medidas": "4.11 x 5.25"
+  }
+ ],
+ "hojas": [
+  {
+   "clave": "AP-01",
+   "titulo": "Planta de conjunto",
+   "disciplina": "Anteproyecto",
+   "dxf": "planos/AP-01_planta-de-conjunto.dxf",
+   "img": "laminas/AP-01.jpg"
+  },
+  {
+   "clave": "AP-02",
+   "titulo": "Plantas arquitectónicas",
+   "disciplina": "Anteproyecto",
+   "dxf": "planos/AP-02_plantas-arquitectonicas.dxf",
+   "img": "laminas/AP-02.jpg"
+  },
+  {
+   "clave": "AP-03",
+   "titulo": "Fachadas y corte",
+   "disciplina": "Anteproyecto",
+   "dxf": "planos/AP-03_fachadas-y-corte.dxf",
+   "img": "laminas/AP-03.jpg"
+  }
+ ],
+ "render": [
+  "render_aereo.jpg",
+  "render_peatonal.jpg"
+ ],
+ "pdf": "anteproyecto.pdf",
+ "zip": "2026-11-11-casa-neoclasica_anteproyecto_dxf.zip",
+ "extra": {
+  "dictamen_arquitectura": [
+   "Terreno de 12.00 x 25.00 m (300 m²); casa de 11.75 x 14.25 m a ejes en 2 niveles, 334.9 m² construidos con desplante de 167.4 m²: COS 0.56 y CUS 1.12 (por verificar con el PDU de Tijuana). Jardín frontal de 3.62 m bajo el pórtico, cochera doble de 32.5 m² con 2 portones seccionales de 2.50 m (2 cajones) y patio posterior de 7.13 m al que se sale de la sala por el cancel corredizo P-4.",
+   "Lenguaje neoclásico adaptado a Tijuana: pórtico de 5 columnas cilíndricas de concreto Ø30 cm con marquesina de 15 cm y 1.20 m de vuelo a nivel de entrepiso en toda la fachada sur (las columnas caen en los macizos, nunca frente a portones o puerta) y cubierta a cuatro aguas de lámina engargolada al 30 % con alero de 0.90 m como cornisa. Se descartaron muro de acento de cantera y jardinera: la fachada sur no tiene un paño ciego ≥ 0.90 m ni un hueco ≥ 1.00 m en planta baja y el motor no los dibujaba; la cantera queda en guarnición y huella de acceso.",
+   "Recorrido: puerta doble P-3 de 1.20 m → acceso (10.1 m²) con paso a cochera, bodega y despacho → vestíbulo (26.3 m²) con medio baño (extractor obligatorio, sin ventana) y escalera en U → sala (23.4 m²) y comedor (16.7 m²) al norte, cocina (15.1 m²) comunicada con el comedor y lavandería con puerta al vestíbulo. Escalera de 1.15 m de tramo, peralte 17.5 cm, huella 29 cm (2p+h = 64 cm).",
+   "Planta alta: estancia familiar (32.1 m²) que reparte a recámara principal (23.4 m²) con baño y vestidor propios, recámara 4 (21.6 m²), recámaras 2 y 3 (16.2 m² c/u, con clóset), baño 2 (con ventila) y cuarto de TV (23.2 m²). Todas las recámaras ≥ 2.70 m de lado con ventana al exterior; altura libre 2.67 m en ambos niveles (≥ 2.30 m) y ventilación cruzada norte–sur.",
+   "Correcciones de motor en revisión: (1) el vuelo del alero era distinto en cada dibujo (AP-03 fachadas 0.60 m, corte 0.40 m, render 0.40/0.90, Blender 0.60) frente a los 0.90 m del ejecutivo; ahora todos usan layout.alero. (2) En cuatro aguas el faldón cortado salía por fuera de la cubierta en AP-03 y A-06; ahora se recorta entre limatesas. (3) La cota general de AP-02 y las cadenas de ejes de A-03 y E-01 se encimaban con la marquesina sobre pilotis; ahora se recorren, y las laterales de A-05 muestran la marquesina. (4) La cédula de acabados cambiaba un piso de spec largo por 'porcelanato 60x120' que nadie pidió; ahora conserva el material. (5) El área pluvial ignoraba alero y marquesina (167 → 232 m²)."
+  ],
+  "dictamen_ingenieria": [
+   "Veredicto: construible conforme a norma — 0 errores y 0 avisos en 29 verificaciones de coordinación —, sujeto a los supuestos por validar indicados abajo. El ciclo de coordinación limitó los vanos abiertos entre locales a 1.80 m y cambió a block de 20 cm los muros en dirección X; 2 muros de planta alta sin muro inferior se especifican como divisorios ligeros de tablaroca.",
+   "Mampostería confinada: block de 20 cm en X y 15 cm en Y, castillos K-1 15x20 (58 en PB y 54 en PA), dalas de desplante y cerramiento y 13 trabes: T-1 de carga 30x50 cm (5 #6, claro 5.60 m) sobre la cochera doble, T-2 20x30 y cerramientos de 15x30 a 15x35 cm. Método simplificado NTC: X VR 84.3 t ≥ Vu 71.8 t (margen 17 %); Y VR 107.8 t ≥ 71.8 t; V basal 65.3 t con c = 0.213 supuesto y T = 0.18 s.",
+   "Losas macizas de 13 cm en entrepiso (≥ 12.7 cm) y azotea (≥ 12.1 cm), f'c 250 kg/cm², #3 @ 20 a.s., @ 10 en la sala y @ 15 en la recámara principal (Mu máx. 1,929 kg·m/m en la sala de 4.46 x 5.25 m). Cubierta de lámina sobre armadura de PTR anclada a la losa (30 kg/m² incluidos en la carga muerta). Marquesina de 15 cm, 14.1 m², sobre 5 pilotis Ø30 cm con zapatas aisladas ZA-P de 80x80x20 cm; su armado se confirma en la memoria definitiva.",
+   "Zapatas corridas de 50 x 20 cm: ZC-1 perimetral (q = 5.56 t/m², excéntricas en los linderos oriente y poniente) y ZC-2 interior (q = 8.35 t/m²) contra una q adm supuesta de 12 t/m² a -0.80 m: requiere estudio de mecánica de suelos y confirmar el espectro sísmico del sitio. Cuantificación: 6,484 kg de acero (19.4 kg/m²) y 77.9 m³ de concreto.",
+   "Instalaciones: toma Ø13 mm, 22 UM (1.21 L/s), alimentación Ø25 mm, cisterna de 2 m³ con hidroneumático y calentador de paso; 25 UD, bajadas de baño 2 (al acceso) y baño principal (al comedor) junto a muro, colector Ø100 mm al 2 % a la red CESPT; captación de 232 m² (cubierta con alero + marquesina), 6.4 L/s a canalón perimetral y 2 bajadas Ø100 mm (9 L/s); 18 circuitos (15,978 W instalados, 11,185 W de demanda, 56.5 A), interruptor general 2P-100 A, desbalance 1.1 %; gas LP con tanque estacionario de 500 L en patio, ventilado y a más de 3 m de flamas. Factibilidades de CESPT y CFE por tramitar.",
+   "Presupuesto de $1,812,816 + IVA ($1,957,842 con IVA fronterizo; $5,413/m²) y programa de 22 semanas (131.5 días hábiles); cancelería, mármol travertino, puerta de encino, marquesina (14.1 m²) y pilotis (5 pzas) quedan entre las 41 partidas de la hoja \"Por cotizar\" hasta tener cotización de proveedores de Tijuana."
+  ]
+ },
+ "revision": {
+  "observaciones": [
+   {
+    "nivel": "Casa · Planta baja",
+    "tipo": "aviso",
+    "mensaje": "Medio baño: ventilación mecánica (extractor) obligatoria."
+   }
+  ],
+  "errores": 0,
+  "avisos": 1
+ },
+ "ejecutivo": {
+  "laminas": [
+   {
+    "clave": "A-01",
+    "titulo": "Planta de conjunto",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-02",
+    "titulo": "Plantas arquitectónicas amuebladas",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-03",
+    "titulo": "Plantas acotadas a ejes",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-04",
+    "titulo": "Planta de azotea",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-05",
+    "titulo": "Fachadas",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-06",
+    "titulo": "Cortes arquitectónicos",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-07",
+    "titulo": "Cancelería y acabados",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "E-01",
+    "titulo": "Planta de cimentación",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "E-02",
+    "titulo": "Losas, trabes y castillos",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "E-03",
+    "titulo": "Detalles estructurales",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "E-04",
+    "titulo": "Cuantificación de acero y concreto",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "IH-01",
+    "titulo": "Instalación hidráulica",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IS-01",
+    "titulo": "Instalación sanitaria y pluvial",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IE-01",
+    "titulo": "Instalación eléctrica",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IG-01",
+    "titulo": "Instalación de gas LP",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IH-02",
+    "titulo": "Isométrico hidráulico",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IE-02",
+    "titulo": "Cuadro de cargas y diagrama unifilar",
+    "disciplina": "Instalaciones"
+   }
+  ],
+  "coordinacion": {
+   "errores": 0,
+   "avisos": 0,
+   "verificaciones": 29
+  },
+  "nivel": "Proyecto ejecutivo completo",
+  "documentos": [
+   "Memoria técnica (Word/PDF)",
+   "Presupuesto (Excel)",
+   "Programa de obra (Excel y Gantt)",
+   "Juego de planos (PDF y DXF)"
+  ]
+ },
+ "generado_por": "híbrido (Claude + motor)"
+}
