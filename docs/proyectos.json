@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-12-casa-brutalista",
+  "fecha": "2026-11-12",
+  "nombre": "Casa Monolito",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Brutalista",
+  "area": 363.4,
+  "terreno": 400.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-11-casa-neoclasica",
   "fecha": "2026-11-11",
   "nombre": "Casa Pórtico Clásico",
