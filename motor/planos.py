@@ -441,6 +441,34 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
             PG = layout.pergola(blq)
             dx.rect(ox + PG["y0"], oy + z0 + PG["z"], PG["y1"] - PG["y0"], PG["viga"], "A-FACHADA")
             dx.rect(ox + PG["y_poste"], oy + z0, PG["poste"], PG["z"], "A-FACHADA")
+        if "volado" in corr["rasgos"] and blq["sistema"] != "acero":
+            # losa en volado de la fachada principal: misma geometría que render, A-05 y Blender (layout.volado);
+            # antes AP-03 no la dibujaba. En la lateral oriente se ve de canto, volando hacia la calle
+            # (como en A-05).
+            VO = layout.volado(blq, corr["rasgos"])
+            if lado == "S":
+                dx.rect(ox + VO["x0"], oy + ztop - VO["peralte"], VO["x1"] - VO["x0"], VO["peralte"], "A-FACHADA")
+            else:
+                dx.rect(ox + blq["y"] - VO["fondo"], oy + ztop - VO["peralte"], VO["fondo"], VO["peralte"], "A-FACHADA")
+        if lado == "S" and "muro_acento" in corr["rasgos"]:
+            # muro de acento en el paño ciego más ancho de la fachada principal, en toda la altura: mismo paño que el
+            # render (hueco_mayor) y A-05; antes AP-03 no lo dibujaba
+            ocup = sorted((v["a"] - 0.3, v["b"] + 0.3) for _, _, n in zs for v in nivel_vanos[id(n)] if v.get("lado") == "S")
+            hs, cur = [], blq["x"]
+            for a_, b_ in ocup:
+                if a_ > cur:
+                    hs.append((cur, a_))
+                cur = max(cur, b_)
+            hs.append((cur, blq["x"] + L))
+            ma, mb = max(hs, key=lambda h_: h_[1] - h_[0])
+            if mb - ma >= 0.9:
+                for i in range(int((ztop - z0) / 0.3)):
+                    zz = oy + z0 + i * 0.3
+                    dx.linea((ox + ma, zz), (ox + mb, zz), "A-FACHADA")
+                    xx = ox + ma + (0.4 if i % 2 else 0.0)
+                    while xx < ox + mb - 0.05:
+                        dx.linea((xx, zz), (xx, zz + 0.3), "A-FACHADA")
+                        xx += 0.8
         if lado == "S" and len(zs) > 1:
             # parteluces y marco con la geometría del render
             zb1 = zs[1][0] - z0

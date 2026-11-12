@@ -479,6 +479,22 @@ def parteluces(blq, celosia=False):
                 ancho=0.08 if celosia else 0.15, y0=0.35, y1=0.10)     # y0/y1: distancia hacia la calle desde el paño
 
 
+VOLADO_FONDO = 1.60
+VOLADO_PERALTE = 0.35
+
+
+def volado(blq, rasgos=()):
+    """Losa en volado (visera) de la fachada principal al nivel de azotea, en coordenadas absolutas: una sola
+    geometría para render, AP-03, A-05 y Blender. Cubre desde 0.30 m antes del paño poniente hasta el 65 % del
+    frente, pero si hay parteluces o celosía se detiene 0.20 m antes del primero (antes la losa atravesaba los
+    parteluces entre el 55 y el 65 % del frente, y AP-03 no dibujaba el volado)."""
+    x0, w = blq["x"], blq["w"]
+    x1 = x0 + 0.65 * w
+    if "parteluces" in rasgos or "celosia" in rasgos:
+        x1 = min(x1, parteluces(blq, "celosia" in rasgos)["xs"][0] - 0.20)
+    return dict(x0=round(x0 - 0.30, 3), x1=round(x1, 3), fondo=VOLADO_FONDO, peralte=VOLADO_PERALTE)
+
+
 def banda_corrida(vanos_nivel):
     """Tramo (a, b) de la banda corrida de cancelería en la fachada sur de un nivel superior, o None."""
     vs = [(v["a"], v["b"]) for v in vanos_nivel if v["tipo"] == "ventana" and v.get("lado") == "S"]

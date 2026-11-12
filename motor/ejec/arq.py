@@ -560,10 +560,16 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
             elif v["tipo"] == "puerta_ext":
                 dx.linea((ox + (a + b) / 2, oy + z + 0.05), (ox + (a + b) / 2, oy + z + z2 - 0.05), capa)
         z += n["h"]
+    if lado in ("E", "O") and "volado" in corr["rasgos"]:
+        # el volado de la fachada sur se ve de canto en las laterales, saliendo hacia la calle (antes no aparecía)
+        VO = layout.volado(blq, corr["rasgos"])
+        u0 = -VO["fondo"] if lado == "E" else L
+        dx.rect(ox + u0, oy + ztop - VO["peralte"], VO["fondo"], VO["peralte"], F)
     # rasgos en fachada principal
     if lado == "S":
         if "volado" in corr["rasgos"]:
-            dx.rect(ox - 0.3, oy + ztop - 0.35, L * 0.65 + 0.3, 0.35, F)
+            VO = layout.volado(blq, corr["rasgos"])
+            dx.rect(ox + VO["x0"] - blq["x"], oy + ztop - VO["peralte"], VO["x1"] - VO["x0"], VO["peralte"], F)
         pv = [(_u(blq, lado, v["a"]), _u(blq, lado, v["b"])) for k_ in range(len(niveles)) for v in lays[k_][1] if v.get("lado") == "S"]
         libres, cur = [], 0.0
         for a_, b_ in sorted((min(p), max(p)) for p in pv):
@@ -893,14 +899,29 @@ def etiquetar(dx, et, ox, oy):
         dx.texto(p, clave, 0.12, "A-CANCEL", centrado=True)
 
 
-def acabados(c, materiales):
-    t, n = c["t"], c["n"]
-    # primero el porcelanato; "piso" sólo como respaldo (un "muro cortina de piso a cerramiento" no es un acabado de piso)
-    piso_g = next((m for m in materiales if "porcelanato" in m.lower()),
-                  next((m for m in materiales if m.lower().startswith("piso")), "Porcelanato 60x120 tono arena"))
+def piso_general(materiales, nivel=0):
+    """Piso de los locales secos según el spec. Antes tomaba el primer material con "porcelanato" aunque fuera el de los
+    baños ("porcelanato gris 60x60 en baños") y lo ponía en sala, recámaras y cocina, ignorando la cláusula "piso de …";
+    tampoco distinguía un piso por nivel ("piso de concreto pulido en planta baja y piso de madera en planta alta")."""
+    def humedo(m):
+        return any(k in m.lower() for k in ("baño", "bano", "muro cortina"))
+    piso_g = next((m for m in materiales if m.lower().startswith("piso") and not humedo(m)),
+                  next((m for m in materiales if "porcelanato" in m.lower() and not humedo(m)),
+                       next((m for m in materiales if "porcelanato" in m.lower()), "Porcelanato 60x120 tono arena")))
+    if re.search(r"planta (baja|alta)", piso_g, re.I):
+        partes = [p_.strip() for p_ in re.split(r"\s+y\s+(?=piso\b)|,\s*(?=piso\b)", piso_g, flags=re.I) if p_.strip()]
+        quiere = "planta alta" if nivel >= 1 else "planta baja"
+        elegida = next((p_ for p_ in partes if quiere in p_.lower()), partes[0])
+        piso_g = re.sub(r"\s+en\s+planta\s+(baja|alta)\b", "", elegida, flags=re.I).strip()
     if len(piso_g) >= 60:
         # recorta a la primera cláusula del spec (antes ponía "Porcelanato 60x120 rectificado", un piso que el spec no pedía)
         piso_g = re.split(r",|\s+(?:en|con|y|sobre)\s+", piso_g)[0].strip()
+    return piso_g
+
+
+def acabados(c, materiales, nivel=0):
+    t, n = c["t"], c["n"]
+    piso_g = piso_general(materiales, nivel)
     piso_g = piso_g[:1].upper() + piso_g[1:]   # la cédula de acabados empieza con mayúscula
     # zoclo del mismo material que el piso (antes era siempre porcelanato aunque el piso fuera de barro o madera)
     zoclo_g = "Porcelanato 10 cm" if "porcelanato" in piso_g.lower() else "Zoclo de 10 cm del mismo material del piso"

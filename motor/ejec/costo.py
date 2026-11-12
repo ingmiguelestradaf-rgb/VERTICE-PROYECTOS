@@ -172,6 +172,11 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None):
                       "con trabe de borde, impermeabilizada", "m²", round((P["x1"] - P["x0"]) * P["fondo"], 2)))
         filas.append((f"Pilotis: columnas circulares de concreto aparente Ø{P['diam'] * 100:.0f} cm con zapata aislada "
                       f"(h = {blq['niveles'][0]['h']:.2f} m)", "pza", len(P["cols"])))
+    if "volado" in rasgos and blq.get("volado"):
+        VO = blq["volado"]
+        filas.append((f"Losa en volado de concreto armado f'c = 250 kg/cm² en fachada principal, peralte {VO['peralte'] * 100:.0f} cm, "
+                      f"vuelo {VO['fondo']:.2f} m, anclada a la losa de azotea, con gotero e impermeabilizada", "m²",
+                      round((VO["x1"] - VO["x0"]) * VO["fondo"], 2)))
     if len(blq["niveles"]) > 1:
         zb1 = blq["niveles"][0]["h"]
         ztop = sum(n["h"] for n in blq["niveles"])

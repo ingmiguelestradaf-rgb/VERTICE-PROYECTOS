@@ -347,7 +347,8 @@ for blq in E["bloques"]:
     libres.append((cur, x0 + w))
     la, lb = max(libres, key=lambda q: q[1] - q[0])
     if "volado" in ras:
-        G.caja("acento", x0 - 0.3, y0 - 1.6, top - 0.35, x0 + w * 0.65, y0 - 0.1, top)
+        VO = blq.get("volado") or dict(x0=x0 - 0.3, x1=x0 + w * 0.65, fondo=1.6, peralte=0.35)
+        G.caja("acento", VO["x0"], y0 - VO["fondo"], top - VO["peralte"], VO["x1"], y0 - 0.1, top)
     if "muro_acento" in ras and lb - la > 0.9:
         G.caja("piedra", la, y0 - 0.16, 0.0, lb, y0 - 0.1, top)
     if "jardinera" in ras:

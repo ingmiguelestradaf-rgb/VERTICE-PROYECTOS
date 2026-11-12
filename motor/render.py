@@ -211,7 +211,8 @@ def _bloque(E, blq, lay, corr, rnd):
     # rasgos de estilo
     ac = corr["acento"]
     if "volado" in corr["rasgos"] and blq["sistema"] != "acero":
-        E.caja(x - 0.3, y - 1.6, ztop - 0.35, w * 0.65 + 0.3, 1.6, 0.35, ac)
+        VO = layout.volado(blq, corr["rasgos"])
+        E.caja(VO["x0"], y - VO["fondo"], ztop - VO["peralte"], VO["x1"] - VO["x0"], VO["fondo"], VO["peralte"], ac)
     if "celosia" in corr["rasgos"] or "parteluces" in corr["rasgos"]:
         PL = layout.parteluces(blq, "celosia" in corr["rasgos"])
         top = min(ztop, z0 + 7.0 if blq["sistema"] == "mamposteria" else ztop)

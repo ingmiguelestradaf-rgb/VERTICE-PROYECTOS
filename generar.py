@@ -132,6 +132,9 @@ def construir(fecha, spec=None, salida=SALIDA, privado=PRIVADO, ejecutivo=True):
     for i, blq in enumerate(proy["bloques"]):
         if "pilotis" in corr["rasgos"] and len(blq["niveles"]) > 1:
             blq["pilotis"] = layout.pilotis(blq, lays[i][0][1])
+        if "volado" in corr["rasgos"] and blq["sistema"] != "acero":
+            # losa en volado de la fachada principal: la pluvial y el presupuesto la cuentan (antes sólo se dibujaba)
+            blq["volado"] = layout.volado(blq, corr["rasgos"])
     esp = (r_est["t_x"] / 100, r_est["t_y"] / 100) if r_est else (0.15, 0.15)
     area_total = sum(b["w"] * b["d"] * sum(n["rep"] for n in b["niveles"]) for b in proy["bloques"])
     desplante = sum(b["w"] * b["d"] for b in proy["bloques"] if b.get("z0", 0) == 0)
