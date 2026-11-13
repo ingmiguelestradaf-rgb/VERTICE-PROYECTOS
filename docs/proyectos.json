@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-13-casa-tropical-moderna",
+  "fecha": "2026-11-13",
+  "nombre": "Casa Celosía",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Tropical moderna",
+  "area": 240.6,
+  "terreno": 180.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-12-casa-brutalista",
   "fecha": "2026-11-12",
   "nombre": "Casa Monolito",

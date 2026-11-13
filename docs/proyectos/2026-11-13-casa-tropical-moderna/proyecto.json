@@ -1,0 +1,325 @@
+{
+ "clave": "2026-11-13-casa-tropical-moderna",
+ "fecha": "2026-11-13",
+ "nombre": "Casa Celosía",
+ "concepto": "Vivienda de dos niveles en un lote angosto de 9 x 20 m que traduce la arquitectura tropical moderna al clima semiárido de Tijuana: en lugar de cerrarse, la casa se protege con sombra profunda y deja pasar el aire. Una cubierta de cuatro aguas de baja pendiente con aleros amplios cubre los muros del sol alto de mediodía, y una celosía de madera termotratada filtra el sol bajo de la tarde y da privacidad a las recámaras frente a la calle sin cancelar la brisa marina del poniente. Los vanos son generosos (55 %) y se alinean entre la fachada de acceso y el patio posterior para la ventilación cruzada; una jardinera de piedra de la región al frente integra vegetación nativa de bajo consumo de agua (agaves, salvia, romero) con la casa.",
+ "tipologia": "casa",
+ "tipologia_nombre": "Casa habitación",
+ "subtipo": "",
+ "corriente": "tropical_moderna",
+ "corriente_nombre": "Tropical moderna",
+ "materiales": "Muros de block de concreto con aplanado de mortero y pintura vinílica color arena; celosía de listones de madera termotratada de pino de 2x2\" con sellador UV; jardinera y zoclo de piedra laja de la región; cubierta de cuatro aguas de baja pendiente con teja de barro de Tecate sobre armadura ligera de PTR galvanizado y triplay, apoyada en la losa de azotea, con aleros de 0.90 m y plafón de madera; cancelería de aluminio color bronce con vidrio claro 6 mm; puerta de acceso de madera de parota; piso de porcelanato tipo piedra 60x60 en planta baja y piso laminado de madera en planta alta; porcelanato antiderrapante en baños",
+ "uso_suelo": "Habitacional unifamiliar",
+ "terreno": {
+  "frente": 9.0,
+  "fondo": 20.0,
+  "area": 180.0
+ },
+ "area_construida": 240.6,
+ "desplante": 120.3,
+ "cos": 0.67,
+ "cus": 1.34,
+ "niveles": 2,
+ "altura": 6.2,
+ "cajones": 1,
+ "usuarios": {
+  "ocupantes": 4
+ },
+ "areas": [
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Cochera",
+   "area": 19.04,
+   "medidas": "3.40 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Acceso",
+   "area": 20.44,
+   "medidas": "3.65 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Bodega",
+   "area": 5.24,
+   "medidas": "1.70 x 3.08"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Medio baño",
+   "area": 4.28,
+   "medidas": "1.70 x 2.52"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Escalera",
+   "area": 7.82,
+   "medidas": "2.30 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Vestíbulo",
+   "area": 21.93,
+   "medidas": "6.45 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Sala-comedor",
+   "area": 24.94,
+   "medidas": "5.25 x 4.75"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Lavandería",
+   "area": 4.99,
+   "medidas": "3.50 x 1.43"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta baja",
+   "rep": 1,
+   "espacio": "Cocina",
+   "area": 11.64,
+   "medidas": "3.50 x 3.33"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara 2",
+   "area": 19.04,
+   "medidas": "3.40 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara 3",
+   "area": 20.44,
+   "medidas": "3.65 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Baño 2",
+   "area": 9.52,
+   "medidas": "1.70 x 5.60"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Escalera",
+   "area": 7.82,
+   "medidas": "2.30 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Pasillo",
+   "area": 21.93,
+   "medidas": "6.45 x 3.40"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Recámara principal",
+   "area": 24.94,
+   "medidas": "5.25 x 4.75"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Vestidor",
+   "area": 4.99,
+   "medidas": "3.50 x 1.43"
+  },
+  {
+   "bloque": "Casa",
+   "nivel": "Planta alta",
+   "rep": 1,
+   "espacio": "Baño principal",
+   "area": 11.64,
+   "medidas": "3.50 x 3.33"
+  }
+ ],
+ "hojas": [
+  {
+   "clave": "AP-01",
+   "titulo": "Planta de conjunto",
+   "disciplina": "Anteproyecto",
+   "dxf": "planos/AP-01_planta-de-conjunto.dxf",
+   "img": "laminas/AP-01.jpg"
+  },
+  {
+   "clave": "AP-02",
+   "titulo": "Plantas arquitectónicas",
+   "disciplina": "Anteproyecto",
+   "dxf": "planos/AP-02_plantas-arquitectonicas.dxf",
+   "img": "laminas/AP-02.jpg"
+  },
+  {
+   "clave": "AP-03",
+   "titulo": "Fachadas y corte",
+   "disciplina": "Anteproyecto",
+   "dxf": "planos/AP-03_fachadas-y-corte.dxf",
+   "img": "laminas/AP-03.jpg"
+  }
+ ],
+ "render": [
+  "render_aereo.jpg",
+  "render_peatonal.jpg"
+ ],
+ "pdf": "anteproyecto.pdf",
+ "zip": "2026-11-13-casa-tropical-moderna_anteproyecto_dxf.zip",
+ "extra": {
+  "dictamen_arquitectura": [
+   "Terreno de 9.00 x 20.00 m (180 m²); casa de 8.75 x 13.75 m a ejes en 2 niveles, 240.6 m² construidos con desplante de 120.3 m²: COS 0.67 y CUS 1.34 (por verificar con el PDU de Tijuana). Jardín frontal y cajón de 3.12 m con jardinera de piedra laja, cochera techada de 19.0 m² con portón seccional de 3.00 m, y patio posterior de 3.13 m al que se sale de la sala-comedor por el cancel corredizo P-4 de 2.25 m.",
+   "Lenguaje tropical moderno adaptado al clima semiárido: cubierta de cuatro aguas de baja pendiente (18 %) de teja de barro de Tecate sobre la losa de azotea, con aleros de 0.90 m que sombrean todos los paños; celosía de 13 listones de madera termotratada en planta alta frente a la recámara 3 y el baño 2 (filtra el sol de la tarde y da privacidad hacia la calle) y vanos generosos alineados sur–norte para la ventilación cruzada con la brisa marina. Muros laterales ciegos por ser de colindancia.",
+   "Recorrido: puerta doble de parota P-3 de 1.20 m → acceso (20.4 m²) con paso a cochera, bodega (5.2 m²) y medio baño (4.3 m², con extractor por estar en colindancia) → vestíbulo (21.9 m²) con escalera en U → sala-comedor (24.9 m²) y cocina (11.6 m²) comunicadas al norte, lavandería (5.0 m²) con puerta al vestíbulo. Escalera de 2 tramos de 8 peraltes, tramo de 1.15 m, peralte 16.9 cm, huella 30.2 cm (2p+h = 64 cm).",
+   "Planta alta: pasillo-estancia (21.9 m²) que reparte a recámara principal (24.9 m²) con baño (11.6 m²) y vestidor (5.0 m²) propios al norte, recámaras 2 (19.0 m²) y 3 (20.4 m²) con clóset y baño 2 (9.5 m², con ventila) al sur. Todas las recámaras ≥ 2.70 m de lado con ventana al exterior; altura libre 2.57 m en ambos niveles (≥ 2.30 m); porcelanato tipo piedra en planta baja y laminado de madera en planta alta.",
+   "Correcciones de motor en esta revisión: (1) la celosía/parteluces arrancaba siempre al 55 % del frente y partía la ventana de la recámara 3 (2/3 filtrada, 1/3 al sol); ahora layout.parteluces recibe los vanos de planta alta y, si el arranque cae dentro de una ventana, arranca 0.10 m antes de su jamba y la cubre completa — misma geometría en render, AP-03, A-05, Blender, presupuesto y en el tope del volado. (2) La memoria técnica y el detalle estructural de la escalera decían '8 peraltes' para la escalera completa; ahora indican 2 tramos de 8 (16 peraltes). (3) El texto ANAQUEL de la bodega se salía del mueble y se encimaba con el nombre del local en A-02; ahora se gira en anaqueles verticales."
+  ],
+  "dictamen_ingenieria": [
+   "Veredicto: construible conforme a norma — 0 errores y 0 avisos en 29 verificaciones de coordinación (aviso arquitectónico atendido: extractor en el medio baño) — sujeto a los supuestos por validar indicados abajo. El ciclo de coordinación no requirió ajustes: muros de block de 15 cm en ambas direcciones, todos los muros de planta alta apoyados en muros o trabes.",
+   "Mampostería confinada (Q = 1.5): castillos K-1 15x20 (42 en PB y 43 en PA), dalas de desplante y cerramiento, 9 trabes-cerramiento de 15x30 a 20x30 cm, entre ellas T-4 20x30 (3 #4) sobre el portón de la cochera de 3.00 m y T-1 a T-3 20x30 (2 #6) alrededor del hueco de escalera. Método simplificado NTC: X VR 58.2 t ≥ Vu 55.4 t (margen 5 %, el más justo; no abrir vanos adicionales en muros X sin revisar); Y VR 89.4 t ≥ 55.4 t; V basal 50.4 t con c = 0.213 supuesto y T = 0.17 s.",
+   "Losas macizas de 13 cm en entrepiso (≥ 13.0 cm) y azotea (≥ 12.4 cm), f'c 250 kg/cm², #3 @ 20 a.s., @ 10 en sala-comedor (Mu 2,183 kg·m/m, tablero 4.75 x 5.25 m) y @ 15 en recámara principal. La azotea carga 100 kg/m² de la cubierta de teja de barro sobre armadura de PTR (166.7 m² inclinados con aleros). Escalera en losa de 14 cm, #3 @ 15.",
+   "Zapatas corridas de concreto B = 50 cm, h = 20 cm, #4 @ 33: ZC-1 perimetral (q = 5.36 t/m², excéntrica en linderos oriente y poniente) y ZC-2 interior (q = 8.89 t/m²) contra una q adm supuesta de 12 t/m² a -0.80 m: requiere estudio de mecánica de suelos y confirmar el espectro sísmico del sitio. Cuantificación: 4,813 kg de acero (20.0 kg/m²) y 57.3 m³ de concreto.",
+   "Instalaciones: toma Ø13 mm, 22 UM (1.21 L/s), cisterna de 2 m³ con hidroneumático y calentador de paso a gas; 25 UD, bajadas del baño principal (a cocina) y baño 2 (a bodega) junto a muro, colector Ø100 mm PVC al 2 % a la red CESPT; captación de 164 m² de cubierta con aleros, 4.6 L/s por canalón perimetral a 2 bajadas Ø100 mm (≈ 9 L/s); 13 circuitos (12,378 W instalados, 8,665 W de demanda, 43.8 A), interruptor general 2P-60 A, desbalance 0.7 %; gas LP con tanque estacionario de 300 L en patio posterior, ventilado y a más de 3 m de flamas. Factibilidades de CESPT y CFE por tramitar.",
+   "Presupuesto de $1,400,181 + IVA ($1,512,196 con IVA fronterizo; $5,819/m²) y programa de 17 semanas (99 días hábiles); cubierta de teja (166.7 m²), canalón (52.2 ml), celosía de madera (13 pzas), portón seccional, cocina integral y cancelería quedan entre las 36 partidas de la hoja \"Por cotizar\" hasta tener cotización de proveedores de Tijuana."
+  ]
+ },
+ "revision": {
+  "observaciones": [
+   {
+    "nivel": "Casa · Planta baja",
+    "tipo": "aviso",
+    "mensaje": "Medio baño: ventilación mecánica (extractor) obligatoria."
+   }
+  ],
+  "errores": 0,
+  "avisos": 1
+ },
+ "ejecutivo": {
+  "laminas": [
+   {
+    "clave": "A-01",
+    "titulo": "Planta de conjunto",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-02",
+    "titulo": "Plantas arquitectónicas amuebladas",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-03",
+    "titulo": "Plantas acotadas a ejes",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-04",
+    "titulo": "Planta de azotea",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-05",
+    "titulo": "Fachadas",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-06",
+    "titulo": "Cortes arquitectónicos",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "A-07",
+    "titulo": "Cancelería y acabados",
+    "disciplina": "Arquitectónico"
+   },
+   {
+    "clave": "E-01",
+    "titulo": "Planta de cimentación",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "E-02",
+    "titulo": "Losas, trabes y castillos",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "E-03",
+    "titulo": "Detalles estructurales",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "E-04",
+    "titulo": "Cuantificación de acero y concreto",
+    "disciplina": "Estructural"
+   },
+   {
+    "clave": "IH-01",
+    "titulo": "Instalación hidráulica",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IS-01",
+    "titulo": "Instalación sanitaria y pluvial",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IE-01",
+    "titulo": "Instalación eléctrica",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IG-01",
+    "titulo": "Instalación de gas LP",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IH-02",
+    "titulo": "Isométrico hidráulico",
+    "disciplina": "Instalaciones"
+   },
+   {
+    "clave": "IE-02",
+    "titulo": "Cuadro de cargas y diagrama unifilar",
+    "disciplina": "Instalaciones"
+   }
+  ],
+  "coordinacion": {
+   "errores": 0,
+   "avisos": 0,
+   "verificaciones": 29
+  },
+  "nivel": "Proyecto ejecutivo completo",
+  "documentos": [
+   "Memoria técnica (Word/PDF)",
+   "Presupuesto (Excel)",
+   "Programa de obra (Excel y Gantt)",
+   "Juego de planos (PDF y DXF)"
+  ]
+ },
+ "generado_por": "híbrido (Claude + motor)"
+}
