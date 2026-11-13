@@ -471,11 +471,22 @@ def altura_pretil(cubierta):
 PARTELUZ_SEP = 0.35
 
 
-def parteluces(blq, celosia=False):
+def parteluces(blq, celosia=False, vanos=None):
     """Parteluces (o celosía) de la fachada principal en planta alta, en coordenadas absolutas: una sola geometría
-    para render, AP-03, A-05 y Blender (antes Blender usaba otro arranque, separación, número y sección)."""
+    para render, AP-03, A-05 y Blender (antes Blender usaba otro arranque, separación, número y sección).
+    Con `vanos` (los de planta alta) el arranque se ajusta para no partir una ventana sur: si el 55 % del frente cae
+    dentro de una ventana, la celosía arranca 0.10 m antes de su jamba poniente y la cubre completa (antes arrancaba
+    a media ventana y dejaba una parte filtrada y otra expuesta al sol)."""
     x0, w = blq["x"], blq["w"]
-    return dict(xs=[round(x0 + 0.55 * w + k * PARTELUZ_SEP, 3) for k in range(int(w * 0.4 / PARTELUZ_SEP))],
+    n = int(w * 0.4 / PARTELUZ_SEP)
+    ini = x0 + 0.55 * w
+    fin = ini + (n - 1) * PARTELUZ_SEP
+    for v in (vanos or []):
+        if v.get("lado") == "S" and v["a"] < ini < v["b"] and v["a"] - 0.10 > x0 + 0.15:
+            ini = v["a"] - 0.10
+            n = int(round((fin - ini) / PARTELUZ_SEP)) + 1
+            break
+    return dict(xs=[round(ini + k * PARTELUZ_SEP, 3) for k in range(n)],
                 ancho=0.08 if celosia else 0.15, y0=0.35, y1=0.10)     # y0/y1: distancia hacia la calle desde el paño
 
 
@@ -483,7 +494,7 @@ VOLADO_FONDO = 1.60
 VOLADO_PERALTE = 0.35
 
 
-def volado(blq, rasgos=()):
+def volado(blq, rasgos=(), vanos=None):
     """Losa en volado (visera) de la fachada principal al nivel de azotea, en coordenadas absolutas: una sola
     geometría para render, AP-03, A-05 y Blender. Cubre desde 0.30 m antes del paño poniente hasta el 65 % del
     frente, pero si hay parteluces o celosía se detiene 0.20 m antes del primero (antes la losa atravesaba los
@@ -491,7 +502,7 @@ def volado(blq, rasgos=()):
     x0, w = blq["x"], blq["w"]
     x1 = x0 + 0.65 * w
     if "parteluces" in rasgos or "celosia" in rasgos:
-        x1 = min(x1, parteluces(blq, "celosia" in rasgos)["xs"][0] - 0.20)
+        x1 = min(x1, parteluces(blq, "celosia" in rasgos, vanos)["xs"][0] - 0.20)
     return dict(x0=round(x0 - 0.30, 3), x1=round(x1, 3), fondo=VOLADO_FONDO, peralte=VOLADO_PERALTE)
 
 

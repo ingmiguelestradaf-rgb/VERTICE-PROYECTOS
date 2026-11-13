@@ -45,8 +45,9 @@ def exportar(ruta, proy, lays, corr, plan, nombre, r_est=None, spec=None):
                             pilotis=layout.pilotis(blq, lays[bi][0][1])
                             if "pilotis" in corr.get("rasgos", []) and len(blq["niveles"]) > 1 else None,
                             # misma geometría que render, AP-03 y A-05 (antes Blender las recalculaba con otros valores)
-                            parteluces=layout.parteluces(blq, "celosia" in corr.get("rasgos", [])),
-                            volado=layout.volado(blq, corr.get("rasgos", [])),
+                            parteluces=layout.parteluces(blq, "celosia" in corr.get("rasgos", []),
+                                                         lays[bi][1][1] if len(lays[bi]) > 1 else None),
+                            volado=layout.volado(blq, corr.get("rasgos", []), lays[bi][1][1] if len(lays[bi]) > 1 else None),
                             marco_x0=round(blq["x"] + layout.inicio_marco(lays[bi][1][1], blq["x"], blq["w"]), 3)
                             if len(blq["niveles"]) > 1 else None))
     escena = dict(nombre=nombre, clave=plan.get("fecha"), tipologia=plan["tipologia"],

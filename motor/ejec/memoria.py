@@ -68,7 +68,7 @@ def escribir(V, ruta, nombre, datos, proy, blq, r, cc, coord, res, materiales, i
     if r.get("escalera"):
         e = r["escalera"]
         doc.seccion("8. Escalera")
-        doc.formula(f"{e['peldanos']} peraltes de {e['peralte']} cm, huella {e['huella']} cm, 2p+h = {e['regla']} cm; "
+        doc.formula(f"2 tramos de {e['peldanos']} peraltes ({2 * e['peldanos']} en total) de {e['peralte']} cm, huella {e['huella']} cm, 2p+h = {e['regla']} cm; "
                     f"losa h = {e['h']} cm, Mu = {e['Mu']} kg·m/m, #3 @ {e['s']} cm", "NTC Concreto / Reglamento")
     doc.seccion("9. Cimentación")
     doc.tabla(["Clave", "Ubicación", "w serv (t/m)", "B (cm)", "h (cm)", "q (t/m²)", "Armado"],

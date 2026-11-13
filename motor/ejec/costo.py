@@ -182,7 +182,7 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None):
         ztop = sum(n["h"] for n in blq["niveles"])
         if "celosia" in rasgos or "parteluces" in rasgos:
             # misma geometría que render, AP-03, A-05 y Blender (layout.parteluces); antes no se cuantificaban
-            PL = layout.parteluces(blq, "celosia" in rasgos)
+            PL = layout.parteluces(blq, "celosia" in rasgos, lays[1][1])
             desc = ("Celosía de madera termotratada (listones de 8 cm)" if "celosia" in rasgos else
                     f"Parteluces verticales de concreto armado {PL['ancho'] * 100:.0f}x{(PL['y0'] - PL['y1']) * 100:.0f} cm "
                     "anclados a losas, aplanado y pintura")

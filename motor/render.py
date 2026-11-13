@@ -211,10 +211,10 @@ def _bloque(E, blq, lay, corr, rnd):
     # rasgos de estilo
     ac = corr["acento"]
     if "volado" in corr["rasgos"] and blq["sistema"] != "acero":
-        VO = layout.volado(blq, corr["rasgos"])
+        VO = layout.volado(blq, corr["rasgos"], lay[1][1] if len(lay) > 1 else None)
         E.caja(VO["x0"], y - VO["fondo"], ztop - VO["peralte"], VO["x1"] - VO["x0"], VO["fondo"], VO["peralte"], ac)
     if "celosia" in corr["rasgos"] or "parteluces" in corr["rasgos"]:
-        PL = layout.parteluces(blq, "celosia" in corr["rasgos"])
+        PL = layout.parteluces(blq, "celosia" in corr["rasgos"], lay[1][1] if len(lay) > 1 else None)
         top = min(ztop, z0 + 7.0 if blq["sistema"] == "mamposteria" else ztop)
         base = z0 + (zs[1][0] - z0 if len(zs) > 1 else 0.3)
         for xx in PL["xs"]:

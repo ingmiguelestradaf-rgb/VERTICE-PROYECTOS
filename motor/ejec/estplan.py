@@ -188,5 +188,5 @@ def detalle_escalera(dx, x0, y0, e):
     hl = e["h"] / 100 / math.cos(ang)
     dx.linea((x0, y0 - hl), (x0 + L, y0 + H - hl), "E-CONCRETO")
     dx.linea((x0 + 0.03, y0 - hl + 0.03), (x0 + L - 0.03, y0 + H - hl + 0.03), "E-ACERO")
-    dx.texto((x0, y0 - hl - 0.25), f"ESCALERA: {n} peraltes de {e['peralte']:.1f} cm, huella {e['huella']:.1f} cm, "
+    dx.texto((x0, y0 - hl - 0.25), f"ESCALERA (2 TRAMOS, CORTE DE UN TRAMO): {n} peraltes por tramo de {e['peralte']:.1f} cm, huella {e['huella']:.1f} cm, "
                                     f"losa h = {e['h']} cm, #3 @ {e['s']} cm longitudinal y #3 @ 25 cm transversal", 0.06, "E-TEXTO")

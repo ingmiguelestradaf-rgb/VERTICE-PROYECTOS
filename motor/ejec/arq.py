@@ -274,7 +274,8 @@ def amueblar(dx, c, vanos, ox=0.0, oy=0.0):
     elif n == "Bodega":
         lon = (w if lado in ("S", "N") else d) - 0.3
         x1, y1, a1, b1 = _caja(dx, c, lado, lon, 0.45, sep=0.0)
-        dx.texto((x1 + a1 / 2, y1 + b1 / 2), "ANAQUEL", 0.1, L, centrado=True)
+        # anaquel angosto en vertical: el texto se gira para no encimarse con el nombre del local (antes se salía del mueble)
+        dx.texto((x1 + a1 / 2, y1 + b1 / 2), "ANAQUEL", 0.1, L, rot=90 if b1 > a1 else 0, centrado=True)
 
 
 def _libre_puertas(c, lado, vanos, fondo):
@@ -562,13 +563,13 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
         z += n["h"]
     if lado in ("E", "O") and "volado" in corr["rasgos"]:
         # el volado de la fachada sur se ve de canto en las laterales, saliendo hacia la calle (antes no aparecía)
-        VO = layout.volado(blq, corr["rasgos"])
+        VO = layout.volado(blq, corr["rasgos"], lays[1][1] if len(lays) > 1 else None)
         u0 = -VO["fondo"] if lado == "E" else L
         dx.rect(ox + u0, oy + ztop - VO["peralte"], VO["fondo"], VO["peralte"], F)
     # rasgos en fachada principal
     if lado == "S":
         if "volado" in corr["rasgos"]:
-            VO = layout.volado(blq, corr["rasgos"])
+            VO = layout.volado(blq, corr["rasgos"], lays[1][1] if len(lays) > 1 else None)
             dx.rect(ox + VO["x0"] - blq["x"], oy + ztop - VO["peralte"], VO["x1"] - VO["x0"], VO["peralte"], F)
         pv = [(_u(blq, lado, v["a"]), _u(blq, lado, v["b"])) for k_ in range(len(niveles)) for v in lays[k_][1] if v.get("lado") == "S"]
         libres, cur = [], 0.0
@@ -601,7 +602,7 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
         # parteluces y marco volumétrico: misma geometría que el render (render.py) para que plano y modelo coincidan
         zb1 = niveles[0]["h"] if len(niveles) > 1 else 0.3
         if "celosia" in corr["rasgos"] or "parteluces" in corr["rasgos"]:
-            PL = layout.parteluces(blq, "celosia" in corr["rasgos"])
+            PL = layout.parteluces(blq, "celosia" in corr["rasgos"], lays[1][1] if len(lays) > 1 else None)
             for xx in PL["xs"]:
                 dx.rect(ox + _u(blq, lado, xx), oy + zb1, PL["ancho"], ztop - zb1, F)
         if "porche" in corr["rasgos"]:

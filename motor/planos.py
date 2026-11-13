@@ -445,7 +445,7 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
             # losa en volado de la fachada principal: misma geometría que render, A-05 y Blender (layout.volado);
             # antes AP-03 no la dibujaba. En la lateral oriente se ve de canto, volando hacia la calle
             # (como en A-05).
-            VO = layout.volado(blq, corr["rasgos"])
+            VO = layout.volado(blq, corr["rasgos"], lays[bi][1][1] if len(lays[bi]) > 1 else None)
             if lado == "S":
                 dx.rect(ox + VO["x0"], oy + ztop - VO["peralte"], VO["x1"] - VO["x0"], VO["peralte"], "A-FACHADA")
             else:
@@ -473,7 +473,7 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
             # parteluces y marco con la geometría del render
             zb1 = zs[1][0] - z0
             if "celosia" in corr["rasgos"] or "parteluces" in corr["rasgos"]:
-                PL = layout.parteluces(blq, "celosia" in corr["rasgos"])
+                PL = layout.parteluces(blq, "celosia" in corr["rasgos"], lays[bi][1][1] if len(lays[bi]) > 1 else None)
                 for xx in PL["xs"]:
                     dx.rect(x0 + xx - blq["x"], oy + z0 + zb1, PL["ancho"], ztop - z0 - zb1, "A-FACHADA")
             # porche y jardinera: misma geometría que A-05 y render (antes AP-03 no los dibujaba)
