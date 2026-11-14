@@ -177,6 +177,21 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None):
         filas.append((f"Losa en volado de concreto armado f'c = 250 kg/cm² en fachada principal, peralte {VO['peralte'] * 100:.0f} cm, "
                       f"vuelo {VO['fondo']:.2f} m, anclada a la losa de azotea, con gotero e impermeabilizada", "m²",
                       round((VO["x1"] - VO["x0"]) * VO["fondo"], 2)))
+    if "jardinera" in rasgos:
+        # jardinera de fachada principal: mismo paño que render (hueco_mayor de planta baja) y A-05 (paño libre de vanos
+        # de planta baja ±0.30 m, ≥ 1.00 m), 0.60 m de fondo y 0.50 m de alto; antes se dibujaba pero no se cuantificaba
+        ocup = sorted((v["a"] - 0.3, v["b"] + 0.3) for v in lays[0][1] if v.get("lado") == "S")
+        libres, cur = [], blq["x"]
+        for a_, b_ in ocup:
+            if a_ > cur:
+                libres.append((cur, a_))
+            cur = max(cur, b_)
+        libres.append((cur, blq["x"] + blq["w"]))
+        ja, jb = max(libres, key=lambda h_: h_[1] - h_[0])
+        if jb - ja >= 1.0:
+            filas.append(("Jardinera de mampostería de piedra de la región en fachada principal, 0.60 m de fondo y 0.50 m "
+                          "de alto, con impermeabilizante interior, dren y tierra preparada (incluye plantas)", "ml",
+                          round(jb - ja - 0.2, 2)))
     if len(blq["niveles"]) > 1:
         zb1 = blq["niveles"][0]["h"]
         ztop = sum(n["h"] for n in blq["niveles"])

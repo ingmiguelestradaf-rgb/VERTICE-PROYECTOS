@@ -275,7 +275,11 @@ def amueblar(dx, c, vanos, ox=0.0, oy=0.0):
         lon = (w if lado in ("S", "N") else d) - 0.3
         x1, y1, a1, b1 = _caja(dx, c, lado, lon, 0.45, sep=0.0)
         # anaquel angosto en vertical: el texto se gira para no encimarse con el nombre del local (antes se salía del mueble)
-        dx.texto((x1 + a1 / 2, y1 + b1 / 2), "ANAQUEL", 0.1, L, rot=90 if b1 > a1 else 0, centrado=True)
+        # y se desplaza a 1/5 del largo del mueble: centrado quedaba bajo el nombre del local (BODEGA) en bodegas angostas
+        if b1 > a1:
+            dx.texto((x1 + a1 / 2, y1 + 0.2 * b1), "ANAQUEL", 0.1, L, rot=90, centrado=True)
+        else:
+            dx.texto((x1 + 0.2 * a1, y1 + b1 / 2), "ANAQUEL", 0.1, L, centrado=True)
 
 
 def _libre_puertas(c, lado, vanos, fondo):
