@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-14-casa-contemporanea",
+  "fecha": "2026-11-14",
+  "nombre": "Casa Umbral",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Contemporánea",
+  "area": 268.1,
+  "terreno": 200.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-13-casa-tropical-moderna",
   "fecha": "2026-11-13",
   "nombre": "Casa Celosía",
