@@ -98,7 +98,7 @@ def construir(fecha, spec=None, salida=SALIDA, privado=PRIVADO, ejecutivo=True):
         if blq["sistema"] == "mamposteria" and corr["cubierta"] not in ("plana", "plana_pretil") \
                 and planos.altura_cubierta(blq, corr) > 0:
             teja = "teja" in mats
-            al = 0.9 if "alero_amplio" in corr["rasgos"] else 0.6
+            al = layout.vuelo_alero(corr["rasgos"])
             span = min(blq["w"], blq["d"]) / (1 if corr["cubierta"].startswith("una") else 2)
             blq["cubierta_ligera"] = dict(tipo=corr["cubierta"], material="teja de barro" if teja else "lámina",
                                           cm=100 if teja else 30, alero=al,

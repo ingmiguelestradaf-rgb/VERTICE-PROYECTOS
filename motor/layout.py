@@ -527,6 +527,16 @@ def es_cortina(corr, piso_idx, v):
             and not v.get("alta") and v.get("lado") and not any(s in str(v.get("cuarto", "")).upper() for s in _SIN_CORTINA))
 
 
+def vuelo_alero(rasgos):
+    """Vuelo de proyecto del alero de la cubierta inclinada según los rasgos: 0.90 m con `alero_amplio`, 0.15 m (sólo el
+    canalón oculto en el remate) con `sin_alero` (corriente nórdica) y 0.60 m en los demás casos. Antes `sin_alero`
+    se ignoraba y la cubierta nórdica salía con 0.60 m de alero en planos, render y presupuesto."""
+    rasgos = rasgos or ()
+    if "alero_amplio" in rasgos:
+        return 0.9
+    return 0.15 if "sin_alero" in rasgos else 0.6
+
+
 def alero(blq, defecto):
     """Vuelo del alero de la cubierta inclinada: el de `cubierta_ligera` (generar.py, 0.90 m con alero_amplio, 0.60 m
     sin él) que usan el ejecutivo, el presupuesto y la pluvial; `defecto` sólo para bloques sin cubierta ligera.

@@ -376,7 +376,7 @@ def _wc(dx, c, lado, despl):
 # ------------------------------------------------------------------ azotea
 def alero(corr):
     """Vuelo del alero de cubiertas inclinadas (igual en A-04, A-05 y renders)."""
-    return 0.9 if "alero_amplio" in corr.get("rasgos", ()) else 0.6
+    return layout.vuelo_alero(corr.get("rasgos", ()))
 
 
 def cubierta_inclinada(dx, blq, corr, r_est, n_baj, gas_xy, ox, oy, sur_primero):

@@ -117,8 +117,9 @@ def generadores(blq, lays, r, cancel, acab):
     return {k: round(v, 2) for k, v in q.items()}, notas
 
 
-def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None):
+def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None, materiales=""):
     filas = []
+    mats = (materiales or "").lower()
     for t in cancel:
         if t["clave"].startswith("V"):
             filas.append((f"{t['clave']} {t['desc']} {t['ancho']:.2f}x{t['alto']:.2f} m — {t['mat']}", "m²", round(t["ancho"] * t["alto"] * t["cant"], 2)))
@@ -205,8 +206,12 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None):
         if "marco" in rasgos:
             fx0 = layout.inicio_marco(lays[1][1], blq["x"], blq["w"])
             largo = 2 * (blq["w"] + 0.05 - fx0) + 2 * (ztop - zb1 + 0.3)
+            # acabado del marco según los materiales del spec (antes siempre "aplanado y pintura" aunque se pidiera
+            # forrado de madera)
+            acab_m = ("forrado de madera termotratada con sellador UV" if any("marco" in m_ and "madera" in m_ for m_ in mats.split(";"))
+                      else "aplanado y pintura en color de acento")
             filas.append(("Marco volumétrico de concreto armado 30 x 90 cm en planta alta de la fachada principal, "
-                          "aplanado y pintura en color de acento", "ml", round(largo, 2)))
+                          f"{acab_m}", "ml", round(largo, 2)))
     if "ventana_corrida" in rasgos and len(blq["niveles"]) > 1:
         # sólo los paños entre ventanas (las ventanas ya están en la cancelería), con la altura de la ventana (1.45 m)
         area = 0.0
@@ -215,6 +220,21 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None):
             area += sum(max(0.0, a2 - b1) for (_, b1), (a2, _) in zip(vs, vs[1:])) * 1.45
         if area > 0:
             filas.append(("Banda corrida: paneles de aluminio compuesto entre ventanas de fachada principal", "m²", round(area, 2)))
+    if any("revestimiento" in m_ and ("madera" in m_ or "entablado" in m_) for m_ in mats.split(";")):
+        # revestimiento exterior ventilado pedido en los materiales (nórdica): fachadas principal y posterior, más los
+        # hastiales de la cubierta a dos aguas cuando dan a esas fachadas, menos vanos; antes no se cuantificaba y el
+        # presupuesto sólo traía el aplanado de mortero
+        H = sum(n["h"] for n in blq["niveles"])
+        cl = blq.get("cubierta_ligera") or {}
+        hastial = 0.0
+        if cl and cl.get("tipo", "").startswith("dos") and blq["w"] <= blq["d"]:
+            hastial = 2 * blq["w"] * (cl["pend"] * blq["w"] / 2) / 2
+        vanos = sum(t["ancho"] * t["alto"] * t["cant"] for t in cancel        # sólo vanos exteriores
+                    if not (t["clave"].startswith("P-") and any(w_ in t["desc"].lower() for w_ in ("interior", "baño"))))
+        area = 2 * blq["w"] * H + hastial - vanos
+        filas.append(("Revestimiento exterior de entablado de madera termotratada sobre bastidor y cámara ventilada, "
+                      "con barrera de humedad y sellador UV (fachadas principal y posterior y hastiales)", "m²",
+                      round(area * 1.05, 2)))
     if q.get("block-20"):
         filas.append(("Block hueco de concreto 20x20x40 (material, 12.5 pza/m²)", "pza", math.ceil(q["block-20"] * 12.5 * 1.05)))
     if q.get("dala"):
