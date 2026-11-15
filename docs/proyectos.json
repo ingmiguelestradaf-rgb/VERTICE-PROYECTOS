@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-15-casa-nordica",
+  "fecha": "2026-11-15",
+  "nombre": "Casa Fiordo",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Nórdica (Escandinava)",
+  "area": 334.9,
+  "terreno": 300.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-14-casa-contemporanea",
   "fecha": "2026-11-14",
   "nombre": "Casa Umbral",
