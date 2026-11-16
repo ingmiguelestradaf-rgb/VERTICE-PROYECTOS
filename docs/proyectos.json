@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-16-casa-parametrica",
+  "fecha": "2026-11-16",
+  "nombre": "Casa Duna",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Paramétrica / Orgánica",
+  "area": 363.4,
+  "terreno": 400.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-15-casa-nordica",
   "fecha": "2026-11-15",
   "nombre": "Casa Fiordo",
