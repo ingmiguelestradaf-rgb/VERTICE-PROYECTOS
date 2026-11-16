@@ -234,7 +234,7 @@ def calcular(V, blq, lays, t_x=15, t_y=15):
             # cubierta inclinada sobre la losa de azotea: la losa queda plana y protegida, sin relleno ni entortado
             # para pendientes; se suma el peso de la cubierta (en proyección horizontal)
             azo.capas = [c for c in azo.capas if not c.nombre.startswith(("Relleno", "Entortado"))]
-            azo.capas.append(K.Capa(f"Cubierta inclinada de {cl['material']} con estructura ligera (proy. horizontal)", 0.0, 0, cl["cm"]))
+            azo.capas.append(K.Capa(f"{'Bóveda' if cl.get('tipo') == 'curva' else 'Cubierta inclinada'} de {cl['material']} con estructura ligera (proy. horizontal)", 0.0, 0, cl["cm"]))
         return (ent, azo, K.combinaciones_ntc(ent.carga_muerta, cv_ent[0], cv_ent[1])["envolvente"],
                 K.combinaciones_ntc(azo.carga_muerta, cv_azo[0], cv_azo[1])["envolvente"])
 

@@ -348,7 +348,8 @@ def pluvial(dx, proy, blq, ox, oy, n_baj, pts=None):
         dx.rect(x - al, y - al, w + 2 * al, d + 2 * al, "IS-PLUVIAL")
         for p in pts:
             dx.circulo(p, 0.2, "IS-PLUVIAL")
-        dx.texto((x + w / 2, y + d / 2 + 0.4), f"CUBIERTA INCLINADA {cl['pend'] * 100:.0f} %: CANALÓN PERIMETRAL A BAP",
+        dx.texto((x + w / 2, y + d / 2 + 0.4), ("BÓVEDA DE LÁMINA: CANALÓN PERIMETRAL A BAP" if cl.get("tipo") == "curva" else
+                  f"CUBIERTA INCLINADA {cl['pend'] * 100:.0f} %: CANALÓN PERIMETRAL A BAP"),
                  max(0.2, w / 60), "I-TEXTO", centrado=True)
         return
     for p in pts:

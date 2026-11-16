@@ -413,6 +413,16 @@ def cubierta_inclinada(dx, blq, corr, r_est, n_baj, gas_xy, ox, oy, sur_primero)
         else:
             dx.linea(((X0 + X1) / 2, Y0), ((X0 + X1) / 2, Y1), "A-MUROS")
             flechas = [((X0 + X1) / 2, (Y0 + Y1) / 2, -1, 0), ((X0 + X1) / 2, (Y0 + Y1) / 2, 1, 0)]
+    elif cub == "curva":
+        # bóveda: clave a lo largo de las generatrices y escurrimiento hacia los dos aleros que reciben los arcos
+        # (antes se trataba como una agua con una sola flecha al sur, contraria a las BAP del norte)
+        span = min(w, d) / 2
+        if layout.boveda_arcos_en_x(blq):
+            dx.linea(((X0 + X1) / 2, Y0), ((X0 + X1) / 2, Y1), "A-MUROS")
+            flechas = [((X0 + X1) / 2, (Y0 + Y1) / 2, -1, 0), ((X0 + X1) / 2, (Y0 + Y1) / 2, 1, 0)]
+        else:
+            dx.linea((X0, (Y0 + Y1) / 2), (X1, (Y0 + Y1) / 2), "A-MUROS")
+            flechas = [((X0 + X1) / 2, (Y0 + Y1) / 2, 0, -1), ((X0 + X1) / 2, (Y0 + Y1) / 2, 0, 1)]
     else:
         span = min(w, d)
         flechas = [((X0 + X1) / 2, (Y0 + Y1) / 2, 0, -1)]
@@ -426,10 +436,17 @@ def cubierta_inclinada(dx, blq, corr, r_est, n_baj, gas_xy, ox, oy, sur_primero)
             dx.linea(p1, (p1[0] - ux * 0.3 - uy * s_ * 0.15, p1[1] - uy * 0.3 + ux * s_ * 0.15), "A-MUROS")
         # texto junto a la flecha, sin encimarse con la cumbrera ni con las otras flechas
         mx, my = (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2
+        et = "ESCURRE" if cub == "curva" else f"PEND. {pend:.0f} %"
         if uy:
-            dx.texto((mx + 0.25, my), f"PEND. {pend:.0f} %", 0.15, "A-TEXTO", rot=90, centrado=True)
+            dx.texto((mx + 0.25, my), et, 0.15, "A-TEXTO", rot=90, centrado=True)
         else:
-            dx.texto((mx, my + 0.25), f"PEND. {pend:.0f} %", 0.15, "A-TEXTO", centrado=True)
+            dx.texto((mx, my + 0.25), et, 0.15, "A-TEXTO", centrado=True)
+    if cub == "curva":
+        cx_, cy_ = (X0 + X1) / 2, (Y0 + Y1) / 2
+        if layout.boveda_arcos_en_x(blq):
+            dx.texto((cx_ - 0.25, cy_ + (Y1 - cy_) / 2), f"CLAVE DE BÓVEDA (FLECHA {rr:.2f} m)", 0.13, "A-TEXTO", rot=90, centrado=True)
+        else:
+            dx.texto((cx_ + (X1 - cx_) / 2, cy_ + 0.25), f"CLAVE DE BÓVEDA (FLECHA {rr:.2f} m)", 0.13, "A-TEXTO", centrado=True)
     for p in INS.puntos_bap(blq, n_baj, ox, oy, sur_primero):
         dx.circulo(p, 0.12, "A-MUROS")
         dx.texto((p[0] + 0.2, p[1] - 0.35 if p[1] > y + d / 2 else p[1] + 0.25), "BAP Ø100", 0.15, "A-TEXTO")
@@ -438,8 +455,11 @@ def cubierta_inclinada(dx, blq, corr, r_est, n_baj, gas_xy, ox, oy, sur_primero)
         dx.circulo((gx, gy), 0.55, "A-MUROS")
         dx.texto((min(gx, X1 - 2.6), gy + 0.75), "TANQUE ESTACIONARIO GAS LP EN PATIO (NPT ±0.00)", 0.14, "A-TEXTO", centrado=True)
     mat = cl["material"].upper()
-    notas = [f"CUBIERTA {cub.replace('_', ' ').upper()} DE {mat}, PENDIENTE {pend:.0f} %, SOBRE TRIPLAY 16 mm, FIELTRO ASFÁLTICO 30 lb",
-             "Y ARMADURA LIGERA DE PTR GALVANIZADO ANCLADA A LA LOSA DE AZOTEA (CÁMARA VENTILADA BAJO LA CUBIERTA)",
+    notas = ([f"BÓVEDA REBAJADA DE {mat} ENGARGOLADA Y ROLADA, FLECHA {rr:.2f} m, CON AISLANTE TÉRMICO",
+              "SOBRE ARCOS DE PTR ROLADO GALVANIZADO ANCLADOS A LA LOSA DE AZOTEA (CÁMARA VENTILADA BAJO LA CUBIERTA)"]
+             if cub == "curva" else
+             [f"CUBIERTA {cub.replace('_', ' ').upper()} DE {mat}, PENDIENTE {pend:.0f} %, SOBRE TRIPLAY 16 mm, FIELTRO ASFÁLTICO 30 lb",
+              "Y ARMADURA LIGERA DE PTR GALVANIZADO ANCLADA A LA LOSA DE AZOTEA (CÁMARA VENTILADA BAJO LA CUBIERTA)"]) + [
              f"ALERO DE {al:.2f} m CON CANALÓN PERIMETRAL DE LÁMINA GALV. CAL. 24 A BAJADAS PLUVIALES Ø100",
              f"PESO DE CUBIERTA {cl['cm']} kg/m² INCLUIDO EN LA CARGA MUERTA DE AZOTEA (VER MEMORIA)",
              f"LOSA DE AZOTEA h = {r_est['losas'][-1]['h']} cm, PLANA, CON IMPERMEABILIZANTE APP 4 mm (VER PLANO E-02)"]
@@ -511,7 +531,13 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
         gable = (lado in ("S", "N") and not ridge_x) or (lado in ("E", "O") and ridge_x)
         al = alero(corr)
         if cub == "curva":
-            dx.polilinea([(ox - al + (L + 2 * al) * i / 20, oy + ztop + rr * 4 * (i / 20) * (1 - i / 20)) for i in range(21)], F)
+            # bóveda de cañón: el arco sólo se ve en las fachadas que miran los arcos; en las otras, la generatriz de la
+            # clave a +flecha (antes se dibujaba un arco en las cuatro fachadas)
+            if (lado in ("S", "N")) == layout.boveda_arcos_en_x(blq):
+                dx.polilinea([(ox - al + (L + 2 * al) * i / 20, oy + ztop + rr * 4 * (i / 20) * (1 - i / 20)) for i in range(21)], F)
+            else:
+                dx.polilinea([(ox - al, oy + ztop), (ox - al, oy + ztop + rr), (ox + L + al, oy + ztop + rr),
+                              (ox + L + al, oy + ztop)], F)
         elif cub.startswith("una"):
             # una agua: baja al sur (y0) y sube al norte, igual que en los renders y en AP-03
             if lado in ("S", "N"):
@@ -670,7 +696,7 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
             dx.linea((ox + _u(blq, lado, PG["x1"]), oy + zp), (ox + _u(blq, lado, PG["x0"]), oy + zp), F)
             for xx in PG["postes"]:
                 dx.rect(ox + _u(blq, lado, xx + pp), oy, pp, zp, F)
-            dx.texto((ox + L / 2, oy + zp + hv + 0.12), "PÉRGOLA DE MADERA TERMOTRATADA (VUELO 2.50 M)", 0.12,
+            dx.texto((ox + L / 2, oy + zp + hv + 0.12), f"PÉRGOLA DE {layout.material_rasgo(materiales, ('pérgola', 'pergola'), 'madera termotratada').upper()} (VUELO 2.50 M)", 0.12,
                      "A-TEXTO", centrado=True)
         elif lado in ("E", "O"):
             ua, ub = sorted((_u(blq, lado, PG["y0"]), _u(blq, lado, PG["y1"])))
@@ -799,7 +825,19 @@ def corte(dx, blq, lays, r_est, eje, pos, ox, oy, titulo, corr=None):
         rr = cl["pend"] * min(blq["w"], blq["d"]) / (1 if una else 2)
         ridge_x = blq["w"] >= blq["d"]
         perp = (eje == "x") == ridge_x                      # cumbrera perpendicular al plano de corte
-        if una:
+        if tipo == "curva":
+            # bóveda rebajada: arco completo si el corte es paralelo a los arcos; si no, la generatriz cortada a la
+            # altura que corresponde a `pos` (antes se dibujaba como dos aguas o como losa plana con "PEND. 10 %")
+            if (eje == "y") == layout.boveda_arcos_en_x(blq):
+                dx.polilinea([(ox - al + (L + 2 * al) * i / 20, oy + z + rr * 4 * (i / 20) * (1 - i / 20)) for i in range(21)], C_)
+            else:
+                zc = layout.boveda_z(blq, al, rr, **({"x": pos} if eje == "x" else {"y": pos}))
+                dx.rect(ox - al, oy + z + zc - 0.04, L + 2 * al, 0.08, C_)
+                dx.linea((ox - al, oy + z), (ox - al, oy + z + zc), C_)
+                dx.linea((ox + L + al, oy + z), (ox + L + al, oy + z + zc), C_)
+            dx.texto((ox + L / 2, oy + z + rr + 0.25), f"BÓVEDA DE {cl['material'].upper()} SOBRE ARCOS DE PTR ROLADO "
+                     f"(FLECHA {rr:.2f} m)", 0.13, "A-TEXTO", centrado=True)
+        elif una:
             if eje == "x":
                 pts = [(-al, z), (L + al, z + rr)]
             else:
@@ -820,8 +858,9 @@ def corte(dx, blq, lays, r_est, eje, pos, ox, oy, titulo, corr=None):
             # en cuatro aguas el faldón cortado sólo existe entre las limatesas (antes salía por fuera de la cubierta)
             a_ = -al + (k + al) * zc / rr if tipo.startswith("cuatro") else -al
             dx.rect(ox + a_, oy + z + zc - 0.04, L - 2 * a_, 0.08, C_)
-        dx.texto((ox + L / 2, oy + z + rr + 0.25), f"CUBIERTA DE {cl['material'].upper()} SOBRE ARMADURA DE PTR "
-                 f"(PEND. {cl['pend'] * 100:.0f} %)", 0.13, "A-TEXTO", centrado=True)
+        if tipo != "curva":
+            dx.texto((ox + L / 2, oy + z + rr + 0.25), f"CUBIERTA DE {cl['material'].upper()} SOBRE ARMADURA DE PTR "
+                     f"(PEND. {cl['pend'] * 100:.0f} %)", 0.13, "A-TEXTO", centrado=True)
     else:
         # pretil (misma altura que fachadas A-05, AP-03 y render: layout.altura_pretil)
         hp = blq.get("pretil") or 0.6

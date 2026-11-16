@@ -537,6 +537,40 @@ def vuelo_alero(rasgos):
     return 0.15 if "sin_alero" in rasgos else 0.6
 
 
+def boveda_arcos_en_x(blq):
+    """Cubierta curva (bóveda rebajada de lámina): los arcos salvan el lado corto del bloque y las generatrices corren
+    a lo largo del lado largo, igual que el render (ridge_x = w >= d). True si el perfil curvo se ve en las fachadas
+    sur/norte (arcos en x); False si se ve en las laterales oriente/poniente."""
+    return blq["w"] < blq["d"]
+
+
+def boveda_z(blq, al, flecha, x=None, y=None):
+    """Altura de la bóveda sobre el nivel de arranque (lecho alto de la losa de azotea) en la coordenada absoluta x
+    (si los arcos van en x) o y (si van en y); parábola con flecha `flecha` al centro y 0 en el borde del alero."""
+    if boveda_arcos_en_x(blq):
+        a, L, u = blq["x"] - al, blq["w"] + 2 * al, x
+    else:
+        a, L, u = blq["y"] - al, blq["d"] + 2 * al, y
+    if u is None or L <= 0:
+        return flecha
+    t = min(1.0, max(0.0, (u - a) / L))
+    return flecha * 4 * t * (1 - t)
+
+
+def material_rasgo(materiales, claves, defecto):
+    """Material de un rasgo según el texto de `materiales` del spec (el renglón que menciona alguna de `claves`).
+    Antes la celosía y la pérgola se rotulaban y presupuestaban siempre de madera aunque el spec pidiera GRC o aluminio."""
+    items = materiales if isinstance(materiales, (list, tuple)) else (materiales or "").split(";")
+    for item in items:
+        t = item.lower()
+        if any(k in t for k in claves):
+            for k, nombre in (("grc", "GRC prefabricado"), ("aluminio", "aluminio"), ("madera", "madera termotratada"),
+                              ("concreto", "concreto"), ("acero", "acero")):
+                if k in t:
+                    return nombre
+    return defecto
+
+
 def alero(blq, defecto):
     """Vuelo del alero de la cubierta inclinada: el de `cubierta_ligera` (generar.py, 0.90 m con alero_amplio, 0.60 m
     sin él) que usan el ejecutivo, el presupuesto y la pluvial; `defecto` sólo para bloques sin cubierta ligera.

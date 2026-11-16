@@ -156,15 +156,29 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None, materiales=""
     cl = blq.get("cubierta_ligera")
     if cl:
         al = cl["alero"]
-        a_inc = (blq["w"] + 2 * al) * (blq["d"] + 2 * al) * math.sqrt(1 + cl["pend"] ** 2)
-        filas.append((f"Cubierta {cl['tipo'].replace('_', ' ')} de {cl['material']} sobre armadura ligera de PTR galvanizado, "
-                      "triplay 16 mm y fieltro asfáltico (incluye alero, cumbrera y limatesas)", "m²", round(a_inc, 2)))
+        if cl["tipo"] == "curva":
+            # bóveda rebajada: desarrollo del arco parabólico (L·(1 + 8/3·(f/L)²)) por el largo de las generatrices;
+            # antes se cuantificaba como faldón plano con "cumbrera y limatesas" sobre triplay
+            from .. import layout as _lay
+            Lx, Ly = blq["w"] + 2 * al, blq["d"] + 2 * al
+            La, Lg = (Lx, Ly) if _lay.boveda_arcos_en_x(blq) else (Ly, Lx)
+            f_ = cl["pend"] * min(blq["w"], blq["d"]) / 2
+            a_inc = La * (1 + 8 / 3 * (f_ / La) ** 2) * Lg
+            filas.append((f"Bóveda rebajada de {cl['material']} engargolada y rolada (flecha {f_:.2f} m) con aislante térmico, "
+                          "sobre arcos de PTR rolado galvanizado anclados a la losa de azotea (incluye alero y remates)",
+                          "m²", round(a_inc, 2)))
+        else:
+            a_inc = (blq["w"] + 2 * al) * (blq["d"] + 2 * al) * math.sqrt(1 + cl["pend"] ** 2)
+            filas.append((f"Cubierta {cl['tipo'].replace('_', ' ')} de {cl['material']} sobre armadura ligera de PTR galvanizado, "
+                          "triplay 16 mm y fieltro asfáltico (incluye alero, cumbrera y limatesas)", "m²", round(a_inc, 2)))
         filas.append(("Canalón perimetral de lámina galvanizada cal. 24 con bajadas", "ml",
                       round(2 * (blq["w"] + blq["d"] + 4 * al), 2)))
         if "porche" in cl["rasgos"]:
             filas.append(("Porche de acceso: postes 20x20 y vigas de madera termotratada con cubierta (1.80 m de fondo)", "lote", 1))
         if "pergola" in cl["rasgos"]:
-            filas.append((f"Pérgola posterior de madera termotratada ({blq['w']:.2f} x 2.50 m)", "lote", 1))
+            from .. import layout as _lay
+            mp = _lay.material_rasgo(mats, ("pérgola", "pergola"), "madera termotratada")
+            filas.append((f"Pérgola posterior de {mp} ({blq['w']:.2f} x 2.50 m)", "lote", 1))
     # rasgos de fachada que no forman parte de los generadores de obra negra (antes no se cuantificaban)
     from .. import layout
     if "pilotis" in rasgos and len(blq["niveles"]) > 1:
@@ -199,7 +213,8 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None, materiales=""
         if "celosia" in rasgos or "parteluces" in rasgos:
             # misma geometría que render, AP-03, A-05 y Blender (layout.parteluces); antes no se cuantificaban
             PL = layout.parteluces(blq, "celosia" in rasgos, lays[1][1])
-            desc = ("Celosía de madera termotratada (listones de 8 cm)" if "celosia" in rasgos else
+            mc = layout.material_rasgo(mats, ("celosía", "celosia"), "madera termotratada")
+            desc = (f"Celosía de {mc} (lamas de 8 cm)" if "celosia" in rasgos else
                     f"Parteluces verticales de concreto armado {PL['ancho'] * 100:.0f}x{(PL['y0'] - PL['y1']) * 100:.0f} cm "
                     "anclados a losas, aplanado y pintura")
             filas.append((f"{desc} en fachada principal, h = {ztop - zb1:.2f} m", "pza", len(PL["xs"])))

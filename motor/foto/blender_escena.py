@@ -304,9 +304,22 @@ for blq in E["bloques"]:
         al = blq.get("alero", 0.6)   # mismo vuelo que planos y ejecutivo (antes fijo en 0.60)
         X0, Y0, X1, Y1 = x0 - al, y0 - al, x0 + w + al, y0 + d + al
         span = min(w, d)
-        pend = {"dos_aguas_pronunciada": 0.8, "dos_aguas_baja": 0.18, "cuatro_aguas_baja": 0.18}.get(cub, 0.3)
+        pend = {"dos_aguas_pronunciada": 0.8, "dos_aguas_baja": 0.18, "cuatro_aguas_baja": 0.18, "curva": 0.2}.get(cub, 0.3)
         r = min(3.2, pend * span / 2)
-        if cub.startswith("una") or cub == "inclinada_irregular" or cub == "curva":
+        if cub == "curva":
+            # bóveda rebajada de cañón con la misma flecha y orientación que planos y render (arcos sobre el lado
+            # corto); antes Blender la modelaba como cubierta a una agua
+            n = 16
+            for i in range(n):
+                t0, t1 = i / n, (i + 1) / n
+                z0, z1 = top + r * 4 * t0 * (1 - t0), top + r * 4 * t1 * (1 - t1)
+                if w < d:
+                    xa, xb = X0 + (X1 - X0) * t0, X0 + (X1 - X0) * t1
+                    G.poli("techo", [(xa, Y0, z0), (xa, Y1, z0), (xb, Y1, z1), (xb, Y0, z1)])
+                else:
+                    ya, yb = Y0 + (Y1 - Y0) * t0, Y0 + (Y1 - Y0) * t1
+                    G.poli("techo", [(X0, ya, z0), (X1, ya, z0), (X1, yb, z1), (X0, yb, z1)])
+        elif cub.startswith("una") or cub == "inclinada_irregular":
             G.poli("techo", [(X0, Y0, top + 0.1), (X1, Y0, top + 0.1), (X1, Y1, top + r), (X0, Y1, top + r)])
             G.poli("muro", [(x0, y0, top), (x0, y0 + d, top), (x0, y0 + d, top + r * 0.95)])
             G.poli("muro", [(x0 + w, y0, top), (x0 + w, y0 + d, top + r * 0.95), (x0 + w, y0 + d, top)])

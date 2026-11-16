@@ -88,14 +88,15 @@ def _cubierta(E, blq, corr, ztop):
         n = 16
         for i in range(n):
             t0, t1 = i / n, (i + 1) / n
-            z0 = ztop + r * 4 * t0 * (1 - t0) * 2; z1 = ztop + r * 4 * t1 * (1 - t1) * 2
+            # flecha = altura_cubierta (misma que fachadas, cortes y A-04; antes el render la duplicaba)
+            z0 = ztop + r * 4 * t0 * (1 - t0); z1 = ztop + r * 4 * t1 * (1 - t1)
             if ridge_x:
                 ya, yb = Y0 + (Y1 - Y0) * t0, Y0 + (Y1 - Y0) * t1
                 E.q([(X0, ya, z0), (X1, ya, z0), (X1, yb, z1), (X0, yb, z1)], tc)
             else:
                 xa, xb = X0 + (X1 - X0) * t0, X0 + (X1 - X0) * t1
                 E.q([(xa, Y0, z0), (xa, Y1, z0), (xb, Y1, z1), (xb, Y0, z1)], tc)
-        return ztop + r * 2
+        return ztop + r
     if cub.startswith("una") or cub == "inclinada_irregular":
         zf, zb = ztop + 0.1, ztop + r
         if cub == "inclinada_irregular":

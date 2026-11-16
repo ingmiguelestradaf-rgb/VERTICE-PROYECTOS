@@ -349,7 +349,7 @@ def altura_cubierta(blq, corr):
     cub = corr["cubierta"]
     span = min(blq["w"], blq["d"])
     pend = {"dos_aguas": 0.30, "cuatro_aguas": 0.30, "dos_aguas_pronunciada": 0.80, "una_agua": 0.12,
-            "una_agua_baja": 0.08, "cuatro_aguas_baja": 0.18, "dos_aguas_baja": 0.18, "curva": 0.10,
+            "una_agua_baja": 0.08, "cuatro_aguas_baja": 0.18, "dos_aguas_baja": 0.18, "curva": 0.20,
             "inclinada_irregular": 0.15}.get(cub, 0)
     if blq["sistema"] == "acero" and pend == 0:
         pend = 0.05
@@ -391,8 +391,14 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
             frontal_gable = (lado == "S" and not ridge_x) or (lado == "E" and ridge_x)
             al = layout.alero(blq, 0.6 if "alero" in " ".join(corr["rasgos"]) or cub.startswith("cuatro") else 0.3)
             if cub == "curva":
-                pts = [(x0 - al + (L + 2 * al) * i / 20, oy + ztop + r * 4 * (i / 20) * (1 - i / 20)) for i in range(21)]
-                dx.polilinea(pts, "A-FACHADA")
+                # perfil de la bóveda sólo en las fachadas que miran los arcos; en las otras se ve la generatriz de la
+                # clave (antes se dibujaba un arco en las cuatro fachadas, imposible en una bóveda de cañón)
+                if (lado == "S") == layout.boveda_arcos_en_x(blq):
+                    pts = [(x0 - al + (L + 2 * al) * i / 20, oy + ztop + r * 4 * (i / 20) * (1 - i / 20)) for i in range(21)]
+                    dx.polilinea(pts, "A-FACHADA")
+                else:
+                    dx.polilinea([(x0 - al, oy + ztop), (x0 - al, oy + ztop + r), (x0 + L + al, oy + ztop + r),
+                                  (x0 + L + al, oy + ztop)], "A-FACHADA")
             elif cub.startswith("una"):
                 # Cubierta a una agua: baja al frente (sur, y0) y sube hacia el fondo (norte), como en los renders.
                 if lado == "S":
@@ -564,7 +570,14 @@ def corte(dx, proy, lays, corr, ox, oy):
             dx.polilinea([(ox + y0 - al, oy + ztop), (ox + y0 + L + al, oy + ztop), (ox + y0 + L + al, oy + ztop + r),
                           (ox + y0 - al, oy + ztop + 0.1)], "A-CORTE", True)
         elif cub == "curva":
-            dx.polilinea([(ox + y0 - al + (L + 2 * al) * i / 20, oy + ztop + r * 4 * (i / 20) * (1 - i / 20)) for i in range(21)], "A-CORTE")
+            # bóveda: el corte (plano y-z en xm) ve el arco sólo si los arcos van en y; si van en x corta la bóveda en
+            # una generatriz horizontal a la altura que le toca a xm (antes siempre dibujaba un arco)
+            if layout.boveda_arcos_en_x(blq):
+                zc = layout.boveda_z(blq, al, r, x=xm)
+                dx.polilinea([(ox + y0 - al, oy + ztop), (ox + y0 - al, oy + ztop + zc), (ox + y0 + L + al, oy + ztop + zc),
+                              (ox + y0 + L + al, oy + ztop)], "A-CORTE")
+            else:
+                dx.polilinea([(ox + y0 - al + (L + 2 * al) * i / 20, oy + ztop + r * 4 * (i / 20) * (1 - i / 20)) for i in range(21)], "A-CORTE")
         elif blq["w"] >= blq["d"]:
             # cumbrera paralela a x: el corte (plano y-z) corta el hastial → triángulo
             dx.polilinea([(ox + y0 - al, oy + ztop), (ox + y0 + L / 2, oy + ztop + r), (ox + y0 + L + al, oy + ztop)], "A-CORTE")
