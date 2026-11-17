@@ -173,14 +173,17 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None, materiales=""
                           "triplay 16 mm y fieltro asfáltico (incluye alero, cumbrera y limatesas)", "m²", round(a_inc, 2)))
         filas.append(("Canalón perimetral de lámina galvanizada cal. 24 con bajadas", "ml",
                       round(2 * (blq["w"] + blq["d"] + 4 * al), 2)))
-        if "porche" in cl["rasgos"]:
-            filas.append(("Porche de acceso: postes 20x20 y vigas de madera termotratada con cubierta (1.80 m de fondo)", "lote", 1))
         if "pergola" in cl["rasgos"]:
             from .. import layout as _lay
             mp = _lay.material_rasgo(mats, ("pérgola", "pergola"), "madera termotratada")
             filas.append((f"Pérgola posterior de {mp} ({blq['w']:.2f} x 2.50 m)", "lote", 1))
     # rasgos de fachada que no forman parte de los generadores de obra negra (antes no se cuantificaban)
     from .. import layout
+    if "porche" in rasgos or (cl and "porche" in cl["rasgos"]):
+        # porche de acceso: se dibuja en AP-03, A-05 y render con cualquier cubierta; antes sólo se presupuestaba con
+        # cubierta ligera inclinada, y en azoteas planas (p. ej. colonial con pretil) quedaba fuera del presupuesto
+        mpo = layout.material_rasgo(mats, ("portal", "porche"), "madera termotratada")
+        filas.append((f"Porche de acceso: postes 20x20 y vigas de {mpo} con cubierta (1.80 m de fondo)", "lote", 1))
     if "pilotis" in rasgos and len(blq["niveles"]) > 1:
         P = layout.pilotis(blq, lays[0][1])
         filas.append((f"Marquesina de concreto armado f'c = 250 kg/cm² e = {P['losa'] * 100:.0f} cm, vuelo {P['fondo']:.2f} m, "

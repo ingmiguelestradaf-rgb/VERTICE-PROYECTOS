@@ -949,9 +949,15 @@ def piso_general(materiales, nivel=0):
     tampoco distinguía un piso por nivel ("piso de concreto pulido en planta baja y piso de madera en planta alta")."""
     def humedo(m):
         return any(k in m.lower() for k in ("baño", "bano", "muro cortina"))
+    def seco(m):
+        # cláusula "piso de …" que remata con el recubrimiento de los locales húmedos ("piso de barro …, y azulejo de
+        # talavera en … baños"): se conserva la parte del piso. Antes la cláusula completa se descartaba por mencionar
+        # baños y la cédula caía en "Porcelanato 60x120 tono arena", un piso que el spec no pedía
+        return re.split(r",?\s+y\s+(?=(?:azulejo|porcelanato|cer[aá]mic|talavera|loseta)\w*\b)", m, flags=re.I)[0].strip()
     piso_g = next((m for m in materiales if m.lower().startswith("piso") and not humedo(m)),
+                  next((seco(m) for m in materiales if m.lower().startswith("piso") and not humedo(seco(m))),
                   next((m for m in materiales if "porcelanato" in m.lower() and not humedo(m)),
-                       next((m for m in materiales if "porcelanato" in m.lower()), "Porcelanato 60x120 tono arena")))
+                       next((m for m in materiales if "porcelanato" in m.lower()), "Porcelanato 60x120 tono arena"))))
     if re.search(r"planta (baja|alta)", piso_g, re.I):
         partes = [p_.strip() for p_ in re.split(r"\s+y\s+(?=piso\b)|,\s*(?=piso\b)", piso_g, flags=re.I) if p_.strip()]
         quiere = "planta alta" if nivel >= 1 else "planta baja"
