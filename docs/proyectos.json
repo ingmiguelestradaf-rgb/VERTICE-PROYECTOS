@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-17-casa-colonial-mexicana",
+  "fecha": "2026-11-17",
+  "nombre": "Casa Cantera",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Colonial mexicana",
+  "area": 240.6,
+  "terreno": 180.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-16-casa-parametrica",
   "fecha": "2026-11-16",
   "nombre": "Casa Duna",
