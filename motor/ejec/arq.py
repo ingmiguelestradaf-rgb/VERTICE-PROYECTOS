@@ -953,7 +953,14 @@ def piso_general(materiales, nivel=0):
         # cláusula "piso de …" que remata con el recubrimiento de los locales húmedos ("piso de barro …, y azulejo de
         # talavera en … baños"): se conserva la parte del piso. Antes la cláusula completa se descartaba por mencionar
         # baños y la cédula caía en "Porcelanato 60x120 tono arena", un piso que el spec no pedía
-        return re.split(r",?\s+y\s+(?=(?:azulejo|porcelanato|cer[aá]mic|talavera|loseta)\w*\b)", m, flags=re.I)[0].strip()
+        # También quita el recubrimiento de baños cuando va entre comas a mitad de la cláusula ("piso de concreto pulido
+        # en planta baja, porcelanato gris en baños y piso de ingeniería en …"): antes quedaba "piso de concreto
+        # pulido sellado, porcelanato gris en baños" en la cédula de todos los locales secos, el presupuesto lo
+        # cotizaba como porcelanato y se perdía el piso del otro nivel.
+        kw = r"(?=(?:piso|azulejo|porcelanato|cer[aá]mic|talavera|loseta)\w*\b)"
+        partes = [p_.strip() for p_ in re.split(r",?\s+y\s+" + kw + r"|,\s*" + kw, m, flags=re.I) if p_.strip()]
+        secas = [p_ for p_ in partes if not humedo(p_)]
+        return " y ".join(secas) if secas else partes[0]
     piso_g = next((m for m in materiales if m.lower().startswith("piso") and not humedo(m)),
                   next((seco(m) for m in materiales if m.lower().startswith("piso") and not humedo(seco(m))),
                   next((m for m in materiales if "porcelanato" in m.lower() and not humedo(m)),

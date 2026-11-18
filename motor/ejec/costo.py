@@ -217,9 +217,19 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None, materiales=""
             # misma geometría que render, AP-03, A-05 y Blender (layout.parteluces); antes no se cuantificaban
             PL = layout.parteluces(blq, "celosia" in rasgos, lays[1][1])
             mc = layout.material_rasgo(mats, ("celosía", "celosia"), "madera termotratada")
-            desc = (f"Celosía de {mc} (lamas de 8 cm)" if "celosia" in rasgos else
-                    f"Parteluces verticales de concreto armado {PL['ancho'] * 100:.0f}x{(PL['y0'] - PL['y1']) * 100:.0f} cm "
-                    "anclados a losas, aplanado y pintura")
+            # parteluces con el material del spec (antes siempre "de concreto armado … aplanado y pintura" aunque se
+            # pidieran de aluminio extruido o acero)
+            mpl = layout.material_rasgo(mats, ("parteluz", "parteluces"), "concreto")
+            secc = f"{PL['ancho'] * 100:.0f}x{(PL['y0'] - PL['y1']) * 100:.0f} cm"
+            if mpl == "aluminio":
+                desc_pl = f"Parteluces verticales de aluminio extruido {secc} anclados a losas con herrajes de acero inoxidable"
+            elif mpl == "acero":
+                desc_pl = f"Parteluces verticales de acero {secc} anclados a losas, primario anticorrosivo y pintura epóxica"
+            elif mpl == "madera termotratada":
+                desc_pl = f"Parteluces verticales de madera termotratada {secc} sobre bastidor metálico anclado a losas"
+            else:
+                desc_pl = f"Parteluces verticales de concreto armado {secc} anclados a losas, aplanado y pintura"
+            desc = f"Celosía de {mc} (lamas de 8 cm)" if "celosia" in rasgos else desc_pl
             filas.append((f"{desc} en fachada principal, h = {ztop - zb1:.2f} m", "pza", len(PL["xs"])))
         if "marco" in rasgos:
             fx0 = layout.inicio_marco(lays[1][1], blq["x"], blq["w"])
@@ -228,8 +238,15 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None, materiales=""
             # forrado de madera)
             acab_m = ("forrado de madera termotratada con sellador UV" if any("marco" in m_ and "madera" in m_ for m_ in mats.split(";"))
                       else "aplanado y pintura en color de acento")
-            filas.append(("Marco volumétrico de concreto armado 30 x 90 cm en planta alta de la fachada principal, "
-                          f"{acab_m}", "ml", round(largo, 2)))
+            # marco de acero cuando el spec lo pide (antes siempre de concreto armado aunque fuera "marco de perfiles
+            # de acero"; misma geometría 30 x 90 cm)
+            if any("marco" in m_.lower() and "acero" in m_.lower() and "concreto" not in m_.lower() for m_ in mats.split(";")):
+                filas.append(("Marco volumétrico de perfiles de acero estructural (sección cajón 30 x 90 cm, placa soldada) "
+                              "en planta alta de la fachada principal, anclado a losas y castillos, primario anticorrosivo "
+                              "y pintura epóxica en color de acento", "ml", round(largo, 2)))
+            else:
+                filas.append(("Marco volumétrico de concreto armado 30 x 90 cm en planta alta de la fachada principal, "
+                              f"{acab_m}", "ml", round(largo, 2)))
     if "ventana_corrida" in rasgos and len(blq["niveles"]) > 1:
         # sólo los paños entre ventanas (las ventanas ya están en la cancelería), con la altura de la ventana (1.45 m)
         area = 0.0

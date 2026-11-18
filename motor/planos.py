@@ -517,7 +517,9 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
                 fa, fb = layout.inicio_marco(nivel_vanos[id(zs[1][2])], blq["x"], L), L + 0.05
                 dx.rect(x0 + fa, oy + z0 + zb1 - 0.3, fb - fa, ztop - z0 - zb1 + 0.3, "A-FACHADA")
                 dx.rect(x0 + fa + 0.3, oy + z0 + zb1, fb - fa - 0.6, ztop - z0 - zb1 - 0.3, "A-FACHADA")
-        dx.texto((x0 + 0.3, oy + ztop + 0.3), f"NPT +{ztop:.2f}", max(0.2, L / 80), "COTAS")
+        # nivel de losa de azotea (NLA, como en A-05) fuera del paño y por debajo del arranque de la cubierta: antes
+        # decía "NPT" y se encimaba con la bóveda, el alero o el pretil sobre la esquina poniente de la fachada
+        dx.texto((x0 + L + 1.0, oy + ztop - 0.25), f"NLA +{ztop:.2f}", max(0.2, L / 80), "COTAS")
     dx.texto((ox + Lt / 2, oy - max(1.5, Lt / 25)), f"FACHADA {'PRINCIPAL (SUR)' if lado == 'S' else 'LATERAL (ORIENTE)'}",
              max(0.35, Lt / 50), "A-TEXTO", centrado=True)
 
