@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-18-casa-high-tech",
+  "fecha": "2026-11-18",
+  "nombre": "Casa Nodo",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "High-Tech",
+  "area": 268.1,
+  "terreno": 200.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-17-casa-colonial-mexicana",
   "fecha": "2026-11-17",
   "nombre": "Casa Cantera",
