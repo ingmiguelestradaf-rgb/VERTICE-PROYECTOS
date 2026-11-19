@@ -506,6 +506,21 @@ def volado(blq, rasgos=(), vanos=None):
     return dict(x0=round(x0 - 0.30, 3), x1=round(x1, 3), fondo=VOLADO_FONDO, peralte=VOLADO_PERALTE)
 
 
+def jardinera(blq, vanos_pb):
+    """Tramo (a, b) de la jardinera de fachada principal: el paño de planta baja más ancho libre de vanos sur (±0.30 m),
+    o None si mide menos de 1.00 m (misma regla que render, A-05 y presupuesto, que en ese caso no la dibujan ni la
+    cuantifican)."""
+    ocup = sorted((v["a"] - 0.3, v["b"] + 0.3) for v in vanos_pb if v.get("lado") == "S")
+    libres, cur = [], blq["x"]
+    for a_, b_ in ocup:
+        if a_ > cur:
+            libres.append((cur, a_))
+        cur = max(cur, b_)
+    libres.append((cur, blq["x"] + blq["w"]))
+    ja, jb = max(libres, key=lambda h_: h_[1] - h_[0])
+    return (ja, jb) if jb - ja >= 1.0 else None
+
+
 def banda_corrida(vanos_nivel):
     """Tramo (a, b) de la banda corrida de cancelería en la fachada sur de un nivel superior, o None."""
     vs = [(v["a"], v["b"]) for v in vanos_nivel if v["tipo"] == "ventana" and v.get("lado") == "S"]

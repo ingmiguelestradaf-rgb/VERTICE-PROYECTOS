@@ -95,6 +95,10 @@ def construir(fecha, spec=None, salida=SALIDA, privado=PRIVADO, ejecutivo=True):
     mats = (spec.get("materiales") or corr["materiales"]).lower()
     for blq in proy["bloques"]:
         blq["pretil"] = layout.altura_pretil(corr["cubierta"])
+        if blq["sistema"] == "mamposteria":
+            # capacidad del tanque de gas LP para el presupuesto, igual que instalaciones.calcular (antes sólo se fijaba con
+            # cubierta inclinada: en azotea plana el presupuesto cotizaba 300 L aunque la memoria pidiera 500 L)
+            blq["gas_L"] = "300 L" if plan["terreno"]["area"] < 300 else "500 L"
         if blq["sistema"] == "mamposteria" and corr["cubierta"] not in ("plana", "plana_pretil") \
                 and planos.altura_cubierta(blq, corr) > 0:
             teja = "teja" in mats
@@ -105,7 +109,6 @@ def construir(fecha, spec=None, salida=SALIDA, privado=PRIVADO, ejecutivo=True):
                                           pend=round(planos.altura_cubierta(blq, corr) / span, 3),
                                           rasgos=[r_ for r_ in corr["rasgos"] if r_ in ("porche", "pergola")])
             # tanque de gas LP a nivel de patio posterior, junto a la colindancia oriente y a >= 3 m de la fachada
-            blq["gas_L"] = "300 L" if plan["terreno"]["area"] < 300 else "500 L"   # igual que instalaciones.calcular
             libre = plan["terreno"]["fondo"] - (blq["y"] + blq["d"])
             blq["tanque_gas"] = [round(blq["x"] + blq["w"] - 0.6, 2),
                                  round(blq["y"] + blq["d"] + max(1.2, min(3.6, libre - 1.0)), 2)]
@@ -142,6 +145,14 @@ def construir(fecha, spec=None, salida=SALIDA, privado=PRIVADO, ejecutivo=True):
     a_terreno = t["frente"] * t["fondo"]
     ests = [estructura.predimensionar(b, lays[i], proy["bloques"]) for i, b in enumerate(proy["bloques"])]
     rev = revision.revisar(proy, lays)
+    # rasgos pedidos en el spec que la fachada no admite: antes se omitían en silencio (p. ej. jardinera en un frente
+    # ocupado por cochera doble, acceso y ventana) y el concepto o el dictamen podían describir algo que no se dibuja
+    for i, blq in enumerate(proy["bloques"]):
+        if "jardinera" in corr["rasgos"] and lays[i] and layout.jardinera(blq, lays[i][0][1]) is None:
+            rev["observaciones"].append(dict(nivel=blq["nombre"], tipo="aviso", mensaje=(
+                "Rasgo 'jardinera' omitido: la fachada principal de planta baja no tiene un paño libre de vanos ≥ 1.00 m "
+                "(no se dibuja ni se presupuesta).")))
+            rev["avisos"] += 1
     proy["_ci"] = plan["tipologia"] != "casa"
     ins = inst.calcular(proy, plan, lays, area_total)
     datos = dict(proyecto=nombre.upper(), clave=clave, fecha=fecha.isoformat())
