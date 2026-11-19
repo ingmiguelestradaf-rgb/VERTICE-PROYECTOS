@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-19-casa-minimalista",
+  "fecha": "2026-11-19",
+  "nombre": "Casa Línea",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Minimalista",
+  "area": 334.9,
+  "terreno": 300.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-18-casa-high-tech",
   "fecha": "2026-11-18",
   "nombre": "Casa Nodo",
