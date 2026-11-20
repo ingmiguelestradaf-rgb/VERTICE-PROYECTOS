@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-20-casa-industrial",
+  "fecha": "2026-11-20",
+  "nombre": "Casa Fundición",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Industrial",
+  "area": 363.4,
+  "terreno": 400.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-19-casa-minimalista",
   "fecha": "2026-11-19",
   "nombre": "Casa Línea",
