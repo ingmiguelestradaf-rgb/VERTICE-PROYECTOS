@@ -153,6 +153,16 @@ def construir(fecha, spec=None, salida=SALIDA, privado=PRIVADO, ejecutivo=True):
                 "Rasgo 'jardinera' omitido: la fachada principal de planta baja no tiene un paño libre de vanos ≥ 1.00 m "
                 "(no se dibuja ni se presupuesta).")))
             rev["avisos"] += 1
+        if "muro_acento" in corr["rasgos"] and lays[i] and layout.muro_acento(blq, [n_[1] for n_ in lays[i]]) is None:
+            rev["observaciones"].append(dict(nivel=blq["nombre"], tipo="aviso", mensaje=(
+                "Rasgo 'muro_acento' omitido: la fachada principal no tiene un paño ciego ≥ 0.90 m en toda la altura "
+                "(no se dibuja ni se presupuesta).")))
+            rev["avisos"] += 1
+        if "estructura_aparente" in corr["rasgos"] and blq["sistema"] == "mamposteria":
+            rev["observaciones"].append(dict(nivel=blq["nombre"], tipo="aviso", mensaje=(
+                "Rasgo 'estructura_aparente' omitido: en mampostería confinada no hay marcos que dejar aparentes "
+                "(sólo se dibuja con marcos de concreto o acero).")))
+            rev["avisos"] += 1
     proy["_ci"] = plan["tipologia"] != "casa"
     ins = inst.calcular(proy, plan, lays, area_total)
     datos = dict(proyecto=nombre.upper(), clave=clave, fecha=fecha.isoformat())

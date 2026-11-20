@@ -169,10 +169,19 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None, materiales=""
                           "m²", round(a_inc, 2)))
         else:
             a_inc = (blq["w"] + 2 * al) * (blq["d"] + 2 * al) * math.sqrt(1 + cl["pend"] ** 2)
-            filas.append((f"Cubierta {cl['tipo'].replace('_', ' ')} de {cl['material']} sobre armadura ligera de PTR galvanizado, "
-                          "triplay 16 mm y fieltro asfáltico (incluye alero, cumbrera y limatesas)", "m²", round(a_inc, 2)))
-        filas.append(("Canalón perimetral de lámina galvanizada cal. 24 con bajadas", "ml",
-                      round(2 * (blq["w"] + blq["d"] + 4 * al), 2)))
+            # remates y base según el tipo: una agua no tiene cumbrera ni limatesas, y la lámina va sobre largueros con
+            # aislante (antes toda cubierta inclinada se describía con triplay, fieltro, cumbrera y limatesas)
+            remates = "alero, caballete y remates laterales" if cl["tipo"] == "una_agua" else "alero, cumbrera y limatesas"
+            base = ("largueros de PTR galvanizado con aislante térmico" if cl["material"] == "lámina"
+                    else "armadura ligera de PTR galvanizado, triplay 16 mm y fieltro asfáltico")
+            filas.append((f"Cubierta {cl['tipo'].replace('_', ' ')} de {cl['material']} sobre {base} (incluye {remates})",
+                          "m²", round(a_inc, 2)))
+        if cl["tipo"] == "una_agua":
+            # una agua: canalón sólo en el alero bajo (fachada principal), donde nacen las bajadas pluviales
+            filas.append(("Canalón de lámina galvanizada cal. 24 en alero bajo con bajadas", "ml", round(blq["w"] + 2 * al, 2)))
+        else:
+            filas.append(("Canalón perimetral de lámina galvanizada cal. 24 con bajadas", "ml",
+                          round(2 * (blq["w"] + blq["d"] + 4 * al), 2)))
         if "pergola" in cl["rasgos"]:
             from .. import layout as _lay
             mp = _lay.material_rasgo(mats, ("pérgola", "pergola"), "madera termotratada")
@@ -210,6 +219,17 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None, materiales=""
             filas.append(("Jardinera de mampostería de piedra de la región en fachada principal, 0.60 m de fondo y 0.50 m "
                           "de alto, con impermeabilizante interior, dren y tierra preparada (incluye plantas)", "ml",
                           round(jb - ja - 0.2, 2)))
+    if "muro_acento" in rasgos:
+        # muro de acento (piedra, ladrillo…) en el paño ciego más ancho de la fachada principal, en toda la altura:
+        # se dibujaba en render, AP-03 y A-05 pero no se cuantificaba
+        MA = layout.muro_acento(blq, [lays[k_][1] for k_ in range(len(lays))])
+        if MA:
+            ma_txt = next((m_.strip() for m_ in mats.split(";") if "acento" in m_), "")
+            mat_a = ("ladrillo aparente recocido" if "ladrillo" in ma_txt else "piedra de la región" if "piedra" in ma_txt
+                     else "ladrillo aparente recocido" if "ladrillo" in mats else "piedra de la región")
+            filas.append((f"Muro de acento: recubrimiento de {mat_a} en paño ciego de fachada principal, asentado con "
+                          "mortero y sellador hidrofugante", "m²",
+                          round((MA[1] - MA[0]) * sum(n["h"] for n in blq["niveles"]), 2)))
     if len(blq["niveles"]) > 1:
         zb1 = blq["niveles"][0]["h"]
         ztop = sum(n["h"] for n in blq["niveles"])

@@ -458,9 +458,15 @@ def cubierta_inclinada(dx, blq, corr, r_est, n_baj, gas_xy, ox, oy, sur_primero)
     notas = ([f"BÓVEDA REBAJADA DE {mat} ENGARGOLADA Y ROLADA, FLECHA {rr:.2f} m, CON AISLANTE TÉRMICO",
               "SOBRE ARCOS DE PTR ROLADO GALVANIZADO ANCLADOS A LA LOSA DE AZOTEA (CÁMARA VENTILADA BAJO LA CUBIERTA)"]
              if cub == "curva" else
-             [f"CUBIERTA {cub.replace('_', ' ').upper()} DE {mat}, PENDIENTE {pend:.0f} %, SOBRE TRIPLAY 16 mm, FIELTRO ASFÁLTICO 30 lb",
-              "Y ARMADURA LIGERA DE PTR GALVANIZADO ANCLADA A LA LOSA DE AZOTEA (CÁMARA VENTILADA BAJO LA CUBIERTA)"]) + [
-             f"ALERO DE {al:.2f} m CON CANALÓN PERIMETRAL DE LÁMINA GALV. CAL. 24 A BAJADAS PLUVIALES Ø100",
+             # lámina sobre largueros con aislante y canalón sólo en el alero bajo de una agua: mismo texto que el presupuesto
+             # (antes toda cubierta inclinada decía triplay, fieltro y canalón perimetral)
+             ([f"CUBIERTA {cub.replace('_', ' ').upper()} DE {mat}, PENDIENTE {pend:.0f} %, SOBRE LARGUEROS DE PTR GALVANIZADO",
+               "CON AISLANTE TÉRMICO, ANCLADOS A LA LOSA DE AZOTEA (CÁMARA VENTILADA BAJO LA CUBIERTA)"]
+              if cl["material"] == "lámina" else
+              [f"CUBIERTA {cub.replace('_', ' ').upper()} DE {mat}, PENDIENTE {pend:.0f} %, SOBRE TRIPLAY 16 mm, FIELTRO ASFÁLTICO 30 lb",
+               "Y ARMADURA LIGERA DE PTR GALVANIZADO ANCLADA A LA LOSA DE AZOTEA (CÁMARA VENTILADA BAJO LA CUBIERTA)"])) + [
+             (f"ALERO DE {al:.2f} m CON CANALÓN EN EL ALERO BAJO DE LÁMINA GALV. CAL. 24 A BAJADAS PLUVIALES Ø100" if cub == "una_agua"
+              else f"ALERO DE {al:.2f} m CON CANALÓN PERIMETRAL DE LÁMINA GALV. CAL. 24 A BAJADAS PLUVIALES Ø100"),
              f"PESO DE CUBIERTA {cl['cm']} kg/m² INCLUIDO EN LA CARGA MUERTA DE AZOTEA (VER MEMORIA)",
              f"LOSA DE AZOTEA h = {r_est['losas'][-1]['h']} cm, PLANA, CON IMPERMEABILIZANTE APP 4 mm (VER PLANO E-02)"]
     for i, t in enumerate(notas):

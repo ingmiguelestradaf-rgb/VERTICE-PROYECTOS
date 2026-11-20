@@ -521,6 +521,21 @@ def jardinera(blq, vanos_pb):
     return (ja, jb) if jb - ja >= 1.0 else None
 
 
+def muro_acento(blq, vanos_niveles):
+    """Tramo (a, b) del muro de acento: el paño ciego más ancho de la fachada principal, libre de vanos sur de TODOS los
+    niveles (±0.30 m), o None si mide menos de 0.90 m (misma regla que render, AP-03 y A-05, que en ese caso no lo
+    dibujan). `vanos_niveles` es la lista de vanos de cada nivel."""
+    ocup = sorted((v["a"] - 0.3, v["b"] + 0.3) for vs in vanos_niveles for v in vs if v.get("lado") == "S")
+    libres, cur = [], blq["x"]
+    for a_, b_ in ocup:
+        if a_ > cur:
+            libres.append((cur, a_))
+        cur = max(cur, b_)
+    libres.append((cur, blq["x"] + blq["w"]))
+    ma, mb = max(libres, key=lambda h_: h_[1] - h_[0])
+    return (ma, mb) if mb - ma >= 0.9 else None
+
+
 def banda_corrida(vanos_nivel):
     """Tramo (a, b) de la banda corrida de cancelería en la fachada sur de un nivel superior, o None."""
     vs = [(v["a"], v["b"]) for v in vanos_nivel if v["tipo"] == "ventana" and v.get("lado") == "S"]
