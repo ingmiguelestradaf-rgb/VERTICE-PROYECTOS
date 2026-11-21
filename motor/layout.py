@@ -607,3 +607,22 @@ def alero(blq, defecto):
     Antes AP-03 (fachadas 0.60, corte 0.40), el render (0.40/0.90) y Blender (0.60) dibujaban vuelos distintos."""
     cl = blq.get("cubierta_ligera")
     return cl["alero"] if cl and cl.get("alero") is not None else defecto
+
+
+# ---------------------------------------------------------------- cubierta inclinada irregular (deconstructivista)
+# Un solo plano de lámina con doble pendiente: punto bajo en la esquina surponiente del alero y alto en la nororiente.
+# Antes el render la modelaba como un cuadrilátero alabeado (no construible con lámina y separado de los muros), AP-03 y
+# A-05 dibujaban un perfil que no correspondía al render, los cortes y A-04 la trataban como una agua y las bajadas
+# pluviales iban al norte aunque la cubierta escurre al sur.
+IRR_KY, IRR_KX = 0.75, 0.25      # parte del desnivel total que se gana de sur a norte y de poniente a oriente
+
+
+def irregular_z(r, u, v):
+    """Altura del plano sobre la losa de azotea; u = 0..1 de poniente a oriente y v = 0..1 de sur a norte, medidos
+    entre bordes de alero. Va de 0.10 m (esquina SO) a r (esquina NE), igual que altura_cubierta."""
+    return 0.1 + (r - 0.1) * (IRR_KY * v + IRR_KX * u)
+
+
+def irregular_pend(blq, al, r):
+    """Pendientes (sur, poniente) en fracción del plano único de la cubierta irregular."""
+    return IRR_KY * (r - 0.1) / (blq["d"] + 2 * al), IRR_KX * (r - 0.1) / (blq["w"] + 2 * al)

@@ -423,11 +423,19 @@ def cubierta_inclinada(dx, blq, corr, r_est, n_baj, gas_xy, ox, oy, sur_primero)
         else:
             dx.linea((X0, (Y0 + Y1) / 2), (X1, (Y0 + Y1) / 2), "A-MUROS")
             flechas = [((X0 + X1) / 2, (Y0 + Y1) / 2, 0, -1), ((X0 + X1) / 2, (Y0 + Y1) / 2, 0, 1)]
+    elif cub == "inclinada_irregular":
+        # plano único con doble pendiente: escurre al sur (pendiente principal) y al poniente, al canalón del alero bajo
+        span = min(w, d)
+        py_, px_ = layout.irregular_pend(blq, al, rr)
+        flechas = [((X0 + X1) / 2, (Y0 + Y1) / 2, 0, -1, py_ * 100), ((X0 + X1) / 2, (Y0 + Y1) / 2 + 1.2, -1, 0, px_ * 100)]
     else:
         span = min(w, d)
         flechas = [((X0 + X1) / 2, (Y0 + Y1) / 2, 0, -1)]
     pend = rr / span * 100 if span else 0
-    for (px, py, ux, uy) in flechas:
+    if cub == "inclinada_irregular":
+        pend = py_ * 100
+    for fl in flechas:
+        (px, py, ux, uy), pend_f = fl[:4], (fl[4] if len(fl) > 4 else pend)
         L_ = 1.8
         p0 = (px + ux * 1.0, py + uy * 1.0)
         p1 = (px + ux * (1.0 + L_), py + uy * (1.0 + L_))
@@ -436,7 +444,7 @@ def cubierta_inclinada(dx, blq, corr, r_est, n_baj, gas_xy, ox, oy, sur_primero)
             dx.linea(p1, (p1[0] - ux * 0.3 - uy * s_ * 0.15, p1[1] - uy * 0.3 + ux * s_ * 0.15), "A-MUROS")
         # texto junto a la flecha, sin encimarse con la cumbrera ni con las otras flechas
         mx, my = (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2
-        et = "ESCURRE" if cub == "curva" else f"PEND. {pend:.0f} %"
+        et = "ESCURRE" if cub == "curva" else f"PEND. {pend_f:.0f} %"
         if uy:
             dx.texto((mx + 0.25, my), et, 0.15, "A-TEXTO", rot=90, centrado=True)
         else:
@@ -460,12 +468,14 @@ def cubierta_inclinada(dx, blq, corr, r_est, n_baj, gas_xy, ox, oy, sur_primero)
              if cub == "curva" else
              # lámina sobre largueros con aislante y canalón sólo en el alero bajo de una agua: mismo texto que el presupuesto
              # (antes toda cubierta inclinada decía triplay, fieltro y canalón perimetral)
-             ([f"CUBIERTA {cub.replace('_', ' ').upper()} DE {mat}, PENDIENTE {pend:.0f} %, SOBRE LARGUEROS DE PTR GALVANIZADO",
+             ([f"CUBIERTA {cub.replace('_', ' ').upper()} DE {mat}, "
+               + (f"PLANO ÚNICO CON PENDIENTE {py_ * 100:.0f} % AL SUR Y {px_ * 100:.0f} % AL PONIENTE, SOBRE LARGUEROS DE PTR GALV."
+                  if cub == "inclinada_irregular" else f"PENDIENTE {pend:.0f} %, SOBRE LARGUEROS DE PTR GALVANIZADO"),
                "CON AISLANTE TÉRMICO, ANCLADOS A LA LOSA DE AZOTEA (CÁMARA VENTILADA BAJO LA CUBIERTA)"]
               if cl["material"] == "lámina" else
               [f"CUBIERTA {cub.replace('_', ' ').upper()} DE {mat}, PENDIENTE {pend:.0f} %, SOBRE TRIPLAY 16 mm, FIELTRO ASFÁLTICO 30 lb",
                "Y ARMADURA LIGERA DE PTR GALVANIZADO ANCLADA A LA LOSA DE AZOTEA (CÁMARA VENTILADA BAJO LA CUBIERTA)"])) + [
-             (f"ALERO DE {al:.2f} m CON CANALÓN EN EL ALERO BAJO DE LÁMINA GALV. CAL. 24 A BAJADAS PLUVIALES Ø100" if cub == "una_agua"
+             (f"ALERO DE {al:.2f} m CON CANALÓN EN EL ALERO BAJO DE LÁMINA GALV. CAL. 24 A BAJADAS PLUVIALES Ø100" if cub in ("una_agua", "inclinada_irregular")
               else f"ALERO DE {al:.2f} m CON CANALÓN PERIMETRAL DE LÁMINA GALV. CAL. 24 A BAJADAS PLUVIALES Ø100"),
              f"PESO DE CUBIERTA {cl['cm']} kg/m² INCLUIDO EN LA CARGA MUERTA DE AZOTEA (VER MEMORIA)",
              f"LOSA DE AZOTEA h = {r_est['losas'][-1]['h']} cm, PLANA, CON IMPERMEABILIZANTE APP 4 mm (VER PLANO E-02)"]
@@ -556,7 +566,13 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
             else:
                 dx.polilinea([(ox - al, oy + ztop), (ox + L + al, oy + ztop), (ox + L + al, oy + ztop + 0.15), (ox - al, oy + ztop + rr)], F, True)
         elif cub == "inclinada_irregular":
-            dx.polilinea([(ox - al, oy + ztop), (ox + L + al, oy + ztop), (ox + L + al, oy + ztop + rr), (ox - al, oy + ztop + 0.15)], F, True)
+            # plano único con doble pendiente (layout.irregular_z, bajo en SO y alto en NE): silueta = borde más alto
+            # visible desde cada lado; en la sur además el alero bajo inclinado (antes un perfil que no era el del render)
+            zi = lambda u, v: oy + ztop + layout.irregular_z(rr, u, v)
+            izq, der = {"S": ((0, 1), (1, 1)), "N": ((1, 1), (0, 1)), "E": ((1, 0), (1, 1)), "O": ((0, 1), (0, 0))}[lado]
+            dx.polilinea([(ox - al, oy + ztop), (ox + L + al, oy + ztop), (ox + L + al, zi(*der)), (ox - al, zi(*izq))], F, True)
+            if lado == "S":
+                dx.linea((ox - al, zi(0, 0)), (ox + L + al, zi(1, 0)), F)
         elif gable:
             dx.polilinea([(ox - al, oy + ztop), (ox + L / 2, oy + ztop + rr), (ox + L + al, oy + ztop)], F, True)
         else:
@@ -843,6 +859,15 @@ def corte(dx, blq, lays, r_est, eje, pos, ox, oy, titulo, corr=None):
                 dx.linea((ox + L + al, oy + z), (ox + L + al, oy + z + zc), C_)
             dx.texto((ox + L / 2, oy + z + rr + 0.25), f"BÓVEDA DE {cl['material'].upper()} SOBRE ARCOS DE PTR ROLADO "
                      f"(FLECHA {rr:.2f} m)", 0.13, "A-TEXTO", centrado=True)
+        elif tipo == "inclinada_irregular":
+            # plano único con doble pendiente cortado en `pos` (layout.irregular_z); antes se cortaba como una agua
+            if eje == "x":
+                u = (pos - blq["x"] + al) / (blq["w"] + 2 * al)
+                pts = [(-al, z + layout.irregular_z(rr, u, 0)), (L + al, z + layout.irregular_z(rr, u, 1))]
+            else:
+                v = (pos - blq["y"] + al) / (blq["d"] + 2 * al)
+                pts = [(-al, z + layout.irregular_z(rr, 0, v)), (L + al, z + layout.irregular_z(rr, 1, v))]
+            dx.polilinea([(ox + a, oy + b) for a, b in pts], C_)
         elif una:
             if eje == "x":
                 pts = [(-al, z), (L + al, z + rr)]
@@ -864,7 +889,11 @@ def corte(dx, blq, lays, r_est, eje, pos, ox, oy, titulo, corr=None):
             # en cuatro aguas el faldón cortado sólo existe entre las limatesas (antes salía por fuera de la cubierta)
             a_ = -al + (k + al) * zc / rr if tipo.startswith("cuatro") else -al
             dx.rect(ox + a_, oy + z + zc - 0.04, L - 2 * a_, 0.08, C_)
-        if tipo != "curva":
+        if tipo == "inclinada_irregular":
+            py_, px_ = layout.irregular_pend(blq, al, rr)
+            dx.texto((ox + L / 2, oy + z + rr + 0.25), f"CUBIERTA DE {cl['material'].upper()} SOBRE LARGUEROS DE PTR "
+                     f"(PLANO ÚNICO, PEND. {py_ * 100:.0f} % AL SUR Y {px_ * 100:.0f} % AL PONIENTE)", 0.13, "A-TEXTO", centrado=True)
+        elif tipo != "curva":
             dx.texto((ox + L / 2, oy + z + rr + 0.25), f"CUBIERTA DE {cl['material'].upper()} SOBRE ARMADURA DE PTR "
                      f"(PEND. {cl['pend'] * 100:.0f} %)", 0.13, "A-TEXTO", centrado=True)
     else:

@@ -97,12 +97,17 @@ def _cubierta(E, blq, corr, ztop):
                 xa, xb = X0 + (X1 - X0) * t0, X0 + (X1 - X0) * t1
                 E.q([(xa, Y0, z0), (xa, Y1, z0), (xb, Y1, z1), (xb, Y0, z1)], tc)
         return ztop + r
-    if cub.startswith("una") or cub == "inclinada_irregular":
+    if cub == "inclinada_irregular":
+        # plano único con doble pendiente (layout.irregular_z), muros cerrando hasta la cubierta en los cuatro lados
+        def zi(px, py):
+            return ztop + layout.irregular_z(r, (px - X0) / (X1 - X0), (py - Y0) / (Y1 - Y0))
+        E.q([(X0, Y0, zi(X0, Y0)), (X1, Y0, zi(X1, Y0)), (X1, Y1, zi(X1, Y1)), (X0, Y1, zi(X0, Y1))], tc)
+        for (a, b) in [((x, y), (x + w, y)), ((x + w, y), (x + w, y + d)), ((x + w, y + d), (x, y + d)), ((x, y + d), (x, y))]:
+            E.q([(a[0], a[1], ztop), (b[0], b[1], ztop), (b[0], b[1], zi(*b) - 0.03), (a[0], a[1], zi(*a) - 0.03)], corr["muro"])
+        return ztop + r
+    if cub.startswith("una"):
         zf, zb = ztop + 0.1, ztop + r
-        if cub == "inclinada_irregular":
-            E.q([(X0, Y0, zf), (X1, Y0, zf + r * 0.6), (X1, Y1, zb + r * 0.3), (X0, Y1, zb)], tc)
-        else:
-            E.q([(X0, Y0, zf), (X1, Y0, zf), (X1, Y1, zb), (X0, Y1, zb)], tc)
+        E.q([(X0, Y0, zf), (X1, Y0, zf), (X1, Y1, zb), (X0, Y1, zb)], tc)
         for xx in (x, x + w):
             E.q([(xx, y, ztop), (xx, y + d, ztop), (xx, y + d, ztop + r * (d / (Y1 - Y0))), (xx, y, ztop + 0.1)], corr["muro"])
         E.q([(x, y + d, ztop), (x + w, y + d, ztop), (x + w, y + d, zb - 0.2), (x, y + d, zb - 0.2)], corr["muro"])

@@ -348,8 +348,20 @@ def pluvial(dx, proy, blq, ox, oy, n_baj, pts=None):
         dx.rect(x - al, y - al, w + 2 * al, d + 2 * al, "IS-PLUVIAL")
         for p in pts:
             dx.circulo(p, 0.2, "IS-PLUVIAL")
-        dx.texto((x + w / 2, y + d / 2 + 0.4), ("BÓVEDA DE LÁMINA: CANALÓN PERIMETRAL A BAP" if cl.get("tipo") == "curva" else
-                  f"CUBIERTA INCLINADA {cl['pend'] * 100:.0f} %: CANALÓN PERIMETRAL A BAP"),
+        # una agua e inclinada irregular escurren al sur: canalón sólo en el alero bajo, igual que A-04 y el presupuesto
+        # (antes IS-01 decía "canalón perimetral" y la pendiente de la irregular salía como 15 % en vez de la real)
+        tipo = cl.get("tipo")
+        if tipo == "curva":
+            nota = "BÓVEDA DE LÁMINA: CANALÓN PERIMETRAL A BAP"
+        elif tipo == "inclinada_irregular":
+            from . import layout as _lay
+            p_s, p_o = _lay.irregular_pend(blq, al, cl["pend"] * min(w, d))
+            nota = f"PLANO ÚNICO {p_s * 100:.0f} % S / {p_o * 100:.0f} % O: CANALÓN ALERO SUR A BAP"
+        elif tipo == "una_agua":
+            nota = f"UNA AGUA {cl['pend'] * 100:.0f} %: CANALÓN ALERO SUR A BAP"
+        else:
+            nota = f"CUBIERTA INCLINADA {cl['pend'] * 100:.0f} %: CANALÓN PERIMETRAL A BAP"
+        dx.texto((x + w / 2, y + d / 2 + 0.4), nota,
                  max(0.2, w / 60), "I-TEXTO", centrado=True)
         return
     for p in pts:

@@ -409,7 +409,16 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
                     dx.polilinea([(x0 - al, oy + ztop), (x0 + L + al, oy + ztop), (x0 + L + al, oy + ztop + r),
                                   (x0 - al, oy + ztop + 0.1)], "A-FACHADA", True)
             elif cub == "inclinada_irregular":
-                dx.polilinea([(x0 - al, oy + ztop), (x0 + L + al, oy + ztop), (x0 + L + al, oy + ztop + r), (x0 - al, oy + ztop + r * 0.15)], "A-FACHADA", True)
+                # plano único con doble pendiente (layout.irregular_z): en la fachada sur se ve el borde norte (alto) como
+                # silueta y el alero sur (bajo) inclinado al frente; en la oriente, el borde oriente de sur a norte
+                zi = lambda u, v: oy + ztop + layout.irregular_z(r, u, v)
+                if lado == "S":
+                    dx.polilinea([(x0 - al, oy + ztop), (x0 + L + al, oy + ztop), (x0 + L + al, zi(1, 1)), (x0 - al, zi(0, 1))],
+                                 "A-FACHADA", True)
+                    dx.linea((x0 - al, zi(0, 0)), (x0 + L + al, zi(1, 0)), "A-FACHADA")
+                else:
+                    dx.polilinea([(x0 - al, oy + ztop), (x0 + L + al, oy + ztop), (x0 + L + al, zi(1, 1)), (x0 - al, zi(1, 0))],
+                                 "A-FACHADA", True)
             elif frontal_gable:
                 dx.polilinea([(x0 - al, oy + ztop), (x0 + L / 2, oy + ztop + r), (x0 + L + al, oy + ztop)], "A-FACHADA", True)
             elif cub.startswith("cuatro"):
@@ -567,7 +576,13 @@ def corte(dx, proy, lays, corr, ox, oy):
     if r:
         cub = corr["cubierta"]
         al = layout.alero(blq, 0.4)
-        if cub.startswith("una") or cub == "inclinada_irregular":
+        if cub == "inclinada_irregular":
+            # plano único con doble pendiente cortado en xm (layout.irregular_z)
+            u = (xm - blq["x"] + al) / (blq["w"] + 2 * al)
+            dx.polilinea([(ox + y0 - al, oy + ztop), (ox + y0 + L + al, oy + ztop),
+                          (ox + y0 + L + al, oy + ztop + layout.irregular_z(r, u, 1)),
+                          (ox + y0 - al, oy + ztop + layout.irregular_z(r, u, 0))], "A-CORTE", True)
+        elif cub.startswith("una"):
             # una agua: sube del frente (y0) al fondo, igual que fachadas y renders
             dx.polilinea([(ox + y0 - al, oy + ztop), (ox + y0 + L + al, oy + ztop), (ox + y0 + L + al, oy + ztop + r),
                           (ox + y0 - al, oy + ztop + 0.1)], "A-CORTE", True)

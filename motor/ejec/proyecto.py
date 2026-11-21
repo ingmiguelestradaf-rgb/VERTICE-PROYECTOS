@@ -86,7 +86,8 @@ def generar(V, carpeta, datos, proy, plan, corr, lays, r, spec, nombre, ins_calc
 
     gas_xy = INS.tanque_gas(blq)
     h = J.nueva("A-04", "Planta de azotea", disciplina="Arquitectónico")
-    sur_bap = corr["cubierta"].startswith("una")   # la cubierta a una agua baja al frente: bajadas al sur
+    # la cubierta a una agua y la inclinada irregular (punto bajo en la esquina SO) bajan al frente: bajadas al sur
+    sur_bap = corr["cubierta"].startswith("una") or corr["cubierta"] == "inclinada_irregular"
     arq.azotea(h["dx"], blq, lays, r, ins_calc["resumen"]["n_baj"], gas_xy, -blq["x"], -blq["y"], sur_primero=sur_bap, corr=corr)
     arq.dibujar_ejes(h["dx"], blq, xs, ys, -blq["x"], -blq["y"])
     J.cerrar(h)

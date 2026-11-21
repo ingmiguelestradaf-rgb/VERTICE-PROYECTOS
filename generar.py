@@ -103,7 +103,10 @@ def construir(fecha, spec=None, salida=SALIDA, privado=PRIVADO, ejecutivo=True):
                 and planos.altura_cubierta(blq, corr) > 0:
             teja = "teja" in mats
             al = layout.vuelo_alero(corr["rasgos"])
-            span = min(blq["w"], blq["d"]) / (1 if corr["cubierta"].startswith("una") else 2)
+            # la inclinada irregular es un solo plano como la una agua (antes se dividía entre 2 y el corte de A-06
+            # dibujaba la cubierta con el doble de altura que AP-03, A-05 y el render)
+            span = min(blq["w"], blq["d"]) / (1 if corr["cubierta"].startswith("una")
+                                              or corr["cubierta"] == "inclinada_irregular" else 2)
             blq["cubierta_ligera"] = dict(tipo=corr["cubierta"], material="teja de barro" if teja else "lámina",
                                           cm=100 if teja else 30, alero=al,
                                           pend=round(planos.altura_cubierta(blq, corr) / span, 3),

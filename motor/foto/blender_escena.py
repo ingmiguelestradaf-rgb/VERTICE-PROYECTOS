@@ -319,7 +319,16 @@ for blq in E["bloques"]:
                 else:
                     ya, yb = Y0 + (Y1 - Y0) * t0, Y0 + (Y1 - Y0) * t1
                     G.poli("techo", [(X0, ya, z0), (X1, ya, z0), (X1, yb, z1), (X0, yb, z1)])
-        elif cub.startswith("una") or cub == "inclinada_irregular":
+        elif cub == "inclinada_irregular":
+            # plano único con doble pendiente: mismo criterio que motor/layout.irregular_z (0.10 m en la esquina SO,
+            # r en la NE; 75 % del desnivel de sur a norte y 25 % de poniente a oriente); antes una agua simple
+            def zi(px, py):
+                return top + 0.1 + (r - 0.1) * (0.75 * (py - Y0) / (Y1 - Y0) + 0.25 * (px - X0) / (X1 - X0))
+            G.poli("techo", [(X0, Y0, zi(X0, Y0)), (X1, Y0, zi(X1, Y0)), (X1, Y1, zi(X1, Y1)), (X0, Y1, zi(X0, Y1))])
+            for (a, b) in (((x0, y0), (x0 + w, y0)), ((x0 + w, y0), (x0 + w, y0 + d)),
+                           ((x0 + w, y0 + d), (x0, y0 + d)), ((x0, y0 + d), (x0, y0))):
+                G.poli("muro", [(a[0], a[1], top), (b[0], b[1], top), (b[0], b[1], zi(*b) - 0.03), (a[0], a[1], zi(*a) - 0.03)])
+        elif cub.startswith("una"):
             G.poli("techo", [(X0, Y0, top + 0.1), (X1, Y0, top + 0.1), (X1, Y1, top + r), (X0, Y1, top + r)])
             G.poli("muro", [(x0, y0, top), (x0, y0 + d, top), (x0, y0 + d, top + r * 0.95)])
             G.poli("muro", [(x0 + w, y0, top), (x0 + w, y0 + d, top + r * 0.95), (x0 + w, y0 + d, top)])

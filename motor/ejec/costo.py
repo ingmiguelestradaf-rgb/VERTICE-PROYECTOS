@@ -168,16 +168,23 @@ def por_cotizar(blq, lays, r, cancel, q, cc, rasgos=(), piso=None, materiales=""
                           "sobre arcos de PTR rolado galvanizado anclados a la losa de azotea (incluye alero y remates)",
                           "m²", round(a_inc, 2)))
         else:
-            a_inc = (blq["w"] + 2 * al) * (blq["d"] + 2 * al) * math.sqrt(1 + cl["pend"] ** 2)
+            if cl["tipo"] == "inclinada_irregular":
+                # plano único con doble pendiente (layout.irregular_pend); antes se medía con la pendiente de una agua
+                from .. import layout as _lay
+                p_s, p_o = _lay.irregular_pend(blq, al, cl["pend"] * min(blq["w"], blq["d"]))
+                a_inc = (blq["w"] + 2 * al) * (blq["d"] + 2 * al) * math.sqrt(1 + p_s ** 2 + p_o ** 2)
+            else:
+                a_inc = (blq["w"] + 2 * al) * (blq["d"] + 2 * al) * math.sqrt(1 + cl["pend"] ** 2)
             # remates y base según el tipo: una agua no tiene cumbrera ni limatesas, y la lámina va sobre largueros con
             # aislante (antes toda cubierta inclinada se describía con triplay, fieltro, cumbrera y limatesas)
-            remates = "alero, caballete y remates laterales" if cl["tipo"] == "una_agua" else "alero, cumbrera y limatesas"
+            remates = ("alero, caballete y remates laterales" if cl["tipo"] in ("una_agua", "inclinada_irregular")
+                       else "alero, cumbrera y limatesas")
             base = ("largueros de PTR galvanizado con aislante térmico" if cl["material"] == "lámina"
                     else "armadura ligera de PTR galvanizado, triplay 16 mm y fieltro asfáltico")
             filas.append((f"Cubierta {cl['tipo'].replace('_', ' ')} de {cl['material']} sobre {base} (incluye {remates})",
                           "m²", round(a_inc, 2)))
-        if cl["tipo"] == "una_agua":
-            # una agua: canalón sólo en el alero bajo (fachada principal), donde nacen las bajadas pluviales
+        if cl["tipo"] in ("una_agua", "inclinada_irregular"):
+            # una agua e inclinada irregular: canalón sólo en el alero bajo (fachada principal), donde nacen las bajadas pluviales
             filas.append(("Canalón de lámina galvanizada cal. 24 en alero bajo con bajadas", "ml", round(blq["w"] + 2 * al, 2)))
         else:
             filas.append(("Canalón perimetral de lámina galvanizada cal. 24 con bajadas", "ml",
