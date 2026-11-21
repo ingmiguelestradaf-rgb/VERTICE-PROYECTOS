@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-21-casa-deconstructivista",
+  "fecha": "2026-11-21",
+  "nombre": "Casa Quiebre",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Deconstructivista",
+  "area": 240.6,
+  "terreno": 180.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-20-casa-industrial",
   "fecha": "2026-11-20",
   "nombre": "Casa Fundición",
