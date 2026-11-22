@@ -127,9 +127,31 @@ def plan_del_dia(fecha):
     if t == "casa":
         area, fr, fo = TERRENOS_CASA[(fecha.day - 1) % 4]
         d["terreno"] = dict(area=area, frente=fr, fondo=fo)
+        k, d["espejo"] = partido_casa(fecha)
+        d["partido"] = (PARTIDOS_CASA_AMPLIA if area >= 300 else PARTIDOS_CASA)[k]
     # variante del día (0..n) usada por las tipologías con subtipos
     d["variante"] = fecha.toordinal() % 2
     return d
+
+
+# Partidos arquitectónicos de vivienda (distribución de espacios). Antes todas las casas usaban la misma planta por
+# tamaño de terreno y sólo cambiaba la fachada; ahora cada vez que regresa un mismo terreno (cada 4 días) toca otro
+# partido y/o su versión en espejo (cochera a la izquierda o a la derecha).
+PARTIDOS_CASA = ["clasico", "estudio_frente", "sala_frente"]
+PARTIDOS_CASA_AMPLIA = ["clasico", "sala_frente", "recamara_pb"]
+# combinaciones (partido, espejo) en el orden en que se rotan: no se repite ninguna en 6 apariciones del mismo terreno
+_ROTACION = [(0, False), (1, True), (2, False), (0, True), (1, False), (2, True)]
+# proyectos publicados antes de esta fecha conservan la planta con la que se generaron (el flujo de Drive los regenera)
+VARIEDAD_DESDE = dt.date(2026, 11, 23)
+
+
+def partido_casa(fecha):
+    if fecha < VARIEDAD_DESDE:
+        return 0, False
+    # el terreno rota cada 4 días: cada aparición del mismo terreno avanza una combinación. Se arranca en la segunda
+    # para no repetir de inmediato la planta clásica sin espejo con la que se hicieron las primeras 22 casas
+    aparicion = (fecha - VARIEDAD_DESDE).days // 4 + 1
+    return _ROTACION[aparicion % len(_ROTACION)]
 
 
 if __name__ == "__main__":

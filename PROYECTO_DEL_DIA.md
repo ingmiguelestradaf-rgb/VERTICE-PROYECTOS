@@ -19,6 +19,16 @@ nov casas (terrenos 9x20, 10x20, 12x25 y 16x25 m) · dic edificios · ene naves 
 mar hoteles/resorts · abr parques de diversiones/acuáticos · may museos/centros recreativos · jun vuelve a casas.
 Una corriente arquitectónica distinta cada día. Proyecto ejecutivo completo: casas. Demás tipologías: nivel básico.
 
+En casas también rota el **partido** (distribución de plantas) y su versión en **espejo**, para que las plantas y
+fachadas no se repitan: cada vez que regresa un mismo terreno (cada 4 días) toca otra combinación.
+
+| Terreno | Partidos |
+|---|---|
+| 9×20 y 10×20 m | `clasico` (sala-comedor al jardín) · `estudio_frente` (estudio a la calle; sala, comedor y cocina al jardín; 3 recámaras + cuarto de TV) · `sala_frente` (sala a la calle; comedor y cocina al jardín) |
+| 12×25 y 16×25 m | `clasico` (despacho al frente) · `sala_frente` (sala a la calle; despacho, comedor y cocina al jardín; 4 recámaras + TV) · `recamara_pb` (recámara de visitas con baño en planta baja; estudio en planta alta) |
+
+Los proyectos anteriores al 23-nov-2026 conservan la planta `clasico` con la que se publicaron.
+
 ## Pasos
 
 1. Agrega los repos `ingmiguelestradaf-rgb/VERTICE-PROYECTOS` (escritura) y `ingmiguelestradaf-rgb/VERTICE-CALCULO`
@@ -44,12 +54,14 @@ Una corriente arquitectónica distinta cada día. Proyecto ejecutivo completo: c
   "materiales": "Muros de block…; cancelería de aluminio…; porcelanato…",
   "paleta": {"muro": "#EEECE7", "acento": "#3A3A3A", "techo": "#D9D6CF", "vidrio": "#4C6A7A", "ventana": 0.55},
   "rasgos": ["volado", "muro_acento"],
+  "partido": "sala_frente", "espejo": true,
   "extra": {"dictamen_arquitectura": ["…"], "dictamen_ingenieria": ["…"]}
 }
 ```
 
 Rasgos: volado, celosia, parteluces, pergola, porche, marco, muro_acento, jardinera, estructura_aparente, pilotis,
-muro_cortina, ventana_corrida, alero_amplio. `modelo` permite reemplazar el programa (formato de `motor/programa.py`).
+muro_cortina, ventana_corrida, alero_amplio. `partido` y `espejo` son opcionales (si no se dan, se usa la rotación del
+calendario). `modelo` permite reemplazar el programa (formato de `motor/programa.py`).
 
 ## Alcance y responsabilidad
 

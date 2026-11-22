@@ -78,7 +78,7 @@ def construir(fecha, spec=None, salida=SALIDA, privado=PRIVADO, ejecutivo=True):
     """Anteproyecto en `salida/<clave>` (público) y proyecto ejecutivo en `privado/<clave>/Proyecto ejecutivo`."""
     plan = calendario.plan_del_dia(fecha)
     spec = spec or {}
-    for k in ("corriente", "variante", "terreno"):
+    for k in ("corriente", "variante", "terreno", "partido", "espejo"):
         if k in spec:
             plan[k] = spec[k] if k != "terreno" else fusionar(plan.get("terreno", {}), spec[k])
     plan["corriente_nombre"] = calendario.CORRIENTES[plan["corriente"]]["nombre"]
