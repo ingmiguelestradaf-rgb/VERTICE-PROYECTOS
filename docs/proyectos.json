@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-22-casa-californiana",
+  "fecha": "2026-11-22",
+  "nombre": "Casa Portal Arena",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Californiana (Mission Revival)",
+  "area": 268.1,
+  "terreno": 200.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-21-casa-deconstructivista",
   "fecha": "2026-11-21",
   "nombre": "Casa Quiebre",
