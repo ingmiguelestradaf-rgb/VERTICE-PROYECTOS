@@ -124,6 +124,11 @@ def _puerta(seg, ancho, cuarto, tipo="puerta"):
 def distribuir(blq, nivel, corriente, piso_idx=0):
     cuartos = []
     _lay((blq["x"], blq["y"], blq["w"], blq["d"]), nivel["zonas"], "y", False, cuartos, "", None)
+    if blq.get("espejo"):
+        # partido en espejo (cochera del otro lado): se reflejan los locales sobre el eje del bloque antes de
+        # calcular puertas, ventanas y portones, así todo lo demás se deriva de la geometría ya reflejada
+        for c in cuartos:
+            c["x"] = round(2 * blq["x"] + blq["w"] - c["x"] - c["w"], 3)
     hojas = [c for c in cuartos if not c["contenedor"]]
     vanos = []
     big = max(blq["w"], blq["d"]) > 40

@@ -78,7 +78,80 @@ def casa(plan):
     z1, z2 = 5.6 / d, 3.4 / d
     z3 = 1 - z1 - z2
     pe = 2.3 / w                        # ancho de escalera en "U" (2 tramos de 1.10 m)
+    pb, pa, trabes = _partido_casa(plan, amplia, w, d, z1, z2, z3, pe)
+    bloques = [B("Casa", lat + inset, frente_lib + inset, w, d, [pb, pa], sistema="mamposteria", claro_max=5.0,
+                 uso="habitacional", colindancias=col)]
+    espejo = bool(plan.get("espejo"))
+    bloques[0]["espejo"] = espejo
+    bloques[0]["partido"] = _nombre_partido(plan, amplia)
+    x0, y0 = lat + inset, frente_lib + inset
+    bloques[0]["trabes_carga"] = [dict(nivel=t["nivel"], eje=t["eje"], c=round(x0 + (w - t["rel"] if espejo else t["rel"]), 3),
+                                       a=round(y0 + t["z0"], 3), b=round(y0 + t["z1"], 3)) for t in trabes]
+    ext = [E("area_verde", 0, fo - post, fr, post, nombre="Patio posterior"),
+           E("acceso", 0, 0, fr, frente_lib, nombre="Cajón y jardín frontal")]
+    if area >= 400:
+        ext.append(E("alberca", lat + 1.5, fo - post + 0.8, min(8, w - 3), max(2.0, post - 1.6), nombre="Alberca"))
+    hab = 4 + (2 if area >= 300 else 0)
+    return dict(terreno=dict(frente=fr, fondo=fo), bloques=bloques, exteriores=ext,
+                usuarios=dict(ocupantes=hab), uso_suelo="Habitacional unifamiliar")
+
+
+def _nombre_partido(plan, amplia):
+    from .calendario import PARTIDOS_CASA, PARTIDOS_CASA_AMPLIA
+    lista = PARTIDOS_CASA_AMPLIA if amplia else PARTIDOS_CASA
+    p = plan.get("partido", 0)
+    if isinstance(p, str):
+        return p if p in lista else lista[0]
+    return lista[int(p) % len(lista)]
+
+
+def _partido_casa(plan, amplia, w, d, z1, z2, z3, pe):
+    """Distribución de planta baja y alta según el partido del día.
+
+    Bandas de frente a fondo: z1 cochera (5.60 m), z2 escalera y vestíbulo (3.40 m, interior en lotes con colindancias),
+    z3 zona hacia el jardín. Los muros de planta alta caen sobre muros de planta baja (mampostería confinada) y las
+    losas no rebasan 5.25 m de claro corto. Regresa (planta baja, planta alta, trabes de carga)."""
+    nombre = _nombre_partido(plan, amplia)
     if not amplia:
+        resto = w - 3.4 - 1.5          # local junto al acceso en la banda de cochera
+        if nombre == "estudio_frente":
+            # estudio con vista a la calle; sala, comedor y cocina de corrido hacia el jardín
+            pb = N("Planta baja", 2.7, [
+                Z(z1, [C("Cochera", 3.4 / w, T["ext"]), C("Acceso", 1.5 / w, T["circ"]),
+                       G(resto / w, [Z(.62, [C("Estudio", 1, T["social"])]), Z(.38, [C("Medio baño", 1, T["hum"])])])]),
+                Z(z2, [C("Escalera", pe, T["esc"]), C("Vestíbulo", 1 - pe - 1.6 / w, T["circ"]), C("Bodega", 1.6 / w, T["alm"])]),
+                Z(z3, [C("Sala", .40, T["social"]), C("Comedor", .28, T["social"]),
+                       G(.32, [Z(.30, [C("Lavandería", 1, T["serv"])]), Z(.70, [C("Cocina", 1, T["coc"])])])]),
+            ])
+            pa = N("Planta alta", 2.7, [
+                Z(z1, [C("Recámara 2", 3.4 / w, T["priv"]), C("Baño 2", 1.5 / w, T["hum"]),
+                       C("Cuarto de TV", resto / w, T["social"])]),
+                Z(z2, [C("Escalera", pe, T["esc"]), C("Pasillo", 1 - pe, T["circ"])]),
+                # la recámara principal rebasa 1.00 m el ancho de la escalera: su puerta abre al pasillo
+                Z(z3, [C("Recámara principal", .40, T["priv"]),
+                       G(.28, [Z(.45, [C("Vestidor", 1, T["priv"])]), Z(.55, [C("Baño principal", 1, T["hum"])])]),
+                       C("Recámara 3", .32, T["priv"])]),
+            ])
+            return pb, pa, []
+        if nombre == "sala_frente":
+            # sala a la calle junto al acceso; comedor y cocina abiertos al jardín; recámara principal al jardín
+            pb = N("Planta baja", 2.7, [
+                # medio baño detrás de la sala: su muro aporta longitud en X que la fachada de la sala pierde por la ventana
+                Z(z1, [C("Cochera", 3.4 / w, T["ext"]), C("Acceso", 1.5 / w, T["circ"]),
+                       G(resto / w, [Z(.68, [C("Sala", 1, T["social"])]), Z(.32, [C("Medio baño", 1, T["hum"])])])]),
+                Z(z2, [C("Bodega", 1.7 / w, T["alm"]), C("Vestíbulo", 1 - pe - 1.7 / w, T["circ"]), C("Escalera", pe, T["esc"])]),
+                # grupo más ancho que profundo: se reparte en X, la cocina junto al comedor y la lavandería al costado
+                Z(z3, [C("Comedor", .45, T["social"]),
+                       G(.55, [Z(.70, [C("Cocina", 1, T["coc"])]), Z(.30, [C("Lavandería", 1, T["serv"])])])]),
+            ])
+            pa = N("Planta alta", 2.7, [
+                Z(z1, [C("Recámara 2", 3.4 / w, T["priv"]), C("Baño 2", 1.5 / w, T["hum"]),
+                       C("Recámara 3", resto / w, T["priv"])]),
+                Z(z2, [C("Pasillo", 1 - pe, T["circ"]), C("Escalera", pe, T["esc"])]),
+                Z(z3, [G(.45, [Z(.45, [C("Vestidor", 1, T["priv"])]), Z(.55, [C("Baño principal", 1, T["hum"])])]),
+                       C("Recámara principal", .55, T["priv"])]),
+            ])
+            return pb, pa, []
         pb = N("Planta baja", 2.7, [
             Z(z1, [C("Cochera", 3.4 / w, T["ext"]), C("Acceso", (w - 3.4 - 1.7) / w, T["circ"]),
                    G(1.7 / w, [Z(.55, [C("Bodega", 1, T["alm"])]), Z(.45, [C("Medio baño", 1, T["hum"])])])]),
@@ -94,43 +167,66 @@ def casa(plan):
             Z(z3, [C("Recámara principal", .60, T["priv"]),
                    G(.40, [Z(.30, [C("Vestidor", 1, T["priv"])]), Z(.70, [C("Baño principal", 1, T["hum"])])])]),
         ])
-        trabes = []
-    else:
-        mb = 1.7 / w
+        return pb, pa, []
+    mb = 1.7 / w
+    resto = 1 - 7.6 / w                # local junto al acceso en la banda de cochera doble
+    # el muro entre recámaras 2 y 3 descansa en una trabe de carga a la mitad de la cochera doble (columna entre portones)
+    trabes = [dict(nivel=0, eje="v", rel=2.9, z0=0.0, z1=5.6)]
+    if nombre == "sala_frente":
+        # sala a la calle; despacho, comedor y cocina hacia el jardín; recámara principal con baño al jardín
+        pb = N("Planta baja", 2.8, [
+            Z(z1, [C("Cochera doble", 5.8 / w, T["ext"]), C("Acceso", 1.8 / w, T["circ"]), C("Sala", resto, T["social"])]),
+            Z(z2, [C("Medio baño", mb, T["hum"]), C("Vestíbulo", 1 - pe - mb, T["circ"]), C("Escalera", pe, T["esc"])]),
+            Z(z3, [C("Despacho", .28, T["social"]), C("Comedor", .32, T["social"]),
+                   G(.40, [Z(.30, [C("Lavandería", 1, T["serv"])]), Z(.70, [C("Cocina", 1, T["coc"])])])]),
+        ])
+        pa = N("Planta alta", 2.8, [
+            Z(z1, [C("Recámara 2", 2.9 / w, T["priv"]), C("Recámara 3", 2.9 / w, T["priv"]), C("Baño 2", 1.8 / w, T["hum"]),
+                   C("Recámara 4", resto, T["priv"])]),
+            Z(z2, [C("Estancia familiar", 1 - pe, T["circ"]), C("Escalera", pe, T["esc"])]),
+            Z(z3, [C("Cuarto de TV", .28, T["social"]), C("Recámara principal", .32, T["priv"]),
+                   G(.40, [Z(.45, [C("Vestidor", 1, T["priv"])]), Z(.55, [C("Baño principal", 1, T["hum"])])])]),
+        ])
+        return pb, pa, trabes
+    if nombre == "recamara_pb":
+        # recámara con baño completo en planta baja (visitas o adulto mayor, sin escaleras); estancia en planta abierta
         pb = N("Planta baja", 2.8, [
             Z(z1, [C("Cochera doble", 5.8 / w, T["ext"]), C("Acceso", 1.8 / w, T["circ"]),
-                   G(1 - 7.6 / w, [Z(.62, [C("Despacho", 1, T["social"])]), Z(.38, [C("Bodega", 1, T["alm"])])])]),
-            # escalera al oriente: así el local bajo ella en planta alta (cuarto de TV, 4.15 m) conserva
-            # frente a la estancia; al poniente la recámara 2 (2.90 m) quedaba encerrada tras la escalera
-            Z(z2, [C("Medio baño", mb, T["hum"]), C("Vestíbulo", 1 - pe - mb, T["circ"]), C("Escalera", pe, T["esc"])]),
-            Z(z3, [C("Sala", .38, T["social"]), C("Comedor", .27, T["social"]),
-                   G(.35, [Z(.30, [C("Lavandería", 1, T["serv"])]), Z(.70, [C("Cocina", 1, T["coc"])])])]),
+                   G(resto, [Z(.62, [C("Recámara de visitas", 1, T["priv"])]), Z(.38, [C("Baño de visitas", 1, T["hum"])])])]),
+            Z(z2, [C("Bodega", mb, T["alm"]), C("Vestíbulo", 1 - pe - mb, T["circ"]), C("Escalera", pe, T["esc"])]),
+            Z(z3, [G(.32, [Z(.30, [C("Lavandería", 1, T["serv"])]), Z(.70, [C("Cocina", 1, T["coc"])])]),
+                   C("Comedor", .30, T["social"]), C("Sala", .38, T["social"])]),
         ])
-        # planta alta: muros sobre muros de planta baja; el muro entre recámaras 2 y 3 descansa en una
-        # trabe de carga a la mitad de la cochera doble (con columna entre los dos portones)
-        z1c = [C("Recámara 2", 2.9 / w, T["priv"]), C("Recámara 3", 2.9 / w, T["priv"]), C("Baño 2", 1.8 / w, T["hum"]),
-               C("Cuarto de TV", 1 - 7.6 / w, T["social"])]
         pa = N("Planta alta", 2.8, [
-            Z(z1, z1c),
+            Z(z1, [C("Recámara 2", 2.9 / w, T["priv"]), C("Recámara 3", 2.9 / w, T["priv"]), C("Baño 2", 1.8 / w, T["hum"]),
+                   C("Cuarto de TV", resto, T["social"])]),
             Z(z2, [C("Estancia familiar", 1 - pe, T["circ"]), C("Escalera", pe, T["esc"])]),
-            # muros alineados con sala | comedor | cocina de planta baja
-            Z(z3, [C("Recámara principal", .38, T["priv"]),
-                   G(.27, [Z(.45, [C("Vestidor", 1, T["priv"])]), Z(.55, [C("Baño principal", 1, T["hum"])])]),
-                   C("Recámara 4", .35, T["priv"])]),
+            Z(z3, [C("Estudio", .32, T["social"]),
+                   G(.30, [Z(.45, [C("Vestidor", 1, T["priv"])]), Z(.55, [C("Baño principal", 1, T["hum"])])]),
+                   C("Recámara principal", .38, T["priv"])]),
         ])
-        trabes = [dict(nivel=0, eje="v", rel=2.9, z0=0.0, z1=5.6)]
-    bloques = [B("Casa", lat + inset, frente_lib + inset, w, d, [pb, pa], sistema="mamposteria", claro_max=5.0,
-                 uso="habitacional", colindancias=col)]
-    x0, y0 = lat + inset, frente_lib + inset
-    bloques[0]["trabes_carga"] = [dict(nivel=t["nivel"], eje=t["eje"], c=round(x0 + t["rel"], 3), a=round(y0 + t["z0"], 3),
-                                       b=round(y0 + t["z1"], 3)) for t in trabes]
-    ext = [E("area_verde", 0, fo - post, fr, post, nombre="Patio posterior"),
-           E("acceso", 0, 0, fr, frente_lib, nombre="Cajón y jardín frontal")]
-    if area >= 400:
-        ext.append(E("alberca", lat + 1.5, fo - post + 0.8, min(8, w - 3), max(2.0, post - 1.6), nombre="Alberca"))
-    hab = 4 + (2 if area >= 300 else 0)
-    return dict(terreno=dict(frente=fr, fondo=fo), bloques=bloques, exteriores=ext,
-                usuarios=dict(ocupantes=hab), uso_suelo="Habitacional unifamiliar")
+        return pb, pa, trabes
+    pb = N("Planta baja", 2.8, [
+        Z(z1, [C("Cochera doble", 5.8 / w, T["ext"]), C("Acceso", 1.8 / w, T["circ"]),
+               G(resto, [Z(.62, [C("Despacho", 1, T["social"])]), Z(.38, [C("Bodega", 1, T["alm"])])])]),
+        # escalera al oriente: así el local bajo ella en planta alta (cuarto de TV, 4.15 m) conserva
+        # frente a la estancia; al poniente la recámara 2 (2.90 m) quedaba encerrada tras la escalera
+        Z(z2, [C("Medio baño", mb, T["hum"]), C("Vestíbulo", 1 - pe - mb, T["circ"]), C("Escalera", pe, T["esc"])]),
+        Z(z3, [C("Sala", .38, T["social"]), C("Comedor", .27, T["social"]),
+               G(.35, [Z(.30, [C("Lavandería", 1, T["serv"])]), Z(.70, [C("Cocina", 1, T["coc"])])])]),
+    ])
+    # planta alta: muros sobre muros de planta baja
+    z1c = [C("Recámara 2", 2.9 / w, T["priv"]), C("Recámara 3", 2.9 / w, T["priv"]), C("Baño 2", 1.8 / w, T["hum"]),
+           C("Cuarto de TV", resto, T["social"])]
+    pa = N("Planta alta", 2.8, [
+        Z(z1, z1c),
+        Z(z2, [C("Estancia familiar", 1 - pe, T["circ"]), C("Escalera", pe, T["esc"])]),
+        # muros alineados con sala | comedor | cocina de planta baja
+        Z(z3, [C("Recámara principal", .38, T["priv"]),
+               G(.27, [Z(.45, [C("Vestidor", 1, T["priv"])]), Z(.55, [C("Baño principal", 1, T["hum"])])]),
+               C("Recámara 4", .35, T["priv"])]),
+    ])
+    return pb, pa, trabes
 
 
 # -------------------------------------------------------------- EDIFICIO

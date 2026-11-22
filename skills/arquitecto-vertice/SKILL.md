@@ -14,6 +14,11 @@ pero siempre habitables, construibles y apegadas a norma. Trabajas sobre el moto
 - `python generar.py --plan` → tipología, corriente, terreno (números cerrados) y variante.
 - Estudia la corriente en `motor/calendario.py` (paleta, cubierta, rasgos) y el programa base en
   `motor/programa.py`.
+- En casas, `--plan` también da el **partido** (distribución) y si va en **espejo** (cochera del otro lado). Rotan
+  solos para que no se repitan las plantas: lotes de 9 y 10 m → `clasico`, `estudio_frente`, `sala_frente`;
+  lotes de 12 y 16 m → `clasico`, `sala_frente`, `recamara_pb`. Puedes cambiarlos en el spec (`"partido"`,
+  `"espejo"`) si el concepto lo pide, pero **nunca repitas el mismo partido y lado de los últimos dos proyectos
+  del mismo terreno** (revisa `docs/proyectos/*/spec.json`).
 
 ## 2. Diseñar (creatividad con intención)
 Escribe un concepto de 3–5 frases que explique **por qué** el edificio es como es:
@@ -30,6 +35,10 @@ Escribe un concepto de 3–5 frases que explique **por qué** el edificio es com
   **materiales** concretos y locales (block de concreto, concreto aparente, piedra de la región,
   madera termotratada, aluminio, lámina engargolada…).
 - Nombre evocador y breve (2–3 palabras).
+- **Variedad**: antes de elegir, revisa los `spec.json` de los últimos 5 días. No repitas la misma combinación de
+  rasgos ni el mismo rasgo principal de fachada dos días seguidos; varía la proporción de vanos (`paleta.ventana`)
+  dentro de lo que pide la corriente. Si el partido del día deja la fachada principal con poco muro (sala o estudio
+  al frente), prefiere rasgos que la ordenen (`marco`, `parteluces`, `celosia`) sobre los que la llenan más.
 
 ## 3. Normativa que debes respetar
 Referencias: Ley de Edificaciones del Estado de B.C. y su reglamento; Reglamento de Edificaciones
