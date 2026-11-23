@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-23-casa-regionalismo-mexicano",
+  "fecha": "2026-11-23",
+  "nombre": "Casa Muro Grana",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Regionalismo mexicano (arquitectura emocional)",
+  "area": 334.9,
+  "terreno": 300.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-22-casa-californiana",
   "fecha": "2026-11-22",
   "nombre": "Casa Portal Arena",
