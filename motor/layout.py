@@ -249,6 +249,14 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
     # tenía puerta al patio: el jardín y el tanque de gas quedaban sin acceso)
     import math as _m
     patio = piso_idx == 0 and blq.get("z0", 0) == 0 and blq.get("uso") == "habitacional" and len(blq["niveles"]) <= 3
+    # el cancel al patio va en la sala o el comedor (antes tomaba el primer local social: en el partido sala_frente de
+    # lotes amplios caía en el despacho y el comedor y la cocina quedaban sin salida al jardín)
+    patio_n = None
+    if patio:
+        soc = [r for r in hojas if r["t"] == "social" and any(e[0] == "N" and e[4] - e[3] >= 2.4
+                                                                for e in bordes_ext(r, blq) if e[0] not in col)]
+        pref = [r for r in soc if "Sala" in r["n"] or "Comedor" in r["n"]]
+        patio_n = (pref or soc or [dict(n=None)])[0]["n"]
     for r in hojas:
         ext = [e for e in bordes_ext(r, blq) if e[0] not in col]
         if r["t"] == "ext" and not any(e[0] == "S" for e in ext) and "Cochera" not in r["n"]:
@@ -303,7 +311,7 @@ def distribuir(blq, nivel, corriente, piso_idx=0):
                 n_fach = sum(1 for e_ in ext if e_[4] - e_[3] >= 1.0)
                 req = 0.175 * r["w"] * r["d"] / 1.45 / max(1, n_fach) + 0.05
                 ancho = max(ancho, min(L - 0.6, req))
-            if patio and r["t"] == "social" and lado == "N" and L >= 2.4:
+            if patio and r["t"] == "social" and r["n"] == patio_n and lado == "N" and L >= 2.4:
                 # ancho justo para el 17.5 % de iluminación con hoja de 2.10 m (mínimo 1.80 m): un cancel más ancho
                 # quita longitud de muro en la dirección X, que suele ser la crítica por sismo en lotes angostos
                 an = min(L - 0.6, max(1.8, _m.ceil((0.175 * r["w"] * r["d"] / 2.0 + 0.05) * 20) / 20))

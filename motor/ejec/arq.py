@@ -992,7 +992,9 @@ def piso_general(materiales, nivel=0):
         # en planta baja, porcelanato gris en baños y piso de ingeniería en …"): antes quedaba "piso de concreto
         # pulido sellado, porcelanato gris en baños" en la cédula de todos los locales secos, el presupuesto lo
         # cotizaba como porcelanato y se perdía el piso del otro nivel.
-        kw = r"(?=(?:piso|azulejo|porcelanato|cer[aá]mic|talavera|loseta)\w*\b)"
+        # "antiderrapante" también abre cláusula ("piso de barro … en locales secos, antiderrapante 60x60 en baños"):
+        # sin él la cláusula entera contaba como húmeda y la cédula caía en "Porcelanato 60x120 tono arena"
+        kw = r"(?=(?:piso|azulejo|porcelanato|cer[aá]mic|talavera|loseta|antiderrapante)\w*\b)"
         partes = [p_.strip() for p_ in re.split(r",?\s+y\s+" + kw + r"|,\s*" + kw, m, flags=re.I) if p_.strip()]
         secas = [p_ for p_ in partes if not humedo(p_)]
         return " y ".join(secas) if secas else partes[0]
