@@ -666,11 +666,10 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
                 dx.rect(ox + pa_, oy + 2.37, pb_ - pa_, 0.32, F)                 # viga de madera + cubierta
                 for xx in (pa_, pb_ - 0.2):
                     dx.rect(ox + xx, oy, 0.2, 2.37, F)                           # postes de madera 20x20
-                # rótulo bajo la viga, entre la puerta y el poste (sobre la viga se encimaba con la celosía);
-                # el material de la cubierta va en las notas de materiales (antes decía teja siempre)
-                db_ = max(_u(blq, lado, pe["a"]), _u(blq, lado, pe["b"]))
-                xt = (db_ + pb_) / 2 if pb_ - db_ > 1.8 else (pa_ + pb_) / 2
-                dx.texto((ox + xt, oy + 2.15), "PORCHE DE MADERA", 0.12, "A-TEXTO", centrado=True)
+                # rótulo dentro del peralte de la viga (2.37–2.69): sobre la viga se encimaba con la celosía y bajo
+                # ella con el poste entre portones cuando el porche cubre la cochera doble; el material de la
+                # cubierta va en las notas de materiales
+                dx.texto((ox + (pa_ + pb_) / 2, oy + 2.47), "PORCHE DE MADERA", 0.12, "A-TEXTO", centrado=True)
         if "pilotis" in corr["rasgos"] and len(niveles) > 1:
             # marquesina de concreto a nivel de entrepiso sobre pilotis (misma geometría que render y AP-03)
             P = layout.pilotis(blq, lays[0][1])
