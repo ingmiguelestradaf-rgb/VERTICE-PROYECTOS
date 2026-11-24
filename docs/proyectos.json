@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-24-casa-japonesa",
+  "fecha": "2026-11-24",
+  "nombre": "Casa Engawa",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Japonesa contemporánea",
+  "area": 363.4,
+  "terreno": 400.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-23-casa-regionalismo-mexicano",
   "fecha": "2026-11-23",
   "nombre": "Casa Muro Grana",
