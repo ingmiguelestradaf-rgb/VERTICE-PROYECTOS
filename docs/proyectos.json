@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-25-casa-moderna-bauhaus",
+  "fecha": "2026-11-25",
+  "nombre": "Casa Franja Roja",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Moderna (Bauhaus / Movimiento Moderno)",
+  "area": 240.6,
+  "terreno": 180.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-24-casa-japonesa",
   "fecha": "2026-11-24",
   "nombre": "Casa Engawa",
