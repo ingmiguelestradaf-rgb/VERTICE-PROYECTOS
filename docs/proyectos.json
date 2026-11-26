@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-26-casa-mid-century",
+  "fecha": "2026-11-26",
+  "nombre": "Casa Alero Naranja",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Mid-Century Modern",
+  "area": 268.1,
+  "terreno": 200.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-25-casa-moderna-bauhaus",
   "fecha": "2026-11-25",
   "nombre": "Casa Franja Roja",
