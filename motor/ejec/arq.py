@@ -73,14 +73,24 @@ def dibujar_ejes(dx, blq, xs, ys, ox=0.0, oy=0.0, cotas=True, capa="A-EJES", r=0
     x0, y0, x1, y1 = blq["x"] + ox, blq["y"] + oy, blq["x"] + blq["w"] + ox, blq["y"] + blq["d"] + oy
     # `sur`: la cadena de cotas al sur se recorre por fuera de la marquesina (antes se encimaban en A-03 y E-01)
     ext = 1.6 + sur
-    for i, x in enumerate(xs):
-        dx.linea((x + ox, y0 - ext - 1.2), (x + ox, y1 + 0.6), capa)
-        c = (x + ox, y0 - ext - 1.2 - r)
+    # globos de ejes muy juntos (separación < 2r + 0.10 m, p. ej. ejes a 0.50 m): el segundo se escalona una fila más
+    # afuera para que los círculos no se encimen (antes se traslapaban en A-03, A-04, E-01, E-02 e instalaciones)
+    paso = 2 * r + 0.1
+    def _filas(vs):
+        out, prev, fila_prev = [], None, 0
+        for v in vs:
+            fila = 1 if prev is not None and v - prev < paso and fila_prev == 0 else 0
+            out.append(fila)
+            prev, fila_prev = v, fila
+        return out
+    for i, (x, f) in enumerate(zip(xs, _filas(xs))):
+        dx.linea((x + ox, y0 - ext - 1.2 - f * paso), (x + ox, y1 + 0.6), capa)
+        c = (x + ox, y0 - ext - 1.2 - r - f * paso)
         dx.circulo(c, r, capa)
         dx.texto(c, nombre_eje(i, "x"), r * 0.9, capa, centrado=True)
-    for j, y in enumerate(ys):
-        dx.linea((x0 - ext - 1.2, y + oy), (x1 + 0.6, y + oy), capa)
-        c = (x0 - ext - 1.2 - r, y + oy)
+    for j, (y, f) in enumerate(zip(ys, _filas(ys))):
+        dx.linea((x0 - ext - 1.2 - f * paso, y + oy), (x1 + 0.6, y + oy), capa)
+        c = (x0 - ext - 1.2 - r - f * paso, y + oy)
         dx.circulo(c, r, capa)
         dx.texto(c, nombre_eje(j, "y"), r * 0.9, capa, centrado=True)
     if cotas:
@@ -246,9 +256,37 @@ def amueblar(dx, c, vanos, ox=0.0, oy=0.0):
             x0, y0, a, b = _caja(dx, c, lb, 0.9, 0.9, despl=(lon / 2 - 0.55))
             dx.linea((x0, y0), (x0 + a, y0 + b), L); dx.linea((x0, y0 + b), (x0 + a, y0), L)
             dx.circulo((x0 + a / 2, y0 + b / 2), 0.05, L)
-        _wc(dx, c, lb, -lon / 2 + 0.45 if lon > 1.6 else 0.0)
+        # WC y lavabo fuera del abatimiento de las puertas de los muros contiguos (antes, en un medio baño largo con
+        # la puerta en el muro corto, el lavabo quedaba en la esquina de la puerta y la hoja chocaba con él)
+        def _dentro(despl, ancho, fondo):
+            u0, u1 = _libre_puertas(c, lb, vv, fondo + 0.08)
+            uc = lon / 2 + despl
+            uc = min(uc, u1 - ancho / 2 - 0.05)
+            uc = max(uc, u0 + ancho / 2 + 0.05)
+            return uc - lon / 2
+        _wc(dx, c, lb, _dentro(-lon / 2 + 0.45, 0.42, 0.7) if lon > 1.6 else 0.0)
         if lon >= 1.6:
-            x0, y0, a, b = _caja(dx, c, lb, 0.6, 0.45, despl=(0.15 if n != "Medio baño" else lon / 2 - 0.45) if lon > 2 else 0.35)
+            dl = (0.15 if n != "Medio baño" else lon / 2 - 0.45) if lon > 2 else 0.35
+            lado_lav = lb
+            if n != "Medio baño" and lon >= 1.9:
+                # con regadera, el lavabo va entre el WC y la regadera (antes, con despl fijo de 0.15 m, se encimaba con
+                # la regadera en baños de menos de 2.40 m de largo); si no cabe, frente a la regadera en el muro opuesto
+                ini_reg, fin_wc = lon - 1.0, 0.45 + 0.21
+                dl = (ini_reg + fin_wc) / 2 - lon / 2
+                ancho_op = d if lb in ("S", "N") else w
+                if ini_reg - fin_wc < 0.6 + 0.1 and ancho_op >= 0.9 + 0.45 + 0.6:
+                    op = OPUESTO[lb]
+                    cw = {"S": c["y"], "N": c["y"] + d, "O": c["x"], "E": c["x"] + w}[op]
+                    ej = "h" if op in ("S", "N") else "v"
+                    base = c["x"] if op in ("S", "N") else c["y"]
+                    uc = lon - 0.55
+                    libre = all(not (v["eje"] == ej and abs(v["c"] - cw) < EPS and v["a"] - base - 0.1 < uc + 0.3
+                                     and v["b"] - base + 0.1 > uc - 0.3) for v in vv if v["tipo"] in ("puerta", "vano"))
+                    if libre:
+                        lado_lav, dl = op, uc - lon / 2
+            if lado_lav == lb:
+                dl = _dentro(dl, 0.6, 0.45)
+            x0, y0, a, b = _caja(dx, c, lado_lav, 0.6, 0.45, despl=dl)
             dx.circulo((x0 + a / 2, y0 + b / 2), 0.14, L)
     elif n == "Lavandería" and corto >= 1.2:
         x0, y0, a, b = _caja(dx, c, lado, 0.7, 0.7, despl=-0.45)
@@ -738,6 +776,10 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
     xn = L + (layout.PERGOLA_FONDO if lado == "E" and "pergola" in corr["rasgos"] else 0.0)
     if lado == "O" and "pilotis" in corr["rasgos"] and len(niveles) > 1:
         xn = max(xn, L + layout.PILOTIS_FONDO)          # ídem con la marquesina sobre pilotis en la poniente
+    if rr > 0:
+        # ídem con el alero de la cubierta inclinada (0.90 m con alero_amplio): antes el triángulo y el rótulo
+        # "NLA" quedaban bajo el alero y su borde los cruzaba
+        xn = max(xn, L + alero(corr))
     for z_, t in marcas:
         dx.polilinea([(ox + xn + 0.4, oy + z_), (ox + xn + 0.65, oy + z_ + 0.2), (ox + xn + 0.15, oy + z_ + 0.2)], "A-NIVELES", True)
         dx.linea((ox + xn + 0.4, oy + z_), (ox + xn + 1.9, oy + z_), "A-NIVELES")
