@@ -456,6 +456,13 @@ def fachada(dx, proy, lays, corr, ox, oy, lado="S"):
             PG = layout.pergola(blq)
             dx.rect(ox + PG["y0"], oy + z0 + PG["z"], PG["y1"] - PG["y0"], PG["viga"], "A-FACHADA")
             dx.rect(ox + PG["y_poste"], oy + z0, PG["poste"], PG["z"], "A-FACHADA")
+        if lado == "E" and "porche" in corr["rasgos"] and zs:
+            # porche de la fachada principal visto de canto en la lateral (fondo 1.80 m, como render y A-05; antes
+            # sólo aparecía en la fachada sur)
+            pe = next((v for v in nivel_vanos[id(zs[0][2])] if v["tipo"] == "puerta_ext" and v.get("lado") == "S"), None)
+            if pe is not None:
+                dx.rect(ox + blq["y"] - 1.8, oy + z0 + 2.37, 1.8, 0.32, "A-FACHADA")
+                dx.rect(ox + blq["y"] - 1.8, oy + z0, 0.2, 2.37, "A-FACHADA")
         if "volado" in corr["rasgos"] and blq["sistema"] != "acero":
             # losa en volado de la fachada principal: misma geometría que render, A-05 y Blender (layout.volado);
             # antes AP-03 no la dibujaba. En la lateral oriente se ve de canto, volando hacia la calle

@@ -294,9 +294,36 @@ def amueblar(dx, c, vanos, ox=0.0, oy=0.0):
         _caja(dx, c, lado, 0.7, 0.6, despl=0.45)
     elif n.startswith("Cochera"):
         n_aut = 2 if "doble" in n else 1
+        # abatimientos de las puertas en los muros de la cochera (p. ej. la puerta de servicio al acceso): el auto se
+        # recorre hacia el fondo o hacia el centro para no quedar dentro de la hoja (antes se encimaban)
+        hojas = []
+        for v in vv:
+            if v["tipo"] not in ("puerta", "puerta_ext") or v.get("corrediza"):
+                continue
+            g = v["b"] - v["a"]
+            if v["eje"] == "v" and v["a"] < c["y"] + d and v["b"] > c["y"]:
+                if abs(v["c"] - c["x"]) < EPS:
+                    hojas.append((c["x"], v["a"], c["x"] + g, v["b"]))
+                elif abs(v["c"] - c["x"] - w) < EPS:
+                    hojas.append((c["x"] + w - g, v["a"], c["x"] + w, v["b"]))
+            elif v["eje"] == "h" and v["a"] < c["x"] + w and v["b"] > c["x"] and abs(v["c"] - c["y"] - d) < EPS:
+                hojas.append((v["a"], c["y"] + d - g, v["b"], c["y"] + d))
+
+        def _choca(ax, ay):
+            return any(ax < h[2] and ax + 1.8 > h[0] and ay < h[3] and ay + 4.5 > h[1] for h in hojas)
+
         for k in range(n_aut):
             off = (k - (n_aut - 1) / 2) * (w / n_aut)
             ax, ay = c["x"] + w / 2 + off - 0.9, c["y"] + 0.5
+            if _choca(ax, ay):
+                cand = [(ax, ay + 0.05 * i) for i in range(1, 41) if ay + 0.05 * i + 4.5 <= c["y"] + d - 0.15]
+                cand += [(ax + sgn * 0.05 * i, ay) for i in range(1, 21) for sgn in (-1, 1)
+                         if c["x"] + 0.15 <= ax + sgn * 0.05 * i <= c["x"] + w - 0.15 - 1.8]
+                for ax2, ay2 in cand:
+                    if not _choca(ax2, ay2) and (n_aut == 1 or abs(ax2 - ax) < 1e-9 or
+                                                 (w / n_aut) - 1.8 >= 2 * abs(ax2 - ax) - 0.3):
+                        ax, ay = ax2, ay2
+                        break
             dx.polilinea([(ax + 0.2, ay), (ax + 1.6, ay), (ax + 1.8, ay + 0.3), (ax + 1.8, ay + 4.2), (ax + 1.6, ay + 4.5),
                           (ax + 0.2, ay + 4.5), (ax, ay + 4.2), (ax, ay + 0.3)], L, True)
             dx.rect(ax + 0.2, ay + 1.3, 1.4, 1.9, L)
@@ -305,9 +332,14 @@ def amueblar(dx, c, vanos, ox=0.0, oy=0.0):
         _caja(dx, c, lado, 0.5, 0.5, sep=0.95)
     elif n == "Vestidor":
         for l_ in [l for l in ("S", "N", "O", "E") if l not in _aberturas(c, vv)][:2]:
-            lon = (w if l_ in ("S", "N") else d) - 0.3
+            Lm = w if l_ in ("S", "N") else d
+            # el clóset deja libre el abatimiento de las puertas de los muros contiguos (antes la hoja de la puerta
+            # entre la recámara y el vestidor chocaba con el clóset del muro de enfrente)
+            u0, u1 = _libre_puertas(c, l_, vv, 0.6 + 0.08)
+            ini, fin = max(0.15, u0), min(Lm - 0.15, u1)
+            lon = fin - ini
             if lon > 0.8:
-                x1, y1, a1, b1 = _caja(dx, c, l_, lon, 0.6, sep=0.0)
+                x1, y1, a1, b1 = _caja(dx, c, l_, lon, 0.6, despl=(ini + fin) / 2 - Lm / 2, sep=0.0)
                 dx.linea((x1, y1), (x1 + a1, y1 + b1), L)
     elif n == "Bodega":
         lon = (w if lado in ("S", "N") else d) - 0.3
@@ -656,6 +688,14 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
         VO = layout.volado(blq, corr["rasgos"], lays[1][1] if len(lays) > 1 else None)
         u0 = -VO["fondo"] if lado == "E" else L
         dx.rect(ox + u0, oy + ztop - VO["peralte"], VO["fondo"], VO["peralte"], F)
+    if lado in ("E", "O") and "porche" in corr["rasgos"]:
+        # el porche de la fachada sur se ve de canto en las laterales (fondo 1.80 m, como render.py y AP-03; antes
+        # sólo aparecía en la fachada principal)
+        if any(v["tipo"] == "puerta_ext" and v.get("lado") == "S" for v in lays[0][1]):
+            u0 = -1.8 if lado == "E" else L
+            dx.rect(ox + u0, oy + 2.37, 1.8, 0.32, F)
+            dx.rect(ox + (u0 if lado == "E" else L + 1.6), oy, 0.2, 2.37, F)
+            dx.linea((ox + min(u0, 0) - 0.5, oy), (ox + max(u0 + 1.8, L) + 0.5, oy), F)
     # rasgos en fachada principal
     if lado == "S":
         if "volado" in corr["rasgos"]:
@@ -776,6 +816,8 @@ def fachada(dx, blq, lays, corr, r_est, lado, ox, oy, materiales):
     xn = L + (layout.PERGOLA_FONDO if lado == "E" and "pergola" in corr["rasgos"] else 0.0)
     if lado == "O" and "pilotis" in corr["rasgos"] and len(niveles) > 1:
         xn = max(xn, L + layout.PILOTIS_FONDO)          # ídem con la marquesina sobre pilotis en la poniente
+    if lado == "O" and "porche" in corr["rasgos"] and any(v["tipo"] == "puerta_ext" and v.get("lado") == "S" for v in lays[0][1]):
+        xn = max(xn, L + 1.8)                            # ídem con el porche visto de canto en la poniente
     if rr > 0:
         # ídem con el alero de la cubierta inclinada (0.90 m con alero_amplio): antes el triángulo y el rótulo
         # "NLA" quedaban bajo el alero y su borde los cruzaba
