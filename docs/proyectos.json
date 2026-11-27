@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-27-casa-mediterranea",
+  "fecha": "2026-11-27",
+  "nombre": "Casa Cal y Mar",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Mediterránea",
+  "area": 334.9,
+  "terreno": 300.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-26-casa-mid-century",
   "fecha": "2026-11-26",
   "nombre": "Casa Alero Naranja",
