@@ -1,5 +1,16 @@
 [
  {
+  "clave": "2026-11-28-casa-art-deco",
+  "fecha": "2026-11-28",
+  "nombre": "Casa Faro Déco",
+  "tipologia": "casa",
+  "tipologia_nombre": "Casa habitación",
+  "corriente": "Art Déco",
+  "area": 363.4,
+  "terreno": 400.0,
+  "subtipo": ""
+ },
+ {
   "clave": "2026-11-27-casa-mediterranea",
   "fecha": "2026-11-27",
   "nombre": "Casa Cal y Mar",
