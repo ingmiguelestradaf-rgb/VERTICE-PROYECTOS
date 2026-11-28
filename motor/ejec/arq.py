@@ -179,8 +179,8 @@ def amueblar(dx, c, vanos, ox=0.0, oy=0.0):
             _caja(dx, c, lado, 0.45, 0.4, s_ * (cw / 2 + 0.3))
         # clóset a lo largo de un muro lateral libre
         lat = [l for l in ("S", "N", "O", "E") if l not in (lado, OPUESTO[lado]) and l not in _aberturas(c, vv)]
-        if lat and not princ:
-            lc = lat[0]
+        mejor = None
+        for lc in (lat if not princ else []):
             Lm = d if lc in ("O", "E") else w
             # el clóset deja libre el abatimiento de las puertas que están junto al muro donde se apoya
             ini, fin = 0.15, Lm - 0.15
@@ -205,6 +205,42 @@ def amueblar(dx, c, vanos, ox=0.0, oy=0.0):
                         ini = max(ini, libre)
             if ini == 0.15 and fin == Lm - 0.15:
                 ini = 0.8                                          # criterio original: libre hacia el sur/oeste
+            # el clóset no invade el buró ni la cama: se separa del muro de la cabecera 0.60 m (buró) o el largo
+            # de la cama si el clóset y la cama no caben lado a lado (antes el clóset se encimaba con el buró)
+            ancho_lado = w if lado in ("S", "N") else d
+            libre_cama = 0.6 if ancho_lado / 2 - 0.1 - 0.6 >= cw / 2 + 0.05 else cl + 0.15
+            if (lado in ("E", "N") and lc in (("S", "N") if lado == "E" else ("O", "E"))):
+                fin = min(fin, Lm - libre_cama)
+            else:
+                ini = max(ini, libre_cama)
+            # el clóset no tapa ventanas: se descuentan los vanos de ventana del muro donde se apoya y se usa el
+            # tramo libre más largo (antes el clóset quedaba frente a la ventana de la recámara)
+            tramos = [(ini, fin)]
+            for v in vv:
+                if v["tipo"] != "ventana":
+                    continue
+                if lc in ("O", "E") and v["eje"] == "v" and abs(v["c"] - (c["x"] if lc == "O" else c["x"] + w)) < EPS:
+                    va_, vb_ = v["a"] - c["y"], v["b"] - c["y"]
+                elif lc in ("S", "N") and v["eje"] == "h" and abs(v["c"] - (c["y"] if lc == "S" else c["y"] + d)) < EPS:
+                    va_, vb_ = v["a"] - c["x"], v["b"] - c["x"]
+                else:
+                    continue
+                va_, vb_ = va_ - 0.05, vb_ + 0.05
+                nuevos = []
+                for p0, p1 in tramos:
+                    if vb_ <= p0 or va_ >= p1:
+                        nuevos.append((p0, p1))
+                        continue
+                    if va_ > p0:
+                        nuevos.append((p0, va_))
+                    if vb_ < p1:
+                        nuevos.append((vb_, p1))
+                tramos = nuevos
+            for p0, p1 in tramos:
+                if p1 - p0 > 1.2 and (mejor is None or p1 - p0 > mejor[2] - mejor[1]):
+                    mejor = (lc, p0, p1, Lm)
+        if mejor:
+            lc, ini, fin, Lm = mejor
             lon = fin - ini
             if lon > 1.2:
                 x1, y1, a1, b1 = _caja(dx, c, lc, lon, 0.6, despl=(ini + fin) / 2 - Lm / 2, sep=0.0)
@@ -917,7 +953,9 @@ def corte(dx, blq, lays, r_est, eje, pos, ox, oy, titulo, corr=None):
             (pa, pb) = (c["y"], c["y"] + c["d"]) if eje == "x" else (c["x"], c["x"] + c["w"])
             if pb - pa < 1.0:
                 continue
-            dx.texto((ox + (pa + pb) / 2 - a0, oy + z + h * 0.62), c["n"].upper(), min(0.2, (pb - pa) / 9), "A-TEXTO", centrado=True)
+            dx.texto((ox + (pa + pb) / 2 - a0, oy + z + h * 0.62), c["n"].upper(),
+                     # el rótulo cabe en el claro del local (antes "RECÁMARA DE VISITAS" se encimaba con el local vecino)
+                     min(0.2, (pb - pa) / 9, 0.85 * (pb - pa) / (0.68 * max(1, len(c["n"])))), "A-TEXTO", centrado=True)
             if pb - pa > 1.8 and c["t"] != "escalera":
                 dx.cota((ox + (pa + pb) / 2 - a0 + 0.35, oy + z), (ox + (pa + pb) / 2 - a0 + 0.35, oy + z + h - losa), 0.0, h=0.13)
         z += h
